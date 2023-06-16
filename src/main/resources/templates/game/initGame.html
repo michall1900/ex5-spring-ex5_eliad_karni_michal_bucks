@@ -17,7 +17,8 @@
                                 <td th:each="col : ${#numbers.sequence(0, endValue)}" class="p-0">
                                         <button class="boardBtn btn btn-link p-0 border-0 bg-transparent"
                                                 th:id="${row + '.' + col}">
-                                            <img class="img-fluid p-0" th:src="@{'/images/' + ${imgPath}}" alt="..."/>
+                                            <img class="img-fluid p-0" th:src="@{'/images/' + ${imgPath}}"
+                                                 th:id="${'image_'+row+'.'+col}" alt="..."/>
                                         </button>
                                 </td>
                             </tr>
@@ -41,7 +42,7 @@
                             <tr th:each = "entry: ${option.entrySet()}">
                                 <td th:text="${entry.key}"></td>
                                 <td th:text="${entry.value}" th:id="${'needed_'+ entry.key}"></td>
-                                <td th:id="${'has_'+ entry.key}" th:attr="data-submarine-size=${entry.key}">0</td>
+                                <td th:id="${'have_'+ entry.key}">0</td>
                                 <td>
                                    <button class="addButton btn btn-primary btn-sm" th:id="${'addButton_' + entry.key}">Add</button>
                                 </td>
