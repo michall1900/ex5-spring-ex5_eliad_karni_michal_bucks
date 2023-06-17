@@ -31,22 +31,19 @@
                    aria-controls="pills-register" aria-selected="true">Register</a>
             </li>
         </ul>
-
-        <div th:if="${param.error}">
-            Invalid username and password.
-        </div>
-        <div th:if="${param.logout}">
-            You have been logged out.
-        </div>
-        <!-- Pills navs -->
         <div class="row ">
             <div class="col-2 col-lg-1">
 
             </div>
             <div class="col-8 col-lg-10">
-                <!-- Pills navs -->
-
-                <!-- Pills content -->
+                <div class="my-2 text-danger fw-bold">
+                    <div th:if="${param.error}">
+                        Invalid username and password.
+                    </div>
+                    <div th:if="${param.logout}">
+                        You have been logged out.
+                    </div>
+                </div>
                 <div class="tab-content ">
                     <div class="tab-pane fade show active" id="pills-login" role="tabpanel" aria-labelledby="tab-login">
                         <form th:if="${mode} == login" th:action="@{/login}" method="post">

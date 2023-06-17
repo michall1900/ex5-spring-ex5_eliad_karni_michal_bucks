@@ -52,7 +52,8 @@ public class ApplicationConfig  {
                 .csrf(withDefaults())
 
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/css/**", "/", "/register", "/403", "/errorpage", "/simulateError").permitAll()
+                        .requestMatchers("/register", "/login").anonymous()
+                        .requestMatchers("/css/**", "/", "/403", "/errorpage", "/simulateError").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/shared/**").hasAnyRole("USER", "ADMIN")
@@ -60,7 +61,6 @@ public class ApplicationConfig  {
                 .formLogin((form) -> form
                                 .loginPage("/login")
                                 .defaultSuccessUrl("/", true)
-                                .permitAll()
                 )
                 .logout(LogoutConfigurer::permitAll)
                 .exceptionHandling(

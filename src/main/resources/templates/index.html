@@ -14,8 +14,9 @@
     <div class="row my-1">
         <div class="col-3"></div>
         <div class="col-6">
-            <h1>Welcome to Battleship!</h1>
-            <p>asdasd</p>
+            <h1 class="text-center">Welcome to Battleship!</h1>
+            <p class="text-center" sec:authorize="!isAuthenticated()">Please login to the game</p>
+            <p class="text-center" sec:authorize="isAuthenticated()">Please press on the "Start game" or the "how to play" buttons</p>
         </div>
         <div class="col-3"></div>
     </div>
