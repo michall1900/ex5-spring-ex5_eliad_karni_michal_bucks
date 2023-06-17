@@ -1,13 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Hello</title>
-</head>
-<body>
-<h1 th:text="${greeting}"></h1>
-    <p>This is a test page.</p>
-    <p>Delete it from your repo before submission!</p>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:insert="fragments/head.html :: head" ></head>
+    <body>
 
-</body>
+    <div th:insert="fragments/upper.html :: appBar"></div>
+    <div class="row my-3">
+        <div class="col-4"></div>
+        <div class="col-4">
+            <img class="img-thumbnail" src="https://ips4-wowslegends-global.gcdn.co/monthly_2022_08/Mackensen_Zieten_P-Hienrich_Dirffinger_DE_BB_1920x1080_LG_SPb_WoWSL_No_Logo.jpg.e9b87818b3aca2ce4ef14cacedcf528c.jpg">
+        </div>
+        <div class="col-4"></div>
+    </div>
+    <div class="row my-1">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <h1>Welcome to Battleship!</h1>
+            <p>asdasd</p>
+        </div>
+        <div class="col-3"></div>
+    </div>
+    </body>
 </html>
