@@ -53,7 +53,7 @@ public class ApplicationConfig  {
 
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/register", "/login").anonymous()
-                        .requestMatchers("/css/**", "/", "/403", "/errorpage", "/how-to-play", "/simulateError", "/game/init").permitAll()
+                        .requestMatchers("/css/**","/images/**","/javascripts/**", "/", "/403", "/errorpage", "/how-to-play", "/simulateError", "/game/init").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/shared/**").hasAnyRole("USER", "ADMIN")
@@ -75,7 +75,7 @@ public class ApplicationConfig  {
     }
 
 
-    // instead of defining open path in the method above you can do it here:
+    // instead of defining an open path in the method above, you can do it here:
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().requestMatchers("/favicon.ico");
