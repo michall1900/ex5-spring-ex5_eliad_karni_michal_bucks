@@ -53,7 +53,7 @@ public class ApplicationConfig  {
 
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/register", "/login").anonymous()
-                        .requestMatchers("/css/**", "/", "/403", "/errorpage", "/simulateError").permitAll()
+                        .requestMatchers("/css/**", "/", "/403", "/errorpage", "/how-to-play", "/simulateError", "/game/init").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/shared/**").hasAnyRole("USER", "ADMIN")

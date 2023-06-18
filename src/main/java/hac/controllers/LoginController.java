@@ -25,10 +25,6 @@ public class LoginController {
     @Qualifier("userDetailsService")
     private InMemoryUserDetailsManager usersManager;
 
-    /** Home page. */
-    @RequestMapping("/")
-    public String index() {return "index";}
-
     @GetMapping("/login")
     public String login(Model model) {
         model.addAttribute("mode", "login");
@@ -38,6 +34,9 @@ public class LoginController {
     /** User zone index. */
     @RequestMapping("/user")
     public String userIndex() { return "user/index"; }
+
+    /** User zone index. */
+
 
     @RequestMapping("/register")
     public String getRegister(Model model) {
