@@ -5,52 +5,124 @@
     const DEFAULT_START_POINT = {row:DEFAULT_VALUE, col:DEFAULT_VALUE}
     const IMG_SOURCES_MAP =  new Map([["empty", "../images/empty.png"],["noShip","../images/noShip.png"],
         ["submarineCell","../images/submarineCell.png"]])
+    const BOARD_SIZE = 10
     const changeButtonView = (btnElement, newClassName, newText)=>{
         btnElement.innerText = newText;
         btnElement.className = newClassName;
     }
 
-    class GameBoard{
-        #BOARD_SIZE = 10
-        matrix = []
-        submarinePlaces = new Map()
-        #controller
+    const getSrcToCompare= (imageElement)=>{
+        let src = imageElement.getAttribute("src")
+        return (src.startsWith("..")? src: `..${src}`);
+    }
 
-        constructor(controller) {
-            for (let row = 0; row < this.#BOARD_SIZE; row++) {
-                this.matrix.push([])
-                for (let col = 0; col < this.#BOARD_SIZE; col++) {
-                    this.matrix[row].push(document.getElementById(`${row}.${col}`));
-                    this.matrix[row][col].addEventListener("click", (event)=>{this.#handleBoardClick(row,col)})
-                }
-            }
-            console.log(this.matrix)
-            this.#controller = controller;
+    class Submarine{
+        INVALID_SUBMARINE = "The submarine you trying to insert is invalid.";
+        MIN_SIZE = 1
+        #size
+        #firstIndex
+        #lastIndex
+        #isVertical
+        #relevantElements = []
+
+        constructor(firstChosenIndex, lastChosenIndex,size) {
+            this.#validateSubmarine(firstChosenIndex, lastChosenIndex, size);
+            [this.#firstIndex, this.#lastIndex] = this.#getRealFirstAndLastIndex(firstChosenIndex, lastChosenIndex);
+            this.#size = size;
+            this.#isVertical = (firstChosenIndex.row > lastChosenIndex.row || firstChosenIndex.row < lastChosenIndex.row);
+            this.#displaySubmarine();
         }
 
+        #displaySubmarine(){
+            for(let row = Math.max(this.#firstIndex.row-1,0);
+                row<=Math.min(this.#lastIndex.row +1, BOARD_SIZE-1);
+                row++){
+                for (let col = Math.max(this.#firstIndex.col - 1, 0);
+                     col <= Math.min(this.#lastIndex.col +1, BOARD_SIZE-1);
+                     col++){
+                    const relevantButton = document.getElementById(`${row}.${col}`)
+                    let imageElement = document.getElementById(`image_${row}.${col}`)
+                    if ((this.#isVertical?
+                        (col=== this.#firstIndex.col && this.#firstIndex.row<= row && row<= this.#lastIndex.row):
+                        (row === this.#firstIndex.row && this.#firstIndex.col<= col && col<= this.#lastIndex.col))){
+                        imageElement.setAttribute("src", IMG_SOURCES_MAP.get("submarineCell"))
+                    }
+                    else{
+                        imageElement.setAttribute("src", IMG_SOURCES_MAP.get("noShip"))
+                        relevantButton.setAttribute("disabled","")
+                    }
+                    this.#relevantElements.push({btn: relevantButton, img:imageElement});
+
+                }
+            }
+        }
+
+        #validateSubmarine(firstChosenIndex, lastChosenIndex, size){
+            if(!((firstChosenIndex.row === lastChosenIndex.row && (Math.abs(firstChosenIndex.col- lastChosenIndex.col )+ 1) === size) ||
+                (firstChosenIndex.col === lastChosenIndex.col && (Math.abs(firstChosenIndex.row-lastChosenIndex.row ) + 1)=== size)))
+                throw new Error (this.INVALID_SUBMARINE)
+            if (size>this.MIN_SIZE){
+                let isVertical = (firstChosenIndex.row > lastChosenIndex.row || firstChosenIndex.row < lastChosenIndex.row);
+                let [realFirstIndex, realLastIndex] = this.#getRealFirstAndLastIndex(firstChosenIndex, lastChosenIndex);
+                this.#checkIfSubmarineInEmptyCells(realFirstIndex, realLastIndex,firstChosenIndex,isVertical);
+            }
+
+
+        }
+
+        #checkIfSubmarineInEmptyCells(firstIndex,lastIndex,firstChosenIndex, isVertical){
+            for(let index = (isVertical? firstIndex.row: firstIndex.col);
+                index < (isVertical? lastIndex.row: lastIndex.col); index++){
+                const [currentRow, currentCol] = isVertical? [index, firstIndex.col]: [firstIndex.row, index];
+                const imageElement = document.getElementById(`image_${currentRow}.${currentCol}`)
+                const src = imageElement.getAttribute("src")
+                const srcToCompute = src.startsWith("..")? src: `..${src}`;
+                if ((currentRow!== firstChosenIndex.row || currentCol!== firstChosenIndex.col) &&
+                    srcToCompute!== IMG_SOURCES_MAP.get("empty"))
+                    throw new Error (this.INVALID_SUBMARINE);
+            }
+        }
+
+        #getRealFirstAndLastIndex(firstChosenIndex, lastChosenIndex){
+            return (firstChosenIndex.col < lastChosenIndex.col || firstChosenIndex.row < lastChosenIndex.row)?
+                [firstChosenIndex, lastChosenIndex]: [lastChosenIndex, firstChosenIndex];
+        }
+    }
+
+    class Controller{
+        #currentSize = DEFAULT_VALUE
+        #currentStartIndex = DEFAULT_START_POINT;
+        #boardMatrix = []
+        constructor() {
+            for (let row = 0; row < BOARD_SIZE; row++) {
+                this.#boardMatrix.push([])
+                for (let col = 0; col < BOARD_SIZE; col++) {
+                    this.#boardMatrix[row].push(document.getElementById(`${row}.${col}`));
+                    this.#boardMatrix[row][col].addEventListener("click", (event)=>{this.#handleBoardClick(row,col)})
+                }
+            }
+        }
         #handleBoardClick(row,col){
             //means that we are adding a new submarine
-            if (this.#controller.getSize() !== DEFAULT_VALUE){
+            if (this.#currentSize !== DEFAULT_VALUE){
                 let imageElement = document.getElementById(`image_${row}.${col}`)
-                console.log(imageElement)
-                let src = imageElement.getAttribute("src")
-                if (".." + src === IMG_SOURCES_MAP.get("empty")){
+                let srcToCompute = getSrcToCompare(imageElement)
+                if (srcToCompute === IMG_SOURCES_MAP.get("empty")){
                     //It's the first choice of the user
-                    if (this.#controller.getIndex() === DEFAULT_START_POINT){
+                    if (this.#currentStartIndex === DEFAULT_START_POINT){
                         imageElement.setAttribute("src",IMG_SOURCES_MAP.get("submarineCell"))
-                        this.#controller.setCurrentStartIndex({row: row, col:col})
+                        this.#currentStartIndex = {row: row, col:col}
                         //need to add here size = 1 case
                     }
                     //It's the last index of the current submarine
                     else{
-                        const {row:firstRow, col:firstCol} = this.#controller.getIndex()
-                        const submarineSize = this.#controller.getSize()
-                        if(this.#isValidSubmarine(firstRow,firstCol, row, col, submarineSize)){
-                            this.#displaySubmarine(firstRow, firstCol,row, col);
-                            let haveElem = document.getElementById(`have_${submarineSize}`)
-                            let neededElem = document.getElementById(`needed_${submarineSize}`)
+                        try{
+                            const submarine = new Submarine(this.#currentStartIndex, {row:row, col:col},this.#currentSize)
+                            //this.#handleChosenSubmarine(this.#controller.getIndex().row, this.#controller.getIndex().col,row, col);
+                            let haveElem = document.getElementById(`have_${this.#currentSize}`)
+                            let neededElem = document.getElementById(`needed_${this.#currentSize}`)
                             haveElem.innerText = `${+(haveElem.innerText) + 1}`
-                            let addBtn = document.getElementById("addButton_" + submarineSize);
+                            let addBtn = document.getElementById(`addButton_${this.#currentSize}`);
                             changeButtonView(addBtn, ADD_BUTTON_VIEW.class, ADD_BUTTON_VIEW.name);
                             if (haveElem.innerText === neededElem.innerText){
                                 addBtn.setAttribute("disabled", "")
@@ -58,129 +130,17 @@
                             //add submarine
                             //reset controller
                         }
-                        //"invalid choice"
-                        else{}
+                        catch (e){
+                            console.log(e)
+                        }
                     }
                 }
             }
-            //clicked on submarine (no ship should be invalid)
+            //clicked on submarine (noShip cells should be invalid)
             else{
                 //check if the "delete" button is clicked, if not - this is an error.
             }
         }
-
-        #isValidSubmarine(firstRow, firstCol, lastRow, lastCol, size){
-            if((firstRow === lastRow && (Math.abs(firstCol- lastCol )+ 1) === size) ||
-                (firstCol === lastCol && (Math.abs(firstRow-lastRow ) + 1)=== size)){
-                let [goingUp, goingDown] = [firstRow > lastRow, firstRow < lastRow];
-                let [goingLeft, goingRight] = [firstCol > lastCol, firstCol < lastCol];
-                console.log(firstRow, firstCol, lastRow, lastCol, goingUp, goingDown, goingLeft, goingRight)
-                console.log(Math.abs(firstCol- lastCol )+ 1, Math.abs(firstRow-lastRow ) + 1, size)
-                if (goingUp){
-                    console.log("going up")
-                    for (let row = firstRow - 1; row>= lastRow; row--) {
-                        console.log(row, firstRow, lastRow)
-                        let imageElement = document.getElementById(`image_${row}.${lastCol}`)
-                        if ((".." + imageElement.getAttribute("src")) !== IMG_SOURCES_MAP.get("empty")) {
-                            console.log("failed in " + row +" "+lastCol);
-                            console.log(this.matrix[row][lastCol].getAttribute("src"))
-                            console.log(IMG_SOURCES_MAP.get("empty"))
-                            return false;
-                        }
-                    }
-                }
-                else if (goingDown){
-                    console.log("going down")
-                    for (let row = firstRow + 1; row <= lastRow; row++) {
-                        console.log(row, firstRow, lastRow)
-                        let imageElement = document.getElementById(`image_${row}.${lastCol}`)
-                        if ((".." + imageElement.getAttribute("src")) !== IMG_SOURCES_MAP.get("empty")) {
-                            console.log("failed in " + row +" "+lastCol);
-                            console.log(this.matrix[row][lastCol].getAttribute("src"))
-                            console.log(IMG_SOURCES_MAP.get("empty"))
-                            return false;
-                        }
-                    }
-                }
-                else if (goingLeft){
-                    for (let col = firstCol - 1; col >= lastCol; col--) {
-                        console.log(col, firstCol, lastCol)
-                        let imageElement = document.getElementById(`image_${firstRow}.${col}`)
-                        if ((".." + imageElement.getAttribute("src")) !== IMG_SOURCES_MAP.get("empty")) {
-                            console.log("failed in " + firstRow +" "+col);
-                            console.log(this.matrix[firstRow][col])
-                            console.log(this.matrix[firstRow][col].getAttribute("src"))
-                            console.log(IMG_SOURCES_MAP.get("empty"))
-                            return false;
-                        }
-                    }
-                }
-                else if (goingRight){
-                    console.log("going right")
-                    for (let col = firstCol + 1; col <= lastCol; col ++) {
-                        console.log(col, firstCol, lastCol)
-                        let imageElement = document.getElementById(`image_${firstRow}.${col}`)
-                        if ((".." + imageElement.getAttribute("src")) !== IMG_SOURCES_MAP.get("empty")) {
-                            console.log("failed in " + firstRow +" "+col);
-                            console.log(this.matrix[firstRow][col].getAttribute("src"))
-                            console.log(IMG_SOURCES_MAP.get("empty"))
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            }
-            return false;
-        }
-
-        #displaySubmarine(firstRow, firstCol, lastRow, lastCol){
-            console.log("display")
-            let [goingUp, goingDown] = [firstRow > lastRow, firstRow < lastRow];
-            let [goingLeft, goingRight] = [firstCol > lastCol, firstCol < lastCol];
-            if (goingUp || goingDown){
-                for (let row = Math.max(((goingUp)? lastRow: firstRow) - 1, 0);
-                     row <= Math.min(((goingUp)? firstRow: lastRow)+1, this.#BOARD_SIZE-1);
-                     row++){
-                    for(let col = Math.max(firstCol-1,0); col<=Math.min(firstCol+1, this.#BOARD_SIZE-1); col++){
-                        let imageElement = document.getElementById(`image_${row}.${col}`)
-                        console.log("firstCol = " + firstCol, " cuurent col = " + col);
-                        console.log((goingUp)? "going up": "going down");
-                        console.log("first row = "+ firstRow, "last row = " + lastRow, "current row = " + row);
-                        console.log(((goingUp)? "is lastRow <= row && row <= firstRow = " + (lastRow <= row && row <= firstRow):
-                            "is firstRow <= row && row <=lastRow = " + (firstRow <= row && row <=lastRow)))
-                        if (firstCol === col && ((goingUp)? (lastRow <= row && row <= firstRow): (firstRow <= row && row <=lastRow))){
-                            imageElement.setAttribute("src", IMG_SOURCES_MAP.get("submarineCell"))
-                        }
-                        else{
-                            imageElement.setAttribute("src", IMG_SOURCES_MAP.get("noShip"))
-                            this.matrix[row][col].setAttribute("disabled","")
-                        }
-                    }
-                }
-            }
-            else if (goingLeft|| goingRight){
-                for(let row = Math.max(firstRow-1,0); row<=Math.min(firstRow+1, this.#BOARD_SIZE-1); row++){
-                    for (let col = Math.max(((goingLeft)? lastCol: firstCol) - 1, 0);
-                         col <= Math.min(((goingLeft)? firstCol: lastCol)+1, this.#BOARD_SIZE-1);
-                         col++){
-                        let imageElement = document.getElementById(`image_${row}.${col}`)
-                        if (firstRow === row && ((goingLeft)?( lastCol <= col && col<= firstCol): (firstCol <= col && col <=lastCol))){
-                            imageElement.setAttribute("src", IMG_SOURCES_MAP.get("submarineCell"))
-                        }
-                        else{
-                            imageElement.setAttribute("src", IMG_SOURCES_MAP.get("noShip"))
-                            this.matrix[row][col].setAttribute("disabled","")
-                        }
-                    }
-                }
-            }
-        }
-
-    }
-    class Controller{
-        #board = new GameBoard(this);
-        #currentSize = DEFAULT_VALUE
-        #currentStartIndex = DEFAULT_START_POINT;
 
         setCurrentSize (size){
             if (this.#currentSize!== DEFAULT_VALUE){
@@ -195,14 +155,6 @@
 
         setCurrentStartIndex(newIndex){
             this.#currentStartIndex = newIndex
-        }
-
-        getSize(){
-            return this.#currentSize;
-        }
-
-        getIndex(){
-            return this.#currentStartIndex;
         }
     }
 
