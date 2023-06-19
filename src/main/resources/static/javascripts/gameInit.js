@@ -1,15 +1,33 @@
 (function(){
     const DEFAULT_VALUE = -1
     const ADD_BUTTON_VIEW = {name: "Add", class:"addButton btn btn-primary btn-sm"}
-    const CANCEL_BUTTON_VIEW = {name:"Cancel", class:"addButton btn btn-secondary btn-sm"}
+    const DELETE_BUTTON_VIEW = {name:"Delete", class: "btn btn-danger btn-sm"}
+    const CANCEL_BUTTON_VIEW = {name:"Cancel", class:"btn btn-secondary btn-sm"}
     const DEFAULT_START_POINT = {row:DEFAULT_VALUE, col:DEFAULT_VALUE}
     const IMG_SOURCES_MAP =  new Map([["empty", "../images/empty.png"],["noShip","../images/noShip.png"],
         ["submarineCell","../images/submarineCell.png"]])
     const BOARD_SIZE = 10
     const MIN_SIZE = 1
-    const ADD_NOT_CLICKED = "You need first click on one of the 'Add' buttons to select submarine."
-    const HAVE_NO_BOARDS_TO_DISPLAY = "You already display all the submarines. Please click on ready button or delete one of the submarine to put it in another place."
+    const ADD_NOT_CLICKED_ERROR = "To select a submarine, you must first click an 'Add' button."
+    const HAVE_NO_SUBMARINE_TO_DISPLAY = "All submarines are already displayed. Click 'Ready' or delete a submarine to relocate it."
+    const YOU_SHOULD_CLICK_DELETE_FIRST_ERROR = "Click on a submarine. To delete it, click 'Delete' first."
+    const YOU_CANT_CHOOSE_THIS_CELL_ERROR = "This location cannot be chosen to display the submarine."
+    const EMPTY_ON_DELETE_ERROR = "You clicked on empty place. Please click on a submarine."
+    const ADD_ON_DELETE_ERROR = "After clicking 'Delete,' you can't click 'Add'."
+    const DELETE_ON_ADD_ERROR = "While adding a new submarine, you can't click 'Delete.'"
+    const DELETE_ON_READY_ERROR = "While adding a new submarine, you can't click 'Delete.'"
+
+    const INIT_INSTRUCTION = "Click 'Add' to create a new submarine, 'Delete' to remove an existing submarine, or 'Ready' once you've selected positions for all submarines."
+    const AFTER_ADD_INSTRUCTION = "Choose the first cell on the game board as the first corner of the submarine, or click 'Cancel' to cancel the current selection."
+    const AFTER_CHOOSING_FIRST_POS_INSTRUCTION = "Choose another cell on the game board as the other corner of the submarine. Ensure it matches the length of your submarine. Click \"Cancel\" or the marked cell to cancel the first corner placing."
+    const AFTER_DELETE_CLICK_INSTRUCTION = "Click on the submarine you wish to delete."
+    let DELETE_ELEMENT;
+    let READY_ELEMENT;
+    let INSTRUCTIONS_ELEMENT;
+    let ERROR_ELEMENT;
     let isDeletePressed = false;
+    let isAddPressed = false;
+
 
     const changeButtonView = (btnElement, newClassName, newText)=>{
         btnElement.innerText = newText;
@@ -19,6 +37,19 @@
     const getSrcToCompare= (imageElement)=>{
         let src = imageElement.getAttribute("src")
         return (src.startsWith("..")? src: `..${src}`);
+    }
+
+    const handelSubmarineAddButton = (size, isIncrease)=>{
+        let haveElem = document.getElementById(`have_${size}`)
+        let neededElem = document.getElementById(`needed_${size}`)
+        haveElem.innerText = `${+(haveElem.innerText) + ((isIncrease)? 1: -1)}`
+        let addBtn = document.getElementById(`addButton_${size}`);
+        changeButtonView(addBtn, ADD_BUTTON_VIEW.class, ADD_BUTTON_VIEW.name);
+        isAddPressed = false;
+        if (haveElem.innerText === neededElem.innerText)
+            addBtn.setAttribute("disabled", "");
+        else
+            addBtn.removeAttribute("disabled");
     }
 
     class Submarine{
@@ -36,7 +67,7 @@
             this.#isVertical = (firstChosenIndex.row > lastChosenIndex.row || firstChosenIndex.row < lastChosenIndex.row);
         }
 
-        displaySubmarine(lastListenerFunction){
+        displaySubmarine(controller){
             for(let row = Math.max(this.#firstIndex.row-1,0);
                 row<=Math.min(this.#lastIndex.row +1, BOARD_SIZE-1);
                 row++){
@@ -45,19 +76,23 @@
                      col++){
                     const relevantButton = document.getElementById(`${row}.${col}`)
                     let imageElement = document.getElementById(`image_${row}.${col}`)
+                    let clonedButton
                     if ((this.#isVertical?
                         (col=== this.#firstIndex.col && this.#firstIndex.row<= row && row<= this.#lastIndex.row):
                         (row === this.#firstIndex.row && this.#firstIndex.col<= col && col<= this.#lastIndex.col))){
                         imageElement.setAttribute("src", IMG_SOURCES_MAP.get("submarineCell"))
-                        relevantButton.removeEventListener("click",lastListenerFunction)
-                        relevantButton.addEventListener("click", (event) =>{this.#handleDelete(lastListenerFunction)})
+                        clonedButton = relevantButton.cloneNode(true)
+                        clonedButton.addEventListener("click", (_) =>{this.#handleDelete(controller)})
+                        relevantButton.parentNode.replaceChild(clonedButton,relevantButton)
                     }
                     else{
                         imageElement.setAttribute("src", IMG_SOURCES_MAP.get("noShip"))
-                        relevantButton.setAttribute("disabled","")
-                        relevantButton.removeEventListener("click",lastListenerFunction)
+                        clonedButton = relevantButton.cloneNode(true)
+                        clonedButton.setAttribute("disabled","")
+                        relevantButton.parentNode.replaceChild(clonedButton,relevantButton)
                     }
-                    this.#relevantElements.push({btn: relevantButton, img:imageElement, row:row, col:col});
+                    this.#relevantElements.push({btn: clonedButton, img:document.getElementById(`image_${row}.${col}`),
+                        row:row, col:col});
 
 
                 }
@@ -95,35 +130,55 @@
                 [firstChosenIndex, lastChosenIndex]: [lastChosenIndex, firstChosenIndex];
         }
 
-        #handleDelete(lastListenerFunction){
-            if (!isDeletePressed)
-                //displayErrorMessage
+        #handleDelete(controller){
+            if (isAddPressed)
+                console.log(YOU_CANT_CHOOSE_THIS_CELL_ERROR)
+            else if (!isDeletePressed)
+                console.log(YOU_SHOULD_CLICK_DELETE_FIRST_ERROR)//should be changed to displayErrorMessage
                 ;
             else{
                 this.#relevantElements.forEach(({btn,img, row, col})=>{
+                    console.log(btn.parentNode)
                     img.setAttribute("src", IMG_SOURCES_MAP.get("empty"))
                     btn.removeAttribute("disabled")
-                    btn.removeEventListener("click", this.#handleDelete)
-                    btn.addEventListener("click", (_)=>lastListenerFunction(row, col))
+                    const clonedBtn = btn.cloneNode(true)
+                    clonedBtn.addEventListener("click", (_)=>controller.handleBoardClick(row, col))
+                    btn.parentNode.replaceChild(clonedBtn, btn);
                 })
+                handelSubmarineAddButton(this.#size, false)
+                controller.deleteSubmarineFromList(this.getFirstIndexString())
+                changeButtonView(DELETE_ELEMENT, DELETE_BUTTON_VIEW.class, DELETE_BUTTON_VIEW.name)
+                INSTRUCTIONS_ELEMENT.innerHTML = INIT_INSTRUCTION
+                isDeletePressed = false
             }
+        }
+
+        getFirstIndexString(){
+           return `${this.#firstIndex.row}.${this.#firstIndex.col}`
         }
     }
 
     class Controller{
         #currentSize = DEFAULT_VALUE
         #currentStartIndex = DEFAULT_START_POINT;
-        #boardMatrix = []
+        #submarineMap = new Map();
+        #numberOfNeededSubmarines = 0
+
         constructor() {
             for (let row = 0; row < BOARD_SIZE; row++) {
-                this.#boardMatrix.push([])
                 for (let col = 0; col < BOARD_SIZE; col++) {
-                    this.#boardMatrix[row].push(document.getElementById(`${row}.${col}`));
-                    this.#boardMatrix[row][col].addEventListener("click", (_)=>{this.#handleBoardClick(row,col)})
+                    document.getElementById(`${row}.${col}`).addEventListener("click",
+                        (_)=>{this.handleBoardClick(row,col)})
                 }
             }
+            document.querySelectorAll('[id^="needed_"]').forEach((elem)=>{
+                console.log(elem)
+                console.log(+(elem.innerText))
+                this.#numberOfNeededSubmarines += (+(elem.innerText))
+            })
+
         }
-        #handleBoardClick(row, col){
+        handleBoardClick(row, col){
             try{
                 this.#handleSubmarineChoice(row, col)
             }
@@ -131,113 +186,120 @@
                 //should display the error message somewhere
                 console.log(e)
             }
-            // if (this.#currentSize !== DEFAULT_VALUE){
-            //     let imageElement = document.getElementById(`image_${row}.${col}`)
-            //     let srcToCompute = getSrcToCompare(imageElement)
-            //     if (srcToCompute === IMG_SOURCES_MAP.get("empty")){
-            //         //It's the first choice of the user
-            //         if (this.#currentStartIndex === DEFAULT_START_POINT){
-            //             imageElement.setAttribute("src",IMG_SOURCES_MAP.get("submarineCell"))
-            //             this.#currentStartIndex = {row: row, col:col}
-            //             if(this.#currentSize === MIN_SIZE){
-            //                 //
-            //             }
-            //
-            //
-            //         }
-            //         //It's the last index of the current submarine
-            //         else{
-            //             try{
-            //                 const submarine = new Submarine(this.#currentStartIndex, {row:row, col:col},this.#currentSize)
-            //                 //this.#handleChosenSubmarine(this.#controller.getIndex().row, this.#controller.getIndex().col,row, col);
-            //                 let haveElem = document.getElementById(`have_${this.#currentSize}`)
-            //                 let neededElem = document.getElementById(`needed_${this.#currentSize}`)
-            //                 haveElem.innerText = `${+(haveElem.innerText) + 1}`
-            //                 let addBtn = document.getElementById(`addButton_${this.#currentSize}`);
-            //                 changeButtonView(addBtn, ADD_BUTTON_VIEW.class, ADD_BUTTON_VIEW.name);
-            //                 if (haveElem.innerText === neededElem.innerText){
-            //                     addBtn.setAttribute("disabled", "")
-            //                 }
-            //                 //add submarine
-            //                 //reset controller
-            //             }
-            //             catch (e){
-            //                 console.log(e)
-            //             }
-            //         }
-            //     }
-            // }
-            // //clicked on submarine (noShip cells should be invalid)
-            // else{
-            //     //check if the "delete" button is clicked, if not - this is an error.
-            // }
         }
 
         #handleSubmarineChoice(row, col){
-            if (this.#currentSize === DEFAULT_VALUE)
-                throw new Error(ADD_NOT_CLICKED) // should be change to - if (all the submarines displayed - display the other message)
+            if (isDeletePressed)
+                throw new Error(EMPTY_ON_DELETE_ERROR)
+            if (!isAddPressed)
+                throw new Error(ADD_NOT_CLICKED_ERROR) // should be change to - if (all the submarines displayed - display the other message)
             let imageElement = document.getElementById(`image_${row}.${col}`)
             let srcToCompute = getSrcToCompare(imageElement)
             if (srcToCompute === IMG_SOURCES_MAP.get("empty")){
-                //It's the first choice of the user
-                if (this.#currentStartIndex === DEFAULT_START_POINT){
-                    imageElement.setAttribute("src",IMG_SOURCES_MAP.get("submarineCell"))
-                    this.#currentStartIndex = {row: row, col:col}
-                    if(this.#currentSize === MIN_SIZE){
-                        this.#createNewSubmarine(row, col)
-                    }
-                }
-                //It's the last index of the current submarine
-                else{
-                    this.#createNewSubmarine(row, col)
-                }
+                this.#handleClickOnEmptyCell(imageElement, row, col)
             }
+            else if(srcToCompute === IMG_SOURCES_MAP.get("submarineCell") &&
+                row === this.#currentStartIndex.row && col === this.#currentStartIndex.col){
+                imageElement.setAttribute("src", IMG_SOURCES_MAP.get("empty"))
+                this.#setCurrentStartIndex(DEFAULT_START_POINT);
+                INSTRUCTIONS_ELEMENT.innerHTML = AFTER_ADD_INSTRUCTION
+            }
+            else
+                throw new Error(YOU_CANT_CHOOSE_THIS_CELL_ERROR)
+
+        }
+        #handleClickOnEmptyCell(imageElement, row, col){
+            //It's the first choice of the user
+            if (this.#currentStartIndex === DEFAULT_START_POINT){
+                imageElement.setAttribute("src",IMG_SOURCES_MAP.get("submarineCell"))
+                this.#currentStartIndex = {row: row, col:col}
+                if(this.#currentSize === MIN_SIZE)
+                    this.#createNewSubmarine(row, col)
+                else
+                    INSTRUCTIONS_ELEMENT.innerHTML = AFTER_CHOOSING_FIRST_POS_INSTRUCTION
+            }
+            //It's the last index of the current submarine
+            else
+                this.#createNewSubmarine(row, col)
         }
 
         #createNewSubmarine(row, col){
             const submarine = new Submarine(this.#currentStartIndex, {row:row, col:col},this.#currentSize)
-            submarine.displaySubmarine()
-            //this.#handleChosenSubmarine(this.#controller.getIndex().row, this.#controller.getIndex().col,row, col);
-            let haveElem = document.getElementById(`have_${this.#currentSize}`)
-            let neededElem = document.getElementById(`needed_${this.#currentSize}`)
-            haveElem.innerText = `${+(haveElem.innerText) + 1}`
-            let addBtn = document.getElementById(`addButton_${this.#currentSize}`);
-            changeButtonView(addBtn, ADD_BUTTON_VIEW.class, ADD_BUTTON_VIEW.name);
-            if (haveElem.innerText === neededElem.innerText){
-                addBtn.setAttribute("disabled", "")
+            submarine.displaySubmarine(this)
+            handelSubmarineAddButton(this.#currentSize, true)
+            this.setCurrentSize(DEFAULT_VALUE)
+            this.#submarineMap.set(submarine.getFirstIndexString(), submarine);
+            console.log(this.#numberOfNeededSubmarines)
+            console.log(this.#submarineMap.size)
+            if (this.#submarineMap.size === this.#numberOfNeededSubmarines) {
+                console.log("READYYY")
             }
-            //add submarine
-            //reset controller
+            INSTRUCTIONS_ELEMENT.innerHTML = INIT_INSTRUCTION
         }
 
+        deleteSubmarineFromList(firstIndexString){
+            this.#submarineMap.delete(firstIndexString);
+            if (this.#submarineMap.size === this.#numberOfNeededSubmarines-1) {
+                console.log("NOT READDDYYYY")
+            }
+        }
         setCurrentSize (size){
             if (this.#currentSize!== DEFAULT_VALUE){
                 let lastBtn = document.getElementById("addButton_" + this.#currentSize.toString())
-                if (lastBtn && lastBtn.innerText === CANCEL_BUTTON_VIEW.name){
+                if (lastBtn.innerText === CANCEL_BUTTON_VIEW.name){
                     changeButtonView(lastBtn, ADD_BUTTON_VIEW.class, ADD_BUTTON_VIEW.name)
+                    isAddPressed = false;
                 }
             }
             this.#currentSize = size
-            this.setCurrentStartIndex(DEFAULT_START_POINT);
+            this.#setCurrentStartIndex(DEFAULT_START_POINT);
         }
 
-        setCurrentStartIndex(newIndex){
+        #setCurrentStartIndex(newIndex){
             this.#currentStartIndex = newIndex
+        }
+
+        resetOnCancel(){
+            if (this.#currentStartIndex!== DEFAULT_START_POINT)
+                document.getElementById(`image_${this.#currentStartIndex.row}.${this.#currentStartIndex.col}`).setAttribute("src", IMG_SOURCES_MAP.get("empty"))
+            this.setCurrentSize(DEFAULT_VALUE)
         }
     }
 
     const handleAddClick = (event, btn, controller)=>{
-        let isAdd = btn.innerHTML === ADD_BUTTON_VIEW.name
-        if (isAdd){
-            changeButtonView(btn, CANCEL_BUTTON_VIEW.class, CANCEL_BUTTON_VIEW.name)
-            controller.setCurrentSize(+(btn.id.split("_")[1]))
-        }
+        if (isDeletePressed)
+            console.log(DELETE_ON_ADD_ERROR)
         else{
-            changeButtonView(btn, ADD_BUTTON_VIEW.class, ADD_BUTTON_VIEW.name)
-            controller.setCurrentSize(DEFAULT_VALUE)
+            if (!isAddPressed){
+                changeButtonView(btn, CANCEL_BUTTON_VIEW.class, CANCEL_BUTTON_VIEW.name)
+                controller.setCurrentSize(+(btn.id.split("_")[1]))
+                INSTRUCTIONS_ELEMENT.innerHTML = AFTER_ADD_INSTRUCTION
+            }
+            else{
+                changeButtonView(btn, ADD_BUTTON_VIEW.class, ADD_BUTTON_VIEW.name)
+                controller.resetOnCancel()
+                INSTRUCTIONS_ELEMENT.innerHTML = INIT_INSTRUCTION
+            }
+            isAddPressed=!isAddPressed;
         }
-    }
 
+    }
+    const handleDeleteClick = (event)=>{
+        if (isAddPressed)
+            console.log(ADD_ON_DELETE_ERROR)
+        else{
+            if (!isDeletePressed){
+                changeButtonView(DELETE_ELEMENT, CANCEL_BUTTON_VIEW.class, CANCEL_BUTTON_VIEW.name)
+                INSTRUCTIONS_ELEMENT.innerHTML = AFTER_DELETE_CLICK_INSTRUCTION
+            }
+            else{
+                changeButtonView(DELETE_ELEMENT, DELETE_BUTTON_VIEW.class, DELETE_BUTTON_VIEW.name)
+                INSTRUCTIONS_ELEMENT.innerHTML = INIT_INSTRUCTION
+            }
+            isDeletePressed= !isDeletePressed
+        }
+
+    }
 
     document.addEventListener("DOMContentLoaded",()=>{
         let controller = new Controller();
@@ -245,5 +307,9 @@
         addButtons.forEach((btn)=>{
             btn.addEventListener("click", (event)=>{handleAddClick(event,btn, controller)});
         })
+        INSTRUCTIONS_ELEMENT = document.getElementById("instructions")
+        INSTRUCTIONS_ELEMENT.innerHTML = INIT_INSTRUCTION
+        DELETE_ELEMENT = document.getElementById("delete")
+        DELETE_ELEMENT.addEventListener("click",handleDeleteClick)
     })
 })();
