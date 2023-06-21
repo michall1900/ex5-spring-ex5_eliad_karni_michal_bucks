@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Hello</title>
-</head>
-<body>
-<h1 th:text="${greeting}"></h1>
-    <p>This is a test page.</p>
-    <p>Delete it from your repo before submission!</p>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:insert="fragments/head.html :: head" ></head>
+    <body>
 
-</body>
+    <div th:insert="fragments/app-bar.html :: appBar"></div>
+    <div th:insert="fragments/main-pic.html :: main-pic"></div>
+    <div class="row my-1">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <h1 class="text-center">Welcome to Battleship!</h1>
+            <p class="text-center" sec:authorize="!isAuthenticated()">Please login to the game</p>
+            <p class="text-center" sec:authorize="isAuthenticated()">Please press on the "Start game" or the "how to play" buttons</p>
+        </div>
+        <div class="col-3"></div>
+    </div>
+    </body>
 </html>
