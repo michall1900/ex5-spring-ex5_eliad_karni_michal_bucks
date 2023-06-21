@@ -10,6 +10,11 @@ import java.util.Map;
 
 @Component
 public class GameBoard implements Serializable {
+
+    public enum Options{
+        TYPE1,
+        TYPE2
+    }
     public final static int SIZE = 10;
     public final static Map<String, String> imgType = new HashMap<String, String>(){{
         put("noShip", "noShip.png");
@@ -19,13 +24,13 @@ public class GameBoard implements Serializable {
     }};
 
     public final static Map <Integer,HashMap<Integer,Integer>> options = new HashMap<Integer, HashMap<Integer,Integer>>(){{
-        put(1,new HashMap<Integer, Integer>(){{
+        put(0,new HashMap<Integer, Integer>(){{
             put (5,1);
             put(4,1);
             put(3,2);
             put(2,1);
         }});
-        put(2,new HashMap<Integer, Integer>(){{
+        put(1,new HashMap<Integer, Integer>(){{
             put (4,1);
             put(3,2);
             put(2,3);

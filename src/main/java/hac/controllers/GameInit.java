@@ -14,7 +14,7 @@ public class GameInit {
         model.addAttribute("endValue", GameBoard.SIZE-1);
         model.addAttribute("imgPath", GameBoard.imgType.get("empty"));
         //we will get the option from the db.
-        model.addAttribute("option", GameBoard.options.get(1));
+        model.addAttribute("option", GameBoard.options.get(0));
         return "game/initGame";
     }
 }

@@ -1,5 +1,6 @@
 package hac.repo.room;
 
+import hac.classes.GameBoard;
 import hac.repo.player.Player;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -28,6 +29,13 @@ public class Room {
     @OneToOne
     private Player currentPlayer;
 
+    @Enumerated(EnumType.STRING)
+    private RoomEnum status;
+
+    @Enumerated(EnumType.STRING)
+    private GameBoard.Options option;
+
+
     public long getId() {
         return id;
     }
@@ -52,6 +60,20 @@ public class Room {
         this.currentPlayer = currentPlayer;
     }
 
+    public RoomEnum getStatus() {
+        return status;
+    }
 
+    public void setStatus(RoomEnum status) {
+        this.status = status;
+    }
+
+    public GameBoard.Options getOption() {
+        return option;
+    }
+
+    public void setOption(GameBoard.Options option) {
+        this.option = option;
+    }
 
 }
