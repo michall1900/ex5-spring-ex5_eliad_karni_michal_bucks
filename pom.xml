@@ -91,13 +91,6 @@
         </dependency>
         <!-- end of spring security dependencies -->
 
-<!--  optional: to enable live reload  -->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-devtools</artifactId>-->
-<!--            <version>3.1.0</version>-->
-<!--        </dependency>-->
-
     </dependencies>
 
     <build>

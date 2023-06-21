@@ -1,6 +1,6 @@
 package hac.controllers;
 
-import hac.classes.User.NewUser;
+import hac.classes.user.NewUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

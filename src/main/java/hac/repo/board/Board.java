@@ -1,8 +1,12 @@
-package hac.repo;
+package hac.repo.board;
 
 
+import hac.repo.player.Player;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Board {
@@ -15,6 +19,10 @@ public class Board {
     @NotBlank(message="User's id must be inserted.")
     private String username;
 
+    @OneToOne
+    private Player player;
 
+    @Column
+    private List<String> submarinePositions = new ArrayList<>();
 
 }
