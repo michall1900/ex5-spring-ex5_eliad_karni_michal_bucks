@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:insert="fragments/head.html :: head" ></head>
+<head th:insert="~{fragments/head.html :: head}" ></head>
 <body>
 
-<div th:insert="fragments/app-bar.html :: appBar"></div>
-<div th:insert="fragments/main-pic.html :: main-pic"></div>
+<div th:insert="~{fragments/app-bar.html :: appBar}"></div>
+<div th:insert="~{fragments/main-pic.html :: main-pic}"></div>
 <div class="row my-1">
   <div class="col-3"></div>
   <div class="col-6">
     <h1 class="text-center">Add Room</h1>
 
-    <form th:href="@{/lobby/create-room}" method="post">
+    <form th:action="@{/lobby/create-room}" method="post">
       <legend>Board type</legend>
       <div class="mb-3">
         <label class="form-label">Choose your wanted board type</label>
         <select name="type" class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
-          <option selected value="1">basic</option>
-          <option value="2">alternative</option>
+          <option selected value=0>basic</option>
+          <option value=1>alternative</option>
         </select>
       </div>
       <button class="btn btn-outline-danger" role="button">open new room</button>

@@ -24,13 +24,13 @@ public class GameBoard implements Serializable {
     }};
 
     public final static Map <Integer,HashMap<Integer,Integer>> options = new HashMap<Integer, HashMap<Integer,Integer>>(){{
-        put(0,new HashMap<Integer, Integer>(){{
+        put(Options.TYPE1.ordinal(),new HashMap<Integer, Integer>(){{
             put (5,1);
             put(4,1);
             put(3,2);
             put(2,1);
         }});
-        put(1,new HashMap<Integer, Integer>(){{
+        put(Options.TYPE2.ordinal(),new HashMap<Integer, Integer>(){{
             put (4,1);
             put(3,2);
             put(2,3);

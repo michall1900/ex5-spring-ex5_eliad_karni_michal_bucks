@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-    <head th:insert="fragments/head.html :: head"></head>
+    <head th:insert="~{fragments/head.html :: head}"></head>
     <body>
 
         <div th:fragment="logout" class="logout" sec:authorize="isAuthenticated()">

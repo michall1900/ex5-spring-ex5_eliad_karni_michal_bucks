@@ -29,10 +29,10 @@ public class Room {
     @OneToOne
     private Player currentPlayer;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private RoomEnum status;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private GameBoard.Options option;
 
 
