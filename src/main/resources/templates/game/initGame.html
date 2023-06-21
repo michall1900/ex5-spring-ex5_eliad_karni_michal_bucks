@@ -9,10 +9,10 @@
 <body>
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-12 my-2">
+            <div class="col-12 my-2 text-center">
                 <h1>Battleship - Game</h1>
             </div>
-            <div class="col-12 my-2" id="instructions">
+            <div class="col-12 my-2 text-center" id="instructions">
             </div>
             <div class="col-7 col-sm-6 col-lg-5 col-xl-4 align-self-center my-2">
                 <div class="row">
@@ -61,6 +61,35 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+        <div class="sticky-bottom">
+            <div class="row justify-content-center bg-light">
+                <div class="col-12 text-center my-2">
+                    <button class="btn btn-success" disabled id="ready">Ready</button>
+                </div>
+                <div class="col-12 my-2 text-center">
+                    Waiting for '____' ... / Player '____' is ready and waiting for you
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#errorModal" id="errorBtn">
+    </button>
+
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorAria" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="errorAria">Error</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="error">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
                 </div>
             </div>
         </div>
