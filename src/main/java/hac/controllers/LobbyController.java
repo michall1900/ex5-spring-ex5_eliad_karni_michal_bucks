@@ -39,6 +39,7 @@ public class LobbyController {
 
     @PostMapping("/create-room")
     public String addRoom(@RequestParam("type") int type, Principal principal){
+        // before creating player validate that player is not inside any room. There is query for that.
         System.out.println("Current logged user details: " + principal.getName());
         System.out.println(type);
         Room room = new Room();
