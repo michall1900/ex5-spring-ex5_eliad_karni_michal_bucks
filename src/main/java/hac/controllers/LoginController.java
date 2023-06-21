@@ -46,7 +46,6 @@ public class LoginController {
 
     @PostMapping("/register")
     public String registerUser(NewUser user){
-        System.out.println("test");
         usersManager.createUser(User.withUsername(user.getUsername())
                 .password(user.getPassword())
                 .roles("USER")

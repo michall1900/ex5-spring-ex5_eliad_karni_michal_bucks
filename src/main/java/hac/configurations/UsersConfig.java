@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
-public class ApplicationConfig  {
+public class UsersConfig {
 
     @Bean
     @Scope("singleton")
@@ -56,7 +56,7 @@ public class ApplicationConfig  {
                         .requestMatchers("/css/**","/images/**","/javascripts/**", "/", "/403", "/errorpage", "/how-to-play", "/simulateError", "/game/init").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
-                        .requestMatchers("/shared/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/shared/**", "/lobby/**" ).hasAnyRole("USER", "ADMIN")
                 )
                 .formLogin((form) -> form
                                 .loginPage("/login")
