@@ -75,10 +75,4 @@ public class ApplicationConfig  {
     }
 
 
-    // instead of defining an open path in the method above, you can do it here:
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/favicon.ico");
-    }
-
 }

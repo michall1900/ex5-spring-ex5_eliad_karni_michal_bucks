@@ -1,4 +1,4 @@
-package hac.classes.User;
+package hac.classes.user;
 
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
