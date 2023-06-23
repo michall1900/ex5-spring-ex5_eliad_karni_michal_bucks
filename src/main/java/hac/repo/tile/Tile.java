@@ -15,11 +15,10 @@ public class Tile {
     public enum TileStatus{
         Miss,
         Hit,
-
+        Empty
     }
     final static String MAX_ERROR = "value can't be bigger than " + (GameBoard.SIZE-1);
     final static String MIN_ERROR = "value can't be less than 0";
-
     final static String NULL_ERROR = "is mandatory";
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -39,6 +38,7 @@ public class Tile {
     @NotNull(message = "Column "+ NULL_ERROR)
     @NotEmpty(message = "Column "+ NULL_ERROR)
     private int col;
+
 
     @Enumerated (EnumType.ORDINAL)
     private TileStatus status;
@@ -65,5 +65,22 @@ public class Tile {
 
     public void setCol(int col) {
         this.col = col;
+    }
+
+    public TileStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TileStatus status) {
+        this.status = status;
+    }
+
+    public Tile(){
+    }
+
+    public Tile(TileStatus status,int row, int col){
+        setStatus(status);
+        setCol(col);
+        setRow(row);
     }
 }

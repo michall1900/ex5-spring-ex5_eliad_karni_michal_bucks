@@ -2,6 +2,8 @@ package hac.repo.board;
 
 
 import hac.repo.player.Player;
+import hac.repo.subamrine.Submarine;
+import hac.repo.tile.Tile;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -24,6 +26,9 @@ public class Board {
     @OneToOne
     private Player player;
 
-//    @Column
-//    private List<Submarine> submarines = new ArrayList<>();
+    @OneToMany
+    private List<Submarine> submarines ;
+
+    @OneToMany
+    private List<Tile> boardTiles;
 }

@@ -16,7 +16,7 @@ public class Room {
         WAITING_FOR_BOARDS,
         ON_GAME
     }
-
+    final static int SIZE = 2;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -25,7 +25,7 @@ public class Room {
 
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @Size(max=2, message="The number of players should not exceed 2.")
+    @Size(max=SIZE, message="The number of players should not exceed "+ SIZE)
     private List<Player> players = new ArrayList<>();
 
     @OneToOne
