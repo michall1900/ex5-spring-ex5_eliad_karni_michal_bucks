@@ -1,6 +1,7 @@
 package hac.controllers;
 
 import java.security.Principal;
+import java.util.Collection;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,16 +17,21 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 @Controller
 @RequestMapping("/lobby")
 public class LobbyController {
-
     @Autowired
     private RoomRepository roomRepo;
 
     private static Logger logger = LoggerFactory.getLogger(LoginController.class);
 
+    @GetMapping("/test")
+    public @ResponseBody List<Room> test() {
+        return roomRepo.findAll();
+    }
 
     @GetMapping("")
     public String getLobby() {
@@ -33,7 +39,10 @@ public class LobbyController {
     }
 
     @GetMapping("/create-room")
-    public String getRoomCreation(){
+    public String getRoomCreation(Model model) {
+        System.out.println(GameBoard.options.get(GameBoard.Options.TYPE1.ordinal()));
+        model.addAttribute("option1", GameBoard.options.get(GameBoard.Options.TYPE1.ordinal()));
+        model.addAttribute("option2", GameBoard.options.get(GameBoard.Options.TYPE2.ordinal()));
         return "/lobby/roomCreation";
     }
 
@@ -60,7 +69,12 @@ public class LobbyController {
         }
         //lock to check if the player is already inside a room
         //lobby.addRoom(room);
-        return "/index";
+        return "redirect:/lobby/wait";
+    }
+
+    @GetMapping("/wait")
+    public String wait(Model model, Principal principal) {
+        return "/lobby/WaitingRoom";
     }
 
 
@@ -69,5 +83,4 @@ public class LobbyController {
         //lobby.printRooms();
         return "/index";
     }
-
 }
