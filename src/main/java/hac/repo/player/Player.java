@@ -1,4 +1,6 @@
 package hac.repo.player;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonView;
 import hac.repo.board.Board;
 import hac.repo.room.Room;
 import jakarta.persistence.*;
@@ -20,6 +22,7 @@ public class Player {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
     private long id;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="room_id", nullable = false)

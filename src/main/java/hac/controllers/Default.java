@@ -15,9 +15,9 @@ public class Default {
     public String index() {return "index";}
     @RequestMapping("/how-to-play")
     public String howToPlay(Model model) {
-        System.out.println(GameBoard.options.get(GameBoard.Options.TYPE1.ordinal()));
-        model.addAttribute("option1", GameBoard.options.get(GameBoard.Options.TYPE1.ordinal()));
-        model.addAttribute("option2", GameBoard.options.get(GameBoard.Options.TYPE2.ordinal()));
+        System.out.println(GameBoard.options.get(GameBoard.Options.BASIC.ordinal()));
+        model.addAttribute("option1", GameBoard.options.get(GameBoard.Options.BASIC.ordinal()));
+        model.addAttribute("option2", GameBoard.options.get(GameBoard.Options.ALTERNATIVE.ordinal()));
         return "how-to-play";
     }
 }

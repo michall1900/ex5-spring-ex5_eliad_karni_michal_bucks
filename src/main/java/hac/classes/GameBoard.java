@@ -12,8 +12,8 @@ import java.util.Map;
 public class GameBoard implements Serializable {
 
     public enum Options{
-        TYPE1,
-        TYPE2
+        BASIC,
+        ALTERNATIVE
     }
     public final static int SIZE = 10;
     public final static Map<String, String> imgType = new HashMap<String, String>(){{
@@ -24,13 +24,13 @@ public class GameBoard implements Serializable {
     }};
 
     public final static Map <Integer,HashMap<Integer,Integer>> options = new HashMap<Integer, HashMap<Integer,Integer>>(){{
-        put(Options.TYPE1.ordinal(),new HashMap<Integer, Integer>(){{
+        put(Options.BASIC.ordinal(),new HashMap<Integer, Integer>(){{
             put (5,1);
             put(4,1);
             put(3,2);
             put(2,1);
         }});
-        put(Options.TYPE2.ordinal(),new HashMap<Integer, Integer>(){{
+        put(Options.ALTERNATIVE.ordinal(),new HashMap<Integer, Integer>(){{
             put (4,1);
             put(3,2);
             put(2,3);

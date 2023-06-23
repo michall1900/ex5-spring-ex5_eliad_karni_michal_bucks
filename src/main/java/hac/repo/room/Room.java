@@ -3,14 +3,11 @@ package hac.repo.room;
 import hac.classes.GameBoard;
 import hac.repo.player.Player;
 import jakarta.persistence.*;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Entity
 public class Room {
@@ -26,8 +23,9 @@ public class Room {
     @Column(name="id", nullable = false)
     private long id;
 
+
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-//    @Max(value=2, message="The number of players should not exceed 2.")
+    @Size(max=2, message="The number of players should not exceed 2.")
     private List<Player> players = new ArrayList<>();
 
     @OneToOne
@@ -80,10 +78,24 @@ public class Room {
         this.option = option;
     }
 
-    public void add(Player p){
-        if (p!=null){
-            players.add(p);
+    public void add(Player player){
+        if (player!=null){
+            players.add(player);
+            player.setRoom(this);
         }
     }
 
+    @Override
+    public String toString(){
+        AtomicReference<String> playersId = new AtomicReference<>("[");
+        if (getPlayers()!= null)
+            getPlayers().forEach((Player player)->{
+                if(player!= null) {
+                    playersId.updateAndGet(v -> v + player.getId()+", ");
+                }
+        });
+        playersId.updateAndGet(v -> v + "]");
+        return "Room{" + "id = " + getId() + ", players ids = " + playersId + ", status = " + getStatus() +
+                ", current player id = "+ ((getCurrentPlayer()!=null)?getCurrentPlayer().getId(): null) + "}";
+    }
 }

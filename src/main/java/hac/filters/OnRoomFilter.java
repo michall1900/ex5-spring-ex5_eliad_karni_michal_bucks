@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
 import hac.repo.room.RoomRepository;
+import hac.services.RoomService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,71 +17,33 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class OnRoomFilter implements HandlerInterceptor {
 
-    RoomRepository roomRepo;
+    RoomService roomService;
 
-    PlayerRepository playerRepo;
-
-    ReentrantReadWriteLock roomLock;
-
-    ReentrantReadWriteLock playerLock;
-
-    public OnRoomFilter(RoomRepository roomRepo, PlayerRepository playerRepo,
-                        ReentrantReadWriteLock roomLock, ReentrantReadWriteLock playerLock){
-        setRoomLock(roomLock);
-        setPlayerLock(playerLock);
-        setPlayerRepo(playerRepo);
-        setRoomRepo(roomRepo);
+    public OnRoomFilter(RoomService roomService){
+        this.setRoomService(roomService);
     }
 
     public OnRoomFilter(){}
 
-    public RoomRepository getRoomRepo() {
-        return roomRepo;
+    public RoomService getRoomService() {
+        return roomService;
     }
 
-    public void setRoomRepo(RoomRepository roomRepo) {
-        this.roomRepo = roomRepo;
-    }
-
-    public PlayerRepository getPlayerRepo() {
-        return playerRepo;
-    }
-
-    public void setPlayerRepo(PlayerRepository playerRepo) {
-        this.playerRepo = playerRepo;
-    }
-
-    public ReentrantReadWriteLock getRoomLock() {
-        return roomLock;
-    }
-
-    public void setRoomLock(ReentrantReadWriteLock roomLock) {
-        this.roomLock = roomLock;
-    }
-
-    public ReentrantReadWriteLock getPlayerLock() {
-        return playerLock;
-    }
-
-    public void setPlayerLock(ReentrantReadWriteLock playerLock) {
-        this.playerLock = playerLock;
+    public void setRoomService(RoomService roomService) {
+        this.roomService = roomService;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
         System.out.println("IN FILTERRR");
-        List<Room> rooms = roomRepo.findAll();
-        for (Room r : rooms) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            try {
-                String roomJson = objectMapper.writeValueAsString(r);
-
-                System.out.println(roomJson);
-            }
-            catch (JsonProcessingException e){
-                System.out.println(e);
-            }
+        List<Room> rooms = roomService.getAllRooms();
+        try{
+            for (Room r : rooms)
+                System.out.println(r);
+        }
+        catch (Exception e){
+            System.out.println(e);
         }
 
         return true; // continue with the request to next filter or to controller
