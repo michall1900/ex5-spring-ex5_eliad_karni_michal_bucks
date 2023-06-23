@@ -54,6 +54,7 @@ public class RoomService {
     @Transactional
     public void addPlayerToRoom(long roomId, Player newPlayer) {
         //TODO be careful with the locks, and be aware of a dead lock that could happened if in any case it happened in opposite way.
+        // TODO - check whats happened if player change an attribute.
         try{
             roomLock.writeLock().lock();
             Room room = roomRepo.findById(roomId).orElseThrow(() -> new RuntimeException(ROOM_NOT_FOUND));

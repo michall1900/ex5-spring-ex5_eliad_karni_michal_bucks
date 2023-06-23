@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
 
+
+//TODO - delete this, it's a temporary route
 @Controller
 @RequestMapping("/game")
 public class TempForGameController {

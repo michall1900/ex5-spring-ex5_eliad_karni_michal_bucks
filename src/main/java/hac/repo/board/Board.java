@@ -8,8 +8,10 @@ import jakarta.validation.constraints.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Entity
 public class Board {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
@@ -22,7 +24,6 @@ public class Board {
     @OneToOne
     private Player player;
 
-    @Column
-    private List<String> submarinePositions = new ArrayList<>();
-
+//    @Column
+//    private List<Submarine> submarines = new ArrayList<>();
 }
