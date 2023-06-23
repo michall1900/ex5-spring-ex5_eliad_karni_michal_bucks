@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /** this is a test controller, delete/replace it when you start working on your project */
 @Controller
 public class Default {
-
     /** Home page. */
     @RequestMapping("/")
     public String index() {return "index";}
