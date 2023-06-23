@@ -3,6 +3,8 @@ import hac.repo.board.Board;
 import hac.repo.room.Room;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 public class Player {
@@ -10,8 +12,7 @@ public class Player {
     public enum PlayerStatus{
         NOT_READY,
         READY,
-        ON_GAME,
-        LEFT_GAME
+        ON_GAME
     }
 
 
@@ -20,11 +21,13 @@ public class Player {
     @Column(nullable = false)
     private long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="room_id", nullable = false)
+//    @OnDelete(action = OnDeleteAction.CASCADE)
     private Room room;
 
-    @OneToOne
-    private Board board;
+//    @OneToOne
+//    private Board board;
 
     @Column(unique = true)
     @NotNull(message = "Username is required.")
@@ -51,13 +54,13 @@ public class Player {
         this.room = room;
     }
 
-    public Board getBoard() {
-        return board;
-    }
+//    public Board getBoard() {
+//        return board;
+//    }
 
-    public void setBoard(Board board) {
-        this.board = board;
-    }
+//    public void setBoard(Board board) {
+//        this.board = board;
+//    }
 
     public String getUsername() {
         return username;

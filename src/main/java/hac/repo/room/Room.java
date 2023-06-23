@@ -3,10 +3,14 @@ package hac.repo.room;
 import hac.classes.GameBoard;
 import hac.repo.player.Player;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Room {
@@ -19,11 +23,11 @@ public class Room {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(nullable = false)
+    @Column(name="id", nullable = false)
     private long id;
 
-    @OneToMany(mappedBy = "room")
-    @Size (max=2, message="The number of players should not exceed 2.")
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+//    @Max(value=2, message="The number of players should not exceed 2.")
     private List<Player> players = new ArrayList<>();
 
     @OneToOne
@@ -74,6 +78,12 @@ public class Room {
 
     public void setOption(GameBoard.Options option) {
         this.option = option;
+    }
+
+    public void add(Player p){
+        if (p!=null){
+            players.add(p);
+        }
     }
 
 }
