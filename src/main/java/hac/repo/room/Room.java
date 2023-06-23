@@ -17,7 +17,7 @@ public class Room {
         ON_GAME
     }
     final static int SIZE = 2;
-
+    final static int DEFAULT_INDEX = -1;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="id", nullable = false)
@@ -28,8 +28,8 @@ public class Room {
     @Size(max=SIZE, message="The number of players should not exceed "+ SIZE)
     private List<Player> players = new ArrayList<>();
 
-    @OneToOne
-    private Player currentPlayer;
+    @Column
+    private int currentPlayerIndex = DEFAULT_INDEX;
 
     @Enumerated(EnumType.ORDINAL)
     private RoomEnum status;
@@ -54,12 +54,12 @@ public class Room {
         this.players = players;
     }
 
-    public Player getCurrentPlayer() {
-        return currentPlayer;
+    public int getCurrentPlayerIndex() {
+        return currentPlayerIndex;
     }
 
-    public void setCurrentPlayer(Player currentPlayer) {
-        this.currentPlayer = currentPlayer;
+    public void setCurrentPlayerIndex(int currentPlayer) {
+        this.currentPlayerIndex = currentPlayer;
     }
 
     public RoomEnum getStatus() {
@@ -87,15 +87,15 @@ public class Room {
 
     @Override
     public String toString(){
-        AtomicReference<String> playersId = new AtomicReference<>("[");
+        AtomicReference<String> playersName = new AtomicReference<>("[");
         if (getPlayers()!= null)
             getPlayers().forEach((Player player)->{
                 if(player!= null) {
-                    playersId.updateAndGet(v -> v + player.getId()+", ");
+                    playersName.updateAndGet(v -> v + player.getUsername()+", ");
                 }
         });
-        playersId.updateAndGet(v -> v + "]");
-        return "Room{" + "id = " + getId() + ", players ids = " + playersId + ", status = " + getStatus() +
-                ", current player id = "+ ((getCurrentPlayer()!=null)?getCurrentPlayer().getId(): null) + "}";
+        playersName.updateAndGet(v -> v + "]");
+        return "Room{" + "id = " + getId() + ", players ids = " + playersName + ", status = " + getStatus() +
+                ", current player id = "+ ((getCurrentPlayerIndex()!=DEFAULT_INDEX)?getCurrentPlayerIndex(): null) + "}";
     }
 }
