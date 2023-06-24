@@ -16,7 +16,7 @@ import java.util.List;
 
 //TODO - delete this, it's a temporary route
 @Controller
-@RequestMapping("/game")
+@RequestMapping("/game/test")
 public class TempForGameController {
 
     @Autowired
@@ -42,7 +42,7 @@ public class TempForGameController {
             Player player1 = playerService.createNewPlayer("1");
             Player player2 = playerService.createNewPlayer("2");
             System.out.println("Going to save player 1");
-            Room room = roomService.createNewRoom(player1, 1);
+            Room room = roomService.createNewRoom(player1, 0);
             System.out.println("Going to save player 2");
             //long roomId = roomService.saveRoom(room).getId();
 //            roomService.addPlayerToRoom(roomId,player1);

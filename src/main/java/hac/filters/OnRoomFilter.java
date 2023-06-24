@@ -74,8 +74,8 @@ public class OnRoomFilter implements HandlerInterceptor {
             System.out.println(e);
         }
         try{
-            Room r = playerService.getRoomByUsername(request.getUserPrincipal().getName());
-            if (r.getStatus()!= Room.RoomEnum.WAITING_FOR_BOARDS){
+            Room.RoomEnum status = playerService.getRoomStatusByUserName(request.getUserPrincipal().getName());
+            if (status != Room.RoomEnum.WAITING_FOR_BOARDS){
                 System.out.println("Invalid room status");
                 //TODO remove player from db + from room list.
                 request.setAttribute("error", INVALID_STATUS);

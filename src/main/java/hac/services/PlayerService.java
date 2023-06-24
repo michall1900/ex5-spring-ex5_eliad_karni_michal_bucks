@@ -64,6 +64,11 @@ public class PlayerService {
 //            playerLock.readLock().unlock();
 //        }
     }
+
+    @Transactional(readOnly = true)
+    public Room.RoomEnum getRoomStatusByUserName(String username){
+        return getRoomByUsername(username).getStatus();
+    }
     @Transactional(readOnly = true)
     public List<Player> getAllPlayers(){
 //        try{

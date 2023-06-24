@@ -12,7 +12,7 @@
     const ERROR_BTN_ID = "errorBtn"
     const ERROR_BODY_ID = "error"
     const READY_BTN_ID = "ready"
-    const DATA_TO_SERVER_ID = "paramsToServer"
+    const DATA_TO_SERVER_ID = "boardName"
 
     const ADD_NOT_CLICKED_ERROR = "To select a submarine, you must first click an 'Add' button."
     const HAVE_NO_SUBMARINE_TO_DISPLAY = "All submarines are already displayed. Click 'Ready' or delete a submarine to relocate it."

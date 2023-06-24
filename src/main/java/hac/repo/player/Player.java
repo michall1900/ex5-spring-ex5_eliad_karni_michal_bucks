@@ -5,6 +5,8 @@ import hac.repo.board.Board;
 import hac.repo.room.Room;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -31,7 +33,8 @@ public class Player {
     @JoinColumn(name="room_id", nullable = false)
     private Room room;
 
-    @OneToOne
+
+    @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private Board board;
 
     @Column(unique = true)
@@ -97,9 +100,9 @@ public class Player {
     }
 
     public HashMap<String, String> getInfo(){
-        HashMap map = new HashMap<String,String>();
+        HashMap<String, String> map = new HashMap<>();
         map.put("name", this.username);
-        map.put("status", this.status);
+        map.put("status", this.status.toString());
         return map;
     }
 }

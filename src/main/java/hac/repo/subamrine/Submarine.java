@@ -14,6 +14,8 @@ public class Submarine {
     final static String MIN_SIZE_ERROR = "Submarine's size can't be lower than 1";
     final static String NULL_ERROR = "is mandatory";
 
+    final static String INVALID_DISPLAY = "Invalid submarine's display (The indexes not pointing on the size or the submarine displayed diagonal)";
+
     final static String MAX_INDEX_ERROR = "size can't be greater than "+ (Board.SIZE-1);
     final static String MIN_INDEX_ERROR = "size can't be greater than 0";
 
@@ -24,7 +26,6 @@ public class Submarine {
 
 
     @Column
-    @NotEmpty(message = "Size "+ NULL_ERROR)
     @Max(value= 5, message = MAX_SIZE_ERROR)
     @Min(value = 0, message= MIN_SIZE_ERROR)
     private int size;
@@ -34,19 +35,16 @@ public class Submarine {
     private int hits = 0;
 
     @Column
-    @NotEmpty(message = "First row "+ NULL_ERROR)
     @Max(value= Board.SIZE-1, message = "First row " + MAX_INDEX_ERROR)
     @Min(value = 0, message= "First row " + MIN_INDEX_ERROR)
     private int firstRow;
 
     @Column
-    @NotEmpty(message = "First column "+ NULL_ERROR)
     @Max(value= Board.SIZE-1, message = "First column " + MAX_INDEX_ERROR)
     @Min(value = 0, message= "First column " + MIN_INDEX_ERROR)
     private int firstCol;
 
     @Column
-    @NotEmpty(message = "Last row "+ NULL_ERROR)
     @Max(value= Board.SIZE-1, message = "Last row " + MAX_INDEX_ERROR)
     @Min(value = 0, message= "Last row " + MIN_INDEX_ERROR)
     private int lastRow;
@@ -54,7 +52,6 @@ public class Submarine {
 
 
     @Column
-    @NotEmpty(message = "Last column "+ NULL_ERROR)
     @Max(value= Board.SIZE-1, message = "Last column " + MAX_INDEX_ERROR)
     @Min(value = 0, message= "Last column " + MIN_INDEX_ERROR)
     private int lastCol;
@@ -128,6 +125,14 @@ public class Submarine {
 
     public void setLastCol(int last_col) {
         this.lastCol = last_col;
+    }
+
+    public void validateSubmarine(){
+        if (firstRow > lastRow || firstCol > lastCol ||
+            !((firstRow == lastRow && lastCol-firstCol+1 ==size)||
+                firstCol== lastCol && lastRow-firstRow+1==size)){
+            throw new RuntimeException(INVALID_DISPLAY);
+        }
     }
 
 }

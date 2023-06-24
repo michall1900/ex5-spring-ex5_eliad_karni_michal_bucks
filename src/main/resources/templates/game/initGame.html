@@ -69,9 +69,12 @@
         <div class="sticky-bottom">
             <div class="row justify-content-center bg-light">
                 <div class="col-12 text-center my-2">
-                    <form th:action="${url}" th:method="post">
+                    <form th:action="${url}" th:method="post" enctype="application/json">
                         <button class="btn btn-success" disabled id="ready">Ready</button>
-                        <div id="paramsToServer" class="d-none"></div>
+<!--                        <div id="paramsToServer" class="d-none"></div>-->
+                        <label>
+                            <input type="hidden" name="boardName" class="d-none" id="boardName"/>
+                        </label>
                     </form>
                 </div>
                 <div class="col-12 my-2 text-center">
