@@ -8,6 +8,8 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.util.HashMap;
+
 @Entity
 public class Player {
 
@@ -79,5 +81,12 @@ public class Player {
 
     public void setStatus(PlayerStatus status) {
         this.status = status;
+    }
+
+    public HashMap<String, String> getInfo(){
+        HashMap map = new HashMap<String,String>();
+        map.put("name", this.username);
+        map.put("status", this.status);
+        return map;
     }
 }

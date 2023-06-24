@@ -1,31 +1,31 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:insert="~{fragments/head.html :: head}" ></head>
-<body>
-
-<div th:insert="~{fragments/app-bar.html :: appBar}"></div>
-<div th:insert="~{fragments/main-pic.html :: main-pic}"></div>
-<div class="row my-1">
-    <div class="col-3"></div>
-    <div class="col-6">
-        <h1 class="text-center">Lobby</h1>
-        <div class="d-grid gap-2 my-2">
-            <a class="btn btn-outline-danger" th:href="@{/lobby/create-room}" role="button">open new room</a>
+    <body>
+        <div th:insert="~{fragments/app-bar.html :: appBar}"></div>
+        <div class="container">
+            <div th:insert="~{fragments/main-pic.html :: main-pic}"></div>
+            <div class="row my-1">
+                <div class="col-6 offset-3">
+                    <h1 class="text-center">Lobby</h1>
+                    <p class="text-danger text-center" th:text="${errorMassage}"></p>
+                    <div class="d-grid gap-2 my-2">
+                        <a class="btn btn-outline-danger" th:href="@{/lobby/create-room}" role="button">open new room</a>
+                    </div>
+                    <table class="table table-dark table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">Board Type</th>
+                            <th scope="col">Room Creator</th>
+                            <th scope="col"></th>
+                        </tr>
+                        </thead>
+                        <tbody id="rooms-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <table class="table table-dark table-striped">
-            <thead>
-            <tr>
-                <th scope="col">Board Type</th>
-                <th scope="col">Room Creator</th>
-                <th scope="col"></th>
-            </tr>
-            </thead>
-            <tbody id="rooms-table-body">
-            </tbody>
-        </table>
-    </div>
-    <div class="col-3"></div>
-</div>
-<script th:src="@{/javascripts/lobby.js}"></script>
-</body>
+        <script th:src="@{/javascripts/lobby.js}"></script>
+    </body>
 </html>

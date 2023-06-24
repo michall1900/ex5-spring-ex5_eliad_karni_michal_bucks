@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Objects;
 
 @Controller
 public class LoginController {
@@ -45,12 +46,19 @@ public class LoginController {
     }
 
     @PostMapping("/register")
-    public String registerUser(NewUser user){
-        usersManager.createUser(User.withUsername(user.getUsername())
-                .password(user.getPassword())
-                .roles("USER")
-                .build());
-        return "redirect:/login";
+    public String registerUser(NewUser user, Model model){
+        try {
+            if(!Objects.equals(user.getPassword(), user.getConfirmpassword()))
+                throw new Exception("The two passwords that you have been entered are distinct.");
+            usersManager.createUser(User.withUsername(user.getUsername())
+                    .password(user.getPassword())
+                    .roles("USER")
+                    .build());
+            return "redirect:/login";
+        }catch (Exception e){
+            model.addAttribute("error-message", e.getMessage());
+            return "loginPages/login-register";
+        }
     }
     /** Administration zone index.
      * Note that we can access current logged user just by adding the Principal

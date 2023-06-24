@@ -9,15 +9,17 @@
 
     function setRoomsTable(roomsJson){
         //TODO validate answer.
+        console.log(roomsJson);
         roomsTableBodyElement.innerHTML = "";
         roomsJson.forEach((room) => {
+            let owner = JSON.parse(room.players)[0]
             console.log(room)
             roomsTableBodyElement.innerHTML += `
                 <tr class="table-secondary">
-                    <td>${room.option}</td>
-                    <td>asd</td>
+                    <td>${room.type}</td>
+                    <td>${owner}</td>
                     <td>
-                        <button type="button" class="btn btn-outline-danger">Enter</button>
+                        <a href="/lobby/enter-room/${room.id}" class="btn btn-outline-danger" role="button">Enter</a>
                     </td>
                 </tr>`;
         })
@@ -25,7 +27,7 @@
 
     async function subscribe() {
         try {
-            let response = await fetch("/lobby/test");
+            let response = await fetch("/lobby/getRooms");
             if (response.status === 502) {
                 // Status 502 is a connection timeout error,
                 // may happen when the connection was pending for too long,

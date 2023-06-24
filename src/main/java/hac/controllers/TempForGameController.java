@@ -32,6 +32,7 @@ public class TempForGameController {
     @GetMapping("")
     public String tempGame(Principal principal){
         try {
+            /*
             System.out.println("in /game");
             Player player1 = playerService.createNewPlayer("1");
             Player player2 = playerService.createNewPlayer("2");
@@ -40,6 +41,7 @@ public class TempForGameController {
             roomService.addPlayerToRoom(roomId,player1);
             roomService.addPlayerToRoom(roomId,player2);
             roomService.changeRoomStatus(roomId, Room.RoomEnum.WAITING_FOR_BOARDS);
+             */
         }
         catch (Exception e){
             System.out.println(e);
