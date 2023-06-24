@@ -1,6 +1,5 @@
 package hac.repo.tile;
 
-import hac.classes.GameBoard;
 import hac.repo.subamrine.Submarine;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;

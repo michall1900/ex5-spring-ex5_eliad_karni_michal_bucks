@@ -3,7 +3,7 @@ package hac.controllers;
 import java.security.Principal;
 import java.util.*;
 
-import hac.classes.GameBoard;
+import hac.repo.board.Board;
 import hac.repo.player.Player;
 
 import hac.repo.room.Room;
@@ -42,7 +42,7 @@ public class LobbyController {
     @GetMapping("/getRoom")
     public @ResponseBody Map<String,String> getRoom(Model model, Principal principal) {
         try {
-            Player player = playerService.getPlayerByUsername(principal.getName());
+            Player player = playerService.getPlayerByUsername(principal.getName(), true);
             Room room = player.getRoom();
             Map<String, String> ans = room.getInfo();
             if(room.full()){
@@ -62,9 +62,9 @@ public class LobbyController {
 
     @GetMapping("/create-room")
     public String getRoomCreation(Model model) {
-        System.out.println(GameBoard.options.get(GameBoard.Options.BASIC.ordinal()));
-        model.addAttribute("option1", GameBoard.options.get(GameBoard.Options.BASIC.ordinal()));
-        model.addAttribute("option2", GameBoard.options.get(GameBoard.Options.ALTERNATIVE.ordinal()));
+        System.out.println(Board.options.get(Board.Options.BASIC.ordinal()));
+        model.addAttribute("option1", Board.options.get(Board.Options.BASIC.ordinal()));
+        model.addAttribute("option2", Board.options.get(Board.Options.ALTERNATIVE.ordinal()));
         return "/lobby/roomCreation";
     }
 

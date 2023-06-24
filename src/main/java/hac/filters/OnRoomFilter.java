@@ -6,6 +6,7 @@ import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
 import hac.repo.room.RoomRepository;
+import hac.services.PlayerService;
 import hac.services.RoomService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,12 +19,15 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class OnRoomFilter implements HandlerInterceptor {
 
+    final static String INVALID_STATUS = "There is a problem with the game.";
     RoomService roomService;
 
+    PlayerService playerService;
 
     PlayerRepository playerRepository;
-    public OnRoomFilter(RoomService roomService){
+    public OnRoomFilter(RoomService roomService, PlayerService playerService){
         this.setRoomService(roomService);
+        this.setPlayerService(playerService);
     }
 
     public OnRoomFilter(){}
@@ -36,29 +40,62 @@ public class OnRoomFilter implements HandlerInterceptor {
         this.roomService = roomService;
     }
 
+    public PlayerService getPlayerService() {
+        return playerService;
+    }
+
+    public void setPlayerService(PlayerService playerService) {
+        this.playerService = playerService;
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
-        System.out.println("IN FILTERRR");
-        List<Room> rooms = roomService.getAllRooms();
+        System.out.println("INTERCEPTOR!!!!!");
+//        if(request.isUserInRole("USER") || request.isUserInRole("ADMIN"))
+//            System.out.println(request.getUserPrincipal().getName());
+//        System.out.println("IN FILTERRR");
         try{
+            List<Room> rooms = roomService.getAllRooms();
             for (Room r : rooms)
                 System.out.println(r);
         }
         catch (Exception e){
+            System.out.println("error while iterate over rooms");
             System.out.println(e);
         }
+        try{
+            List<Player> players = playerService.getAllPlayers();
+            for (Player r : players)
+                System.out.println(r);
+        }
+        catch (Exception e){
+            System.out.println("error while iterate over players");
+            System.out.println(e);
+        }
+        try{
+            Room r = playerService.getRoomByUsername(request.getUserPrincipal().getName());
+            if (r.getStatus()!= Room.RoomEnum.WAITING_FOR_BOARDS){
+                System.out.println("Invalid room status");
+                //TODO remove player from db + from room list.
+                request.setAttribute("error", INVALID_STATUS);
+                response.sendRedirect("/lobby");
+                return false;
+            }
+            else {
+                System.out.println("Valid");
+                return true;
+            }
+        }
+        catch (Exception e){
+            System.out.println("Invalid room/ player");
+            System.out.println(e);
+            //TODO if e == NO_ROOM this is an error in the db and we need to delete player from players db.
+            request.setAttribute("error", e.getMessage());
+            response.sendRedirect("/lobby");
+            return false;
+        }
 
-//        List<Player> players = playerRepository.findAll();
-//        try{
-//            for (Player r : players)
-//                System.out.println(r);
-//        }
-//        catch (Exception e){
-//            System.out.println(e);
-//        }
-
-        return true; // continue with the request to next filter or to controller
     }
 
     @Override

@@ -7,13 +7,37 @@ import hac.repo.tile.Tile;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 @Entity
 public class Board {
+    public enum Options{
+        BASIC,
+        ALTERNATIVE
+    }
+    public final static int SIZE = 10;
+    public final static Map<String, String> imgType = new HashMap<String, String>(){{
+        put("noShip", "noShip.png");
+        put("submarineCell", "submarineCell.png");
+        put("explodeShip", "explodeShip.jpg");
+        put("empty", "empty.png");
+    }};
+
+    public final static Map <Integer,HashMap<Integer,Integer>> options = new HashMap<Integer, HashMap<Integer,Integer>>(){{
+        put(Options.BASIC.ordinal(),new HashMap<Integer, Integer>(){{
+            put (5,1);
+            put(4,1);
+            put(3,2);
+            put(2,1);
+        }});
+        put(Options.ALTERNATIVE.ordinal(),new HashMap<Integer, Integer>(){{
+            put (4,1);
+            put(3,2);
+            put(2,3);
+            put(1,4);
+        }});
+    }};
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -21,18 +45,19 @@ public class Board {
     private long id;
 
     @OneToOne
+    @JoinColumn(name="player_id", nullable = false)
     private Player player;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "board_id")
-    private Set<Submarine> submarines ;
+    private List<Submarine> submarines ;
 
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "board_id")
     private List<Tile> boardTiles;
 
-    public Board(long id, Player player, Set<Submarine> submarines, List<Tile> boardTiles) {
+    public Board(long id, Player player, List<Submarine> submarines, List<Tile> boardTiles) {
         setId(id);
         setBoardTiles(boardTiles);
         setPlayer(player);
@@ -58,11 +83,11 @@ public class Board {
         this.player = player;
     }
 
-    public Set<Submarine> getSubmarines() {
+    public List<Submarine> getSubmarines() {
         return submarines;
     }
 
-    public void setSubmarines(Set<Submarine> submarines) {
+    public void setSubmarines(List<Submarine> submarines) {
         this.submarines = submarines;
     }
 

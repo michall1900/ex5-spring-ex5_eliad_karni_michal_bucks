@@ -52,15 +52,22 @@ public class Player {
     }
 
     public Room getRoom() {
-        return room;
+        return this.room;
     }
 
     public void setRoom(Room room) {
+//        if (room == null) {
+//            if (this.room != null) {
+//                this.room.getPlayers().remove(this);
+//            }
+//        } else if{
+//            room.getPlayers().add(this);
+//        }
         this.room = room;
     }
 
     public Board getBoard() {
-        return board;
+        return this.board;
     }
 
     public void setBoard(Board board) {
@@ -68,7 +75,7 @@ public class Player {
     }
 
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     public void setUsername(String username) {
@@ -76,7 +83,7 @@ public class Player {
     }
 
     public PlayerStatus getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(PlayerStatus status) {

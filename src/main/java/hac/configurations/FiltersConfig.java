@@ -3,6 +3,7 @@ package hac.configurations;
 import hac.filters.OnRoomFilter;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.RoomRepository;
+import hac.services.PlayerService;
 import hac.services.RoomService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,22 +33,18 @@ public class FiltersConfig implements WebMvcConfigurer {
     RoomService roomService;
 
     @Autowired
-    PlayerRepository playerRepository;
+    PlayerService playerService;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
                 .addResourceHandler("/static/**")
-                .addResourceLocations("classpath:/static/");
+                .addResourceLocations("/static/");
     }
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new OnRoomFilter(roomService))
+        registry.addInterceptor(new OnRoomFilter(roomService, playerService))
                 .addPathPatterns("/game/init");
     }
-//@Override
-//public void addInterceptors(InterceptorRegistry registry) {
-//    registry.addInterceptor(new OnRoomFilter(roomService, playerRepository))
-//            .addPathPatterns("/game/init");
-//}
+
 }

@@ -190,7 +190,9 @@
            return `${this.#firstIndex.row}.${this.#firstIndex.col}`
         }
         getDataToSend(){
-            return {"firstIndex":this.#firstIndex, "lastIndex":this.#lastIndex, "size":this.#size};
+            return {"firstRow":this.#firstIndex.row,"firstCol":this.#firstIndex.col,
+                "lastRow":this.#lastIndex.row,"lastCol":this.#lastIndex.col ,
+                "size":this.#size};
         }
     }
 
