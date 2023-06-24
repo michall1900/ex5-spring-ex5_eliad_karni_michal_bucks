@@ -39,8 +39,15 @@ public class LoginController {
     /** User zone index. */
 
 
+    @RequestMapping("/register/{errorMessage}")
+    public String getRegisterErrorMessage(@RequestParam("errorMessage") String errorMessage, Model model) {
+        model.addAttribute("mode", "register");
+        model.addAttribute("errorMessage", errorMessage);
+        return "loginPages/login-register";
+    }
+
     @RequestMapping("/register")
-    public String getRegister(Model model) {
+    public String getRegister(String errorMessage, Model model) {
         model.addAttribute("mode", "register");
         return "loginPages/login-register";
     }
@@ -48,15 +55,19 @@ public class LoginController {
     @PostMapping("/register")
     public String registerUser(NewUser user, Model model){
         try {
-            if(!Objects.equals(user.getPassword(), user.getConfirmpassword()))
+            if(user.getPassword().equals(user.getConfirmpassword()))
                 throw new Exception("The two passwords that you have been entered are distinct.");
+            if(usersManager.userExists(user.getUsername()))
+                throw new Exception("The user is already exist!");
             usersManager.createUser(User.withUsername(user.getUsername())
                     .password(user.getPassword())
                     .roles("USER")
                     .build());
             return "redirect:/login";
         }catch (Exception e){
-            model.addAttribute("error-message", e.getMessage());
+            model.addAttribute("mode", "register");
+            System.out.println(e.getMessage());
+            model.addAttribute("errorMessage", e.getMessage());
             return "loginPages/login-register";
         }
     }
