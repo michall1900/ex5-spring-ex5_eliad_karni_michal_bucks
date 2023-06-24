@@ -1,5 +1,6 @@
 package hac.controllers;
 
+import hac.classes.GameBoard;
 import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
@@ -40,9 +41,9 @@ public class TempForGameController {
             System.out.println("in /game");
             Player player1 = playerService.createNewPlayer("1");
             Player player2 = playerService.createNewPlayer("2");
-            Room room = roomService.createNewRoom();
+            Room room = roomService.createNewRoom(player1, 1);
             long roomId = roomService.saveRoom(room).getId();
-            roomService.addPlayerToRoom(roomId,player1);
+//            roomService.addPlayerToRoom(roomId,player1);
             roomService.addPlayerToRoom(roomId,player2);
             roomService.changeRoomStatus(roomId, Room.RoomEnum.WAITING_FOR_BOARDS);
         }

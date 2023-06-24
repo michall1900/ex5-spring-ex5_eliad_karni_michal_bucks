@@ -9,6 +9,8 @@ import jakarta.validation.constraints.NotNull;
 import java.util.concurrent.atomic.AtomicReference;
 
 
+import java.util.HashMap;
+
 @Entity
 public class Player {
 
@@ -85,5 +87,12 @@ public class Player {
     public String toString() {
         return "Player{" + "id = " + getId() + ", name = " + getUsername() + ", status = " + getStatus() +
                 getRoom().getId() + "}";
+    }
+
+    public HashMap<String, String> getInfo(){
+        HashMap map = new HashMap<String,String>();
+        map.put("name", this.username);
+        map.put("status", this.status);
+        return map;
     }
 }

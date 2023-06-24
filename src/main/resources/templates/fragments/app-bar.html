@@ -23,7 +23,7 @@
             <p   class="badge bg-primary text-wrap">administrator mode</p>
           </li>
           <li>
-            <p class="d-inline p-2 text-bg-dark">Welcome <span sec:authorize="isAuthenticated()" sec:authentication="name"></span>!</p>
+            <p class="d-inline p-2 text-bg-dark">Welcome <span sec:authorize="isAuthenticated()" sec:authentication="name"></span>! </p>
           </li>
           <li sec:authorize="isAuthenticated()">
             <form th:action="@{/logout}" method="post" style="display:inline">

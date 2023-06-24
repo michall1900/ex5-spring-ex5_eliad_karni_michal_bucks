@@ -5,8 +5,7 @@ import hac.repo.player.Player;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Entity
@@ -97,5 +96,22 @@ public class Room {
         playersName.updateAndGet(v -> v + "]");
         return "Room{" + "id = " + getId() + ", players ids = " + playersName + ", status = " + getStatus() +
                 ", current player id = "+ ((getCurrentPlayerIndex()!=DEFAULT_INDEX)?getCurrentPlayerIndex(): null) + "}";
+    }
+
+    public Map<String,String> getInfo(){
+        StringBuilder players = new StringBuilder("[");
+        for (Player player : this.players){
+            players.append( "\"" + player.getUsername() + "\"").append(",");
+        }
+        players = new StringBuilder(players.substring(0, players.length() - 1) + "]");
+        Map<String,String> info = new HashMap<String, String>();
+        info.put("id", Long.toString(this.id));
+        info.put("players", players.toString());
+        info.put("type", this.option.name());
+        return info;
+    }
+
+    public boolean full(){
+        return this.players.size() == 2;
     }
 }

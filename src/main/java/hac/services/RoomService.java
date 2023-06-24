@@ -1,5 +1,6 @@
 package hac.services;
 
+import hac.classes.GameBoard;
 import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
@@ -31,11 +32,15 @@ public class RoomService {
     @Resource(name="getPlayerLock")
     ReentrantReadWriteLock playerLock;
 
+    synchronized private void lockAll(){
+        roomLock.writeLock().lock();
+        playerLock.writeLock().lock();
+    }
+
     @Transactional
     public Room saveRoom(Room room) {
         try {
-            roomLock.writeLock().lock();
-            playerLock.writeLock().lock();
+            lockAll();
             return roomRepo.save(room);
         }
         finally {
@@ -44,34 +49,30 @@ public class RoomService {
         }
     }
 
-    public Room createNewRoom(){
+    public Room createNewRoom(Player player, int type){
         Room room = new Room();
         room.setStatus(Room.RoomEnum.WAITING_FOR_NEW_PLAYER);
-        return room;
+        room.setOption(GameBoard.Options.values()[type]);
+        room.add(player);
+        return saveRoom(room);
     }
-
 
     @Transactional
     public void addPlayerToRoom(long roomId, Player newPlayer) {
         //TODO be careful with the locks, and be aware of a dead lock that could happened if in any case it happened in opposite way.
         // TODO - check whats happened if player change an attribute.
         try{
-            roomLock.writeLock().lock();
+            lockAll();
             Room room = roomRepo.findById(roomId).orElseThrow(() -> new RuntimeException(ROOM_NOT_FOUND));
-
-            playerLock.writeLock().lock();
-            if (playersRepo.findByPlayerIdAndRoomId(newPlayer.getId(), roomId).isPresent()) {
+            if (playersRepo.findByUsername(newPlayer.getUsername()) != null) {
                 throw new RuntimeException(PLAYER_IN_ROOM);
             }
-
-            newPlayer.setRoom(room);
             room.add(newPlayer);
             roomRepo.save(room);
         }
         finally {
             roomLock.writeLock().unlock();
-            if (playerLock.isWriteLockedByCurrentThread())
-                playerLock.writeLock().unlock();
+            playerLock.writeLock().unlock();
         }
     }
 

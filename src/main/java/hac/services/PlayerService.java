@@ -22,4 +22,17 @@ public class PlayerService {
         player.setStatus(Player.PlayerStatus.NOT_READY);
         return player;
     }
+
+    public Player getPlayerByUsername(String username) throws Exception{
+        try {
+            playerLock.readLock().lock();
+            Player player = playersRepo.findByUsername(username);
+            if(player == null){
+                throw new Exception("username don't exists in the DB");
+            }
+            return player;
+        }finally {
+            playerLock.readLock().unlock();
+        }
+    }
 }

@@ -27,14 +27,15 @@ public class GameInit {
     @PostMapping("")
     public String postBoard(@Valid GameBoard gameBoard, Model model, Principal principal){
         System.out.println("Recieved!");
-        try{
+//        try{
+//
+//        }
+//        catch (Exception e){
+//
+//            return "redirect:/game/init";
+//        }
 
-        }
-        catch (Exception e){
-
-            return "redirect:/game/init";
-        }
-
+        return "redirect:/game/init";
     }
 
 
