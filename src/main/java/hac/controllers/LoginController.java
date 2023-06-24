@@ -33,7 +33,9 @@ public class LoginController {
 
     /** User zone index. */
     @RequestMapping("/user")
-    public String userIndex() { return "user/index"; }
+    public String userIndex() {
+        return "user/index";
+    }
 
     /** User zone index. */
 

@@ -49,14 +49,14 @@ public class OnRoomFilter implements HandlerInterceptor {
             System.out.println(e);
         }
 
-        List<Player> players = playerRepository.findAll();
-        try{
-            for (Player r : players)
-                System.out.println(r);
-        }
-        catch (Exception e){
-            System.out.println(e);
-        }
+//        List<Player> players = playerRepository.findAll();
+//        try{
+//            for (Player r : players)
+//                System.out.println(r);
+//        }
+//        catch (Exception e){
+//            System.out.println(e);
+//        }
 
         return true; // continue with the request to next filter or to controller
     }
