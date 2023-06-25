@@ -46,6 +46,7 @@ public class BoardService {
 
     @Transactional
     public void saveNewBoard(Board board, String username){
+        //TODO order the code.
         Player p = playerService.getPlayerByUsername(username,true);
         Room r = playerService.getRoomByUsername(username);
         if (p.getBoard()!=null)
@@ -54,9 +55,9 @@ public class BoardService {
         p.setBoard(board);
         p.setStatus(Player.PlayerStatus.READY);
         board.setPlayer(p);
-        //check this later;
         boardRepository.save(board);
-
     }
+
+
 
 }

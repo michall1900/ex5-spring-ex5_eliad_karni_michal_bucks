@@ -357,6 +357,8 @@
         DELETE_ELEMENT.addEventListener("click",handleDeleteClick)
         ERROR_ELEMENT = document.getElementById(ERROR_BODY_ID);
         ERROR_BTN = document.getElementById(ERROR_BTN_ID)
+        if (ERROR_ELEMENT.value && ERROR_ELEMENT.value!=="")
+            ERROR_BTN.click();
         READY_BTN_ELEMENT = document.getElementById(READY_BTN_ID);
         DATA_TO_SERVER_ELEMENT = document.getElementById(DATA_TO_SERVER_ID);
     })

@@ -2,7 +2,10 @@ package hac.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hac.repo.board.Board;
+import hac.repo.room.Room;
 import hac.services.BoardService;
+import hac.services.PlayerService;
+import hac.services.RoomService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
@@ -15,6 +18,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Set;
 
 @Controller
@@ -26,47 +30,50 @@ public class GameInit {
 
     @Autowired
     private Validator validator;
+
+    @Autowired
+    private RoomService roomService;
+
+    @Autowired
+    private PlayerService playerService;
+
     @GetMapping("")
-    public String gameInit(Model model){
+    public String gameInit(Model model, Principal principal){
+        try{
+            model.addAttribute("names", roomService.getAllOpponentNamesByUsername(principal.getName()));
+        }
+        catch(Exception e){
+            model.addAttribute("error",e.getMessage());
+            System.out.println(e);
+        }
         model.addAttribute("endValue", Board.SIZE-1);
         model.addAttribute("imgPath", Board.imgType.get("empty"));
         //we will get the option from the db.
         model.addAttribute("option", Board.options.get(0));
         model.addAttribute("url","/game/init");
+
         return "game/initGame";
     }
 
     //TODO handle board error
     @PostMapping("")
     public String postBoard(@RequestParam("boardName") String boardString, Model model, Principal principal){
-        System.out.println("Recieved!");
-        System.out.println(boardString);
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Board board = objectMapper.readValue(boardString, Board.class);
-            BindingResult bindingResult = new BeanPropertyBindingResult(board, "board");
             Set<ConstraintViolation<Board>> violations = validator.validate(board);
             if (!violations.isEmpty()) {
-                // Handle the validation errors.
-                // This is just an example; replace with your own error handling.
                 throw new ConstraintViolationException(violations);
             }
             boardService.saveNewBoard(board, principal.getName());
-            return "redirect:/game";
+            roomService.updateRoomStatusByUsername(principal.getName());
+            return "game/waitingForStartGame";
 
         } catch (Exception e) {
+            //TODO = Add the error message;
             e.printStackTrace();
             return "redirect:/game/init";
         }
-//        try {
-//            boardService.saveNewBoard(board, principal.getName());
-//            return "redirect:/game";
-//        }
-//        catch (Exception e){
-//            System.out.println(e);
-//            //TODO = Add the error message;
-//            return "redirect:/game/init";
-//        }
 
     }
 

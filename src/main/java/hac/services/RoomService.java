@@ -5,13 +5,14 @@ import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
 import hac.repo.room.RoomRepository;
-import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Service
@@ -26,6 +27,8 @@ public class RoomService {
     @Autowired
     private PlayerRepository playersRepo;
 
+    @Autowired
+    private PlayerService playerService;
 //    @Resource(name="getRoomLock")
 //    ReentrantReadWriteLock roomLock;
 //
@@ -100,5 +103,44 @@ public class RoomService {
 //            roomLock.readLock().unlock();
 //        }
     }
+    @Transactional(readOnly = true)
+    public List<String> getAllNotReadyPlayersNameInRoomByUsername(String username){
+        List<String> waitingPlayersList = new ArrayList<>();
+        List<Player> playersOnRoom = playerService.getRoomByUsername(username).getPlayers();
+        playersOnRoom.forEach((player)->{
+            if(player.getStatus() == Player.PlayerStatus.NOT_READY)
+                waitingPlayersList.add(player.getUsername());
+        });
+        return waitingPlayersList;
+    }
+
+    @Transactional
+    public void updateRoomStatusByUsername(String username){
+        Room room = playerService.getRoomByUsername(username);
+        List<Player> playersOnRoom = room.getPlayers();
+        AtomicInteger counterOfNotReady = new AtomicInteger();
+        playersOnRoom.forEach((player)->{
+            if(player.getStatus() == Player.PlayerStatus.NOT_READY)
+                counterOfNotReady.addAndGet(1);
+        });
+        if (counterOfNotReady.get()==0){
+            room.setStatus(Room.RoomEnum.ON_GAME);
+            playersOnRoom.forEach((player)->{
+                player.setStatus(Player.PlayerStatus.ON_GAME);
+            });
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getAllOpponentNamesByUsername(String username){
+        List<String> namesList = new ArrayList<>();
+        List<Player> playersOnRoom = playerService.getRoomByUsername(username).getPlayers();
+        playersOnRoom.forEach((player)->{
+            if (!Objects.equals(player.getUsername(), username))
+                namesList.add(player.getUsername());
+        });
+        return namesList;
+    }
+
 }
 

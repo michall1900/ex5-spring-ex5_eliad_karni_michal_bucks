@@ -81,6 +81,11 @@ public class PlayerService {
     }
 
     @Transactional
+    public Player.PlayerStatus getPlayerStatusByUsername(String username){
+        return getPlayerByUsername(username, true).getStatus();
+    }
+
+    @Transactional
     public void removePlayer(String username) throws RuntimeException{
         Player player = getPlayerByUsername(username, false);
         Room room = player.getRoom();
