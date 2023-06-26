@@ -68,7 +68,6 @@ public class LoginController {
             return "redirect:/login";
         }catch (Exception e){
             model.addAttribute("mode", "register");
-            System.out.println(e.getMessage());
             model.addAttribute("errorMessage", e.getMessage());
             return "loginPages/login-register";
         }

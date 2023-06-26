@@ -112,6 +112,6 @@ public class Room {
     }
 
     public boolean full(){
-        return this.players.size() == 2;
+        return this.players.size() == Room.SIZE;
     }
 }

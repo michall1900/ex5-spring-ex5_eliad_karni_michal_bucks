@@ -71,6 +71,9 @@ public class RoomService {
                 throw new RuntimeException(PLAYER_IN_ROOM);
             }
             room.add(newPlayer);
+            if(room.full()){
+                room.setStatus(Room.RoomEnum.WAITING_FOR_BOARDS);
+            }
             //roomRepo.save(room);
         //}
 //        finally {

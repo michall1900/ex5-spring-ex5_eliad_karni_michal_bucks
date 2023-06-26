@@ -1,5 +1,6 @@
 package hac.configurations;
 
+import hac.filters.InRoomFilter;
 import hac.filters.OnRoomFilter;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.RoomRepository;
@@ -45,6 +46,13 @@ public class FiltersConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new OnRoomFilter(roomService, playerService))
                 .addPathPatterns("/game/init");
-    }
+        registry.addInterceptor(new InRoomFilter(roomService, playerService))
+                .addPathPatterns("/lobby", "/how-to-play", "/logout");
 
+    }
+//@Override
+//public void addInterceptors(InterceptorRegistry registry) {
+//    registry.addInterceptor(new OnRoomFilter(roomService, playerRepository))
+//            .addPathPatterns("/game/init");
+//}
 }
