@@ -19,7 +19,7 @@
             if (response.status === 400){
                 //reconnect - waiting a lot of time
                 await new Promise(resolve => setTimeout(resolve, TimeOut))
-                waitForAllUsers();
+                await waitForAllUsers();
             }
             else if(response.status!== 200){
                 displayError(response.text());
@@ -31,7 +31,7 @@
                 }
                 else{
                     await new Promise(resolve => setTimeout(resolve, TimeOut))
-                    waitForAllUsers();
+                    await waitForAllUsers();
                 }
 
             }

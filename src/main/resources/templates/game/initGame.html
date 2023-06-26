@@ -20,6 +20,7 @@
                     <span th:each="name, stat: ${names}">
                     <span th:text="${'`' + name + '`'}"></span>
                     <th:block th:if="${!stat.last}">, </th:block>
+                    </span>
                 </div>
             </span>
             <div class="col-12 my-2 text-center" id="instructions">

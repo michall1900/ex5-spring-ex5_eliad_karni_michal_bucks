@@ -21,10 +21,10 @@ public class Board {
     }
     public final static int SIZE = 10;
     public final static Map<String, String> imgType = new HashMap<String, String>(){{
-        put("noShip", "noShip.png");
-        put("submarineCell", "submarineCell.png");
-        put("explodeShip", "explodeShip.jpg");
-        put("empty", "empty.png");
+        put(String.valueOf(Tile.TileStatus.Miss), "noShip.png");
+        put(String.valueOf(Tile.TileStatus.Submarine), "submarineCell.png");
+        put(String.valueOf(Tile.TileStatus.Hit), "explodeShip.jpg");
+        put(String.valueOf(Tile.TileStatus.Empty), "empty.png");
     }};
 
     public final static Map <Integer,HashMap<Integer,Integer>> options = new HashMap<Integer, HashMap<Integer,Integer>>(){{
@@ -136,12 +136,6 @@ public class Board {
                 for(int col = submarine.getFirstCol(); col<=submarine.getLastCol(); col++){
                     boardTiles.get(Board.SIZE*row + col).setSubmarine(submarine);
                     boardTiles.get(Board.SIZE*row + col).setStatus(Tile.TileStatus.Submarine);
-                    System.out.print(row);
-                    System.out.print(" ");
-                    System.out.print(col);
-                    System.out.print(" ");
-                    System.out.print(boardTiles.get(Board.SIZE*row + col).getStatus());
-                    System.out.println(" ");
                 }
             }
         }));

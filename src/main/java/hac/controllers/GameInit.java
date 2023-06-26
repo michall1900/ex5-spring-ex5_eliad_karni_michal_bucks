@@ -2,23 +2,18 @@ package hac.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hac.repo.board.Board;
-import hac.repo.room.Room;
+import hac.repo.tile.Tile;
 import hac.services.BoardService;
 import hac.services.PlayerService;
 import hac.services.RoomService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
 import java.security.Principal;
-import java.util.List;
 import java.util.Set;
 
 @Controller
@@ -37,6 +32,7 @@ public class GameInit {
     @Autowired
     private PlayerService playerService;
 
+
     @GetMapping("")
     public String gameInit(Model model, Principal principal){
         try{
@@ -47,7 +43,7 @@ public class GameInit {
             System.out.println(e);
         }
         model.addAttribute("endValue", Board.SIZE-1);
-        model.addAttribute("imgPath", Board.imgType.get("empty"));
+        model.addAttribute("imgPath", Board.imgType.get(String.valueOf(Tile.TileStatus.Empty)));
         //we will get the option from the db.
         model.addAttribute("option", Board.options.get(0));
         model.addAttribute("url","/game/init");

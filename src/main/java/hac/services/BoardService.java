@@ -5,9 +5,17 @@ import hac.repo.board.BoardRepository;
 import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
+import hac.repo.tile.Tile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+
+import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 
 @Service
 public class BoardService {
@@ -58,6 +66,48 @@ public class BoardService {
         boardRepository.save(board);
     }
 
+    @Transactional(readOnly = true)
+    public ArrayList<ArrayList<String>> getTwoDimensionalArrayByPlayer(Player player, Boolean getSubmarine){
 
+        Board board = player.getBoard();
+        List<Tile> tiles= board.getBoardTiles();
+        ArrayList<ArrayList<String>> boardToSend = new ArrayList<>();
+        for (int row = 0; row<Board.SIZE; row++){
+            ArrayList<String> rowToSend = new ArrayList<>();
+            for(int col =0; col<Board.SIZE; col++){
+                Tile currentTile = tiles.get(row*Board.SIZE + col);
+                Tile.TileStatus status = currentTile.getStatus();
+                if (status == Tile.TileStatus.Submarine){
+                    if (getSubmarine){
+                        rowToSend.add(Board.imgType.get(String.valueOf(status)));
+                    }
+                    else
+                        rowToSend.add(Board.imgType.get(String.valueOf(Tile.TileStatus.Empty)));
+                }
+                else
+                    rowToSend.add(Board.imgType.get(String.valueOf(status)));
+            }
+            boardToSend.add(rowToSend);
+        }
+        return boardToSend;
+    }
 
+    @Transactional(readOnly = true)
+    public HashMap<String, ArrayList<ArrayList<String>>>  getOpponentBoardsByUsername(String username){
+        HashMap<String,  ArrayList<ArrayList<String>>> allBoards = new HashMap<>();
+        Room room = playerService.getRoomByUsername(username);
+        List<Player> players = room.getPlayers();
+        players.forEach((player)->{
+            String playerName = player.getUsername();
+            if (!Objects.equals(playerName, username))
+                allBoards.put(playerName,getTwoDimensionalArrayByPlayer(player, false));
+        });
+        return allBoards;
+    }
+
+    @Transactional(readOnly = true)
+    public ArrayList<ArrayList<String>> getUserBoardByUsername(String username){
+        Player player = playerService.getPlayerByUsername(username,false);
+        return getTwoDimensionalArrayByPlayer(player,true);
+    }
 }

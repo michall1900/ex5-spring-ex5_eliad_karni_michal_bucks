@@ -88,13 +88,13 @@ public class OnRoomFilter implements HandlerInterceptor {
             else {
                 if (roomStatus == Room.RoomEnum.WAITING_FOR_BOARDS && playerStatus == Player.PlayerStatus.READY) {
                     request.setAttribute("error", BOARD_ALREADY_SENT);
-                    response.sendRedirect("/game");
+                    response.sendRedirect("/game/wait-to-start-page");
                 }
                 //If the game is on and the player already in game, the user should get to the game path.
                 else if (roomStatus == Room.RoomEnum.ON_GAME && playerStatus == Player.PlayerStatus.ON_GAME) {
                     request.setAttribute("error", BOARD_ALREADY_SENT);
                     // TODO change to the path for the game
-                    response.sendRedirect("/game/wait-to-start");
+                    response.sendRedirect("/game/on-game");
                 } else {
                     System.out.println("Invalid room status");
                     //TODO remove player from db + from room list. If we got there it's already exist
