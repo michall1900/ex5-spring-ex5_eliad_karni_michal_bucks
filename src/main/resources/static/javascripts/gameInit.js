@@ -12,6 +12,7 @@
     const ERROR_BTN_ID = "errorBtn"
     const ERROR_BODY_ID = "error"
     const READY_BTN_ID = "ready"
+    const DATA_TO_SERVER_ID = "paramsToServer"
 
     const ADD_NOT_CLICKED_ERROR = "To select a submarine, you must first click an 'Add' button."
     const HAVE_NO_SUBMARINE_TO_DISPLAY = "All submarines are already displayed. Click 'Ready' or delete a submarine to relocate it."
@@ -32,6 +33,7 @@
     let INSTRUCTIONS_ELEMENT;
     let ERROR_ELEMENT;
     let ERROR_BTN;
+    let DATA_TO_SERVER_ELEMENT;
     let isDeletePressed = false;
     let isAddPressed = false;
 
@@ -187,6 +189,9 @@
         getFirstIndexString(){
            return `${this.#firstIndex.row}.${this.#firstIndex.col}`
         }
+        getDataToSend(){
+            return {"firstIndex":this.#firstIndex, "lastIndex":this.#lastIndex, "size":this.#size};
+        }
     }
 
     class Controller{
@@ -258,6 +263,8 @@
             this.setCurrentSize(DEFAULT_VALUE)
             this.#submarineMap.set(submarine.getFirstIndexString(), submarine);
             if (this.#submarineMap.size === this.#numberOfNeededSubmarines) {
+                console.log(JSON.stringify(this.#getDataToSend()))
+                DATA_TO_SERVER_ELEMENT.value = JSON.stringify(this.#getDataToSend())
                 READY_BTN_ELEMENT.removeAttribute("disabled")
             }
             INSTRUCTIONS_ELEMENT.innerHTML = INIT_INSTRUCTION
@@ -289,6 +296,15 @@
             if (this.#currentStartIndex!== DEFAULT_START_POINT)
                 document.getElementById(`image_${this.#currentStartIndex.row}.${this.#currentStartIndex.col}`).setAttribute("src", IMG_SOURCES_MAP.get("empty"))
             this.setCurrentSize(DEFAULT_VALUE)
+        }
+
+        #getDataToSend(){
+            let dataToSend = {"submarines":[]}
+            this.#submarineMap.forEach((submarine)=>{
+                dataToSend.submarines.push(submarine.getDataToSend())
+            })
+            console.log(dataToSend)
+            return dataToSend;
         }
     }
 
@@ -327,10 +343,6 @@
 
     }
 
-    const handleReady= (event)=>{
-
-    }
-
     document.addEventListener("DOMContentLoaded",()=>{
         let controller = new Controller();
         let addButtons = document.querySelectorAll(".addButton");
@@ -344,6 +356,6 @@
         ERROR_ELEMENT = document.getElementById(ERROR_BODY_ID);
         ERROR_BTN = document.getElementById(ERROR_BTN_ID)
         READY_BTN_ELEMENT = document.getElementById(READY_BTN_ID);
-        READY_BTN_ELEMENT.addEventListener("click",handleReady)
+        DATA_TO_SERVER_ELEMENT = document.getElementById(DATA_TO_SERVER_ID);
     })
 })();

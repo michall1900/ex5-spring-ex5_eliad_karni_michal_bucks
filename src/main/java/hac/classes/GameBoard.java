@@ -1,15 +1,25 @@
 package hac.classes;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.stereotype.Component;
 
 import javax.swing.text.html.Option;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 @Component
 public class GameBoard implements Serializable {
+
+
+
 
     public enum Options{
         BASIC,
@@ -38,7 +48,35 @@ public class GameBoard implements Serializable {
         }});
     }};
 
-    GameBoard(){
+    public GameBoard() {
+    }
+
+    public GameBoard(List<Submarine> submarines, Options option) {
+        setSubmarines(submarines);
+        setOption(option);
+    }
+
+    private List<Submarine> submarines;
+
+    @Enumerated(EnumType.ORDINAL)
+    private Options option;
+    public List<Submarine> getSubmarines() {
+        return submarines;
+    }
+
+    public void setSubmarines(List<Submarine> submarines) {
+        this.submarines = submarines;
+    }
+
+    public Options getOption() {
+        return option;
+    }
+
+    public void setOption(Options option) {
+        this.option = option;
+    }
+
+    public void validateBoard(){
 
     }
 }

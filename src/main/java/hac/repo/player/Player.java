@@ -5,8 +5,9 @@ import hac.repo.board.Board;
 import hac.repo.room.Room;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+
+import java.util.concurrent.atomic.AtomicReference;
+
 
 import java.util.HashMap;
 
@@ -28,11 +29,10 @@ public class Player {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="room_id", nullable = false)
-//    @OnDelete(action = OnDeleteAction.CASCADE)
     private Room room;
 
-//    @OneToOne
-//    private Board board;
+    @OneToOne
+    private Board board;
 
     @Column(unique = true)
     @NotNull(message = "Username is required.")
@@ -59,13 +59,13 @@ public class Player {
         this.room = room;
     }
 
-//    public Board getBoard() {
-//        return board;
-//    }
+    public Board getBoard() {
+        return board;
+    }
 
-//    public void setBoard(Board board) {
-//        this.board = board;
-//    }
+    public void setBoard(Board board) {
+        this.board = board;
+    }
 
     public String getUsername() {
         return username;
@@ -81,6 +81,12 @@ public class Player {
 
     public void setStatus(PlayerStatus status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Player{" + "id = " + getId() + ", name = " + getUsername() + ", status = " + getStatus() +
+                getRoom().getId() + "}";
     }
 
     public HashMap<String, String> getInfo(){

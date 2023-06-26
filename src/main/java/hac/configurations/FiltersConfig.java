@@ -31,6 +31,9 @@ public class FiltersConfig implements WebMvcConfigurer {
     @Autowired
     RoomService roomService;
 
+    @Autowired
+    PlayerRepository playerRepository;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
@@ -42,4 +45,9 @@ public class FiltersConfig implements WebMvcConfigurer {
         registry.addInterceptor(new OnRoomFilter(roomService))
                 .addPathPatterns("/game/init");
     }
+//@Override
+//public void addInterceptors(InterceptorRegistry registry) {
+//    registry.addInterceptor(new OnRoomFilter(roomService, playerRepository))
+//            .addPathPatterns("/game/init");
+//}
 }

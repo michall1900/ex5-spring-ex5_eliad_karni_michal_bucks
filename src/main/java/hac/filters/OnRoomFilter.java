@@ -2,6 +2,7 @@ package hac.filters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
 import hac.repo.room.RoomRepository;
@@ -19,6 +20,8 @@ public class OnRoomFilter implements HandlerInterceptor {
 
     RoomService roomService;
 
+
+    PlayerRepository playerRepository;
     public OnRoomFilter(RoomService roomService){
         this.setRoomService(roomService);
     }
@@ -45,6 +48,15 @@ public class OnRoomFilter implements HandlerInterceptor {
         catch (Exception e){
             System.out.println(e);
         }
+
+//        List<Player> players = playerRepository.findAll();
+//        try{
+//            for (Player r : players)
+//                System.out.println(r);
+//        }
+//        catch (Exception e){
+//            System.out.println(e);
+//        }
 
         return true; // continue with the request to next filter or to controller
     }
