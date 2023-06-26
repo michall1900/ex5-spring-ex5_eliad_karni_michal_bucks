@@ -55,7 +55,7 @@ public class UsersConfig {
                         .requestMatchers("/register", "/login").anonymous()
                         .requestMatchers("/css/**","/images/**","/javascripts/**", "/", "/403", "/errorpage", "/how-to-play", "/simulateError").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/user/**", "/game/**").hasRole("USER")
+                        .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/shared/**", "/lobby/**" , "game/**").hasAnyRole("USER", "ADMIN")
                 )
                 .formLogin((form) -> form

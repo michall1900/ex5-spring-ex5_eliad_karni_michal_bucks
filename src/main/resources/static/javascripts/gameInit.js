@@ -12,7 +12,7 @@
     const ERROR_BTN_ID = "errorBtn"
     const ERROR_BODY_ID = "error"
     const READY_BTN_ID = "ready"
-    const DATA_TO_SERVER_ID = "paramsToServer"
+    const DATA_TO_SERVER_ID = "boardName"
 
     const ADD_NOT_CLICKED_ERROR = "To select a submarine, you must first click an 'Add' button."
     const HAVE_NO_SUBMARINE_TO_DISPLAY = "All submarines are already displayed. Click 'Ready' or delete a submarine to relocate it."
@@ -190,7 +190,9 @@
            return `${this.#firstIndex.row}.${this.#firstIndex.col}`
         }
         getDataToSend(){
-            return {"firstIndex":this.#firstIndex, "lastIndex":this.#lastIndex, "size":this.#size};
+            return {"firstRow":this.#firstIndex.row,"firstCol":this.#firstIndex.col,
+                "lastRow":this.#lastIndex.row,"lastCol":this.#lastIndex.col ,
+                "size":this.#size};
         }
     }
 
@@ -355,6 +357,8 @@
         DELETE_ELEMENT.addEventListener("click",handleDeleteClick)
         ERROR_ELEMENT = document.getElementById(ERROR_BODY_ID);
         ERROR_BTN = document.getElementById(ERROR_BTN_ID)
+        if (ERROR_ELEMENT.value && ERROR_ELEMENT.value!=="")
+            ERROR_BTN.click();
         READY_BTN_ELEMENT = document.getElementById(READY_BTN_ID);
         DATA_TO_SERVER_ELEMENT = document.getElementById(DATA_TO_SERVER_ID);
     })

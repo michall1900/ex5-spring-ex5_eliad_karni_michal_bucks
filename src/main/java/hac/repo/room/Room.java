@@ -1,6 +1,6 @@
 package hac.repo.room;
 
-import hac.classes.GameBoard;
+import hac.repo.board.Board;
 import hac.repo.player.Player;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -30,11 +30,11 @@ public class Room {
     @Column
     private int currentPlayerIndex = DEFAULT_INDEX;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private RoomEnum status;
 
-    @Enumerated(EnumType.ORDINAL)
-    private GameBoard.Options option;
+    @Enumerated(EnumType.STRING)
+    private Board.Options option;
 
 
     public long getId() {
@@ -69,17 +69,17 @@ public class Room {
         this.status = status;
     }
 
-    public GameBoard.Options getOption() {
+    public Board.Options getOption() {
         return option;
     }
 
-    public void setOption(GameBoard.Options option) {
+    public void setOption(Board.Options option) {
         this.option = option;
     }
 
     public void add(Player player){
         if (player!=null){
-            players.add(player);
+            this.players.add(player);
             player.setRoom(this);
         }
     }

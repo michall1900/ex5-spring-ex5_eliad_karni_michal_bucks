@@ -1,6 +1,5 @@
 package hac.repo.tile;
 
-import hac.classes.GameBoard;
 import hac.repo.subamrine.Submarine;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
@@ -21,8 +20,8 @@ public class Tile {
     @Column(name="id", nullable = false)
     private long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "tutorial_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "submarine_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Submarine submarine;
 
@@ -40,6 +39,14 @@ public class Tile {
 
     public TileStatus getStatus() {
         return status;
+    }
+
+    public Submarine getSubmarine() {
+        return submarine;
+    }
+
+    public void setSubmarine(Submarine submarine) {
+        this.submarine = submarine;
     }
 
     public void setStatus(TileStatus status) {
