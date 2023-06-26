@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:insert="~{fragments/head.html :: head}" ></head>
+<body>
+<div th:insert="~{fragments/app-bar.html :: appBar}"></div>
+<div class="container">
+  <div th:insert="~{fragments/main-pic.html :: main-pic}"></div>
+  <div class="row my-1">
+    <div class="col-10 offset-1">
+      <h3 class="text-center">
+        <span th:if="${status} == 'WIN'">Congratulations!</span>
+        <span th:if="${status} == 'LOSE'">Sorry....</span>
+      </h3>
+      <h2 class="text-center">
+        <span th:if="${status} == 'WIN'">YOU WON" </span>
+        <span th:if="${status} == 'LOSE'">YOU LOST</span>
+        THE GAME...
+      </h2>
+      <h6 class="text-center" th:if="${status} == 'LOSE'"><span th:text="${winner}"></span> Won</h6>
+      <div class="d-grid gap-2 my-2">
+        <a class="btn btn-outline-danger" th:href="@{/lobby}" role="button">back to lobby</a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

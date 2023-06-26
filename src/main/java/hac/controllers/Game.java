@@ -71,4 +71,27 @@ public class Game {
         model.addAttribute("myBoard", boardService.getUserBoardByUsername(principal.getName()));
         return "game/game";
     }
+
+    @GetMapping("/finish-page")
+    public String finishGame(Model model, Principal principal){
+        Player player = playerService.getPlayerByUsername(principal.getName(), true);
+        if(player.getStatus() == Player.PlayerStatus.WIN) {
+            model.addAttribute("status", "WIN");
+        }
+        else if(player.getStatus() == Player.PlayerStatus.LOSE){
+            Room room = playerService.getRoomByUsername(principal.getName());
+            for(Player checkedPlayer : room.getPlayers()){
+                if (checkedPlayer.getStatus() == Player.PlayerStatus.WIN) {
+                    model.addAttribute("winner", checkedPlayer.getUsername());
+                    break;
+                }
+            }
+            model.addAttribute("status", "LOSE");
+        }
+        else
+            return "redirect: /lobby";
+        model.addAttribute("status", "LOSE");
+        model.addAttribute("winner", "Eliad");
+        return "game/finishGame";
+    }
 }
