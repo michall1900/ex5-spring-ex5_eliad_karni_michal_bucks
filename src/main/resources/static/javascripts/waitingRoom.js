@@ -26,7 +26,7 @@
         JSON.parse(roomsJson.players).forEach((player) => {
             roomPlayersTableBodyElement.innerHTML += `
                 <tr class="table-secondary">
-                    <td>${player[0]}</td>
+                    <td>${player}</td>
                 </tr>`;
         })
     }
