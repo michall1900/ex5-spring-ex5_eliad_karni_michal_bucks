@@ -3,7 +3,8 @@
     const ERROR_BTN_ID = "errorBtn"
     const ERROR_BODY_ID = "error"
     const DEFAULT_ERROR = "There is a problem to connect to the server"
-
+    let csrfToken
+    let csrfHeader
     let timestamp = 0;
     let isNeedToPoll = false;
 
@@ -43,15 +44,18 @@
         let [opponentName, row, col] = buttonIdString.split(".");
         row = +row
         col= +col
+
         console.log(opponentName, row, col)
         try {
             let response = await fetch("/game/update", {
-                method: "Post",
+                method: "POST",
                 headers:{
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json; charset=utf-8',
+                    [csrfHeader]: csrfToken
                 },
                 body: JSON.stringify({"row": row, "col": col, "opponentName": opponentName})
             })
+            //let response = await fetch("/game/update", {method:'POST', headers:{[csrfHeader]: csrfToken}})
             await checkResponse(response);
         }
         catch(e){
@@ -78,5 +82,7 @@
         ERROR_BTN = document.getElementById(ERROR_BTN_ID)
         if (ERROR_ELEMENT.value && ERROR_ELEMENT.value!=="")
             ERROR_BTN.click();
+        csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
     })
 })();

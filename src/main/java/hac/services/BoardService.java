@@ -77,6 +77,13 @@ public class BoardService {
             for(int col =0; col<Board.SIZE; col++){
                 Tile currentTile = tiles.get(row*Board.SIZE + col);
                 Tile.TileStatus status = currentTile.getStatus();
+                if (status == Tile.TileStatus.Hit) {
+                    System.out.println(status);
+                    System.out.println(row);
+                    System.out.println(col);
+                    System.out.println(player.getUsername());
+                    System.out.println(getSubmarine);
+                }
                 if (status == Tile.TileStatus.Submarine){
                     if (getSubmarine){
                         rowToSend.add(Board.imgType.get(String.valueOf(status)));
@@ -86,6 +93,7 @@ public class BoardService {
                 }
                 else
                     rowToSend.add(Board.imgType.get(String.valueOf(status)));
+
             }
             boardToSend.add(rowToSend);
         }

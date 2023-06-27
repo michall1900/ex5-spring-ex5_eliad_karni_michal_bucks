@@ -10,34 +10,34 @@ import java.io.Serializable;
 @Component
 public class UserTurn implements Serializable {
     final static String ERROR_MESSAGE = "Your choice is invalid";
-    String row;
-    String col;
+    int row;
+    int col;
     String opponentName;
 
     public UserTurn() {
     }
 
-    public UserTurn(String row, String col, String opponentName) {
+    public UserTurn(int row, int col, String opponentName) {
         setRow(row);
         setCol(col);
         setOpponentName(opponentName);
     }
 
-    public String getRow() {
+    public int getRow() {
         return row;
     }
 
-    public void setRow(String row) {
+    public void setRow(int row) {
         validateIndex(row);
         this.row = row;
     }
 
-    public String getCol() {
+    public int getCol() {
         validateIndex(col);
         return col;
     }
 
-    public void setCol(String col) {
+    public void setCol(int col) {
         this.col = col;
     }
 
@@ -50,9 +50,8 @@ public class UserTurn implements Serializable {
     }
 
 
-    private void validateIndex(String index){
-
-        if (Integer.parseInt(index)<0 || Integer.parseInt(index)>= Board.SIZE)
+    private void validateIndex(int index){
+        if (index<0 || index>= Board.SIZE)
             throw new InvalidChoiceError(ERROR_MESSAGE);
     }
 }

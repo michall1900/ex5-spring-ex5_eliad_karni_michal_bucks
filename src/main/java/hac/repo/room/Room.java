@@ -14,7 +14,8 @@ public class Room {
     public enum RoomEnum {
         WAITING_FOR_NEW_PLAYER,
         WAITING_FOR_BOARDS,
-        ON_GAME
+        ON_GAME,
+        GAME_OVER
     }
     final static int SIZE = 2;
     final static int DEFAULT_INDEX = -1;

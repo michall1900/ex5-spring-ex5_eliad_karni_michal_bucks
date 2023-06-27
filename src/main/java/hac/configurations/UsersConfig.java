@@ -56,7 +56,7 @@ public class UsersConfig {
                         .requestMatchers("/css/**","/images/**","/javascripts/**", "/", "/403", "/errorpage", "/how-to-play", "/simulateError").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
-                        .requestMatchers("/shared/**", "/lobby/**" , "/game/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/shared/**", "/lobby/**", "/game/**" ).hasAnyRole("USER", "ADMIN")
                 )
                 .formLogin((form) -> form
                                 .loginPage("/login")

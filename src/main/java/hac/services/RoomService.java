@@ -2,6 +2,7 @@ package hac.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hac.classes.customErrors.DbError;
+import hac.classes.customErrors.GameOver;
 import hac.classes.customErrors.InvalidChoiceError;
 import hac.classes.forGame.UserTurn;
 import hac.embeddables.UpdateObject;
@@ -24,7 +25,7 @@ public class RoomService {
 
     static final String ROOM_NOT_FOUND ="Room not found";
     static final String PLAYER_IN_ROOM = "Player is already in the room";
-
+    static final String GAME_OVER = "The game end";
     static final String NOT_ENOUGH_PLAYERS = "Some of the players are disconnecter";
     static final String NOT_USER_TURN = "It's not your turn";
 
@@ -144,6 +145,7 @@ public class RoomService {
         }
     }
 
+
     @Transactional(readOnly = true)
     public List<String> getAllOpponentNamesByUsername(String username){
         List<String> namesList = new ArrayList<>();
@@ -179,31 +181,45 @@ public class RoomService {
         if (!getPlayerUsernameTurn(username).equals(username))
             throw new InvalidChoiceError(NOT_USER_TURN);
     }
-//    @Transactional
-//    public void setUpdates(String currentUserName, UserTurn userTurn){
-//        checkIfBothUsersAreInSameRoom(currentUserName, userTurn.getOpponentName());
-//        validateTurn(currentUserName);
-//        Room room = playerService.getRoomByUsername(currentUserName);
-//        Board board = boardService.getUserBoardByUserName(userTurn.getOpponentName());
-//        ArrayList<HashMap<String,String>> boardUpdates = board.getHitChanges(userTurn.getRow(), userTurn.getCol());
-//        UpdateObject updateObject = new UpdateObject();
-//        updateObject.setBoardChanges(boardUpdates);
-//        HashMap<String, String> detailsAboutUpdate = new HashMap<>();
-//        detailsAboutUpdate.put("attackerName", currentUserName);
-//        detailsAboutUpdate.put("opponentName", userTurn.getOpponentName());
-//        detailsAboutUpdate.put("row", Integer.toString(userTurn.getRow()));
-//        detailsAboutUpdate.put("col", Integer.toString(userTurn.getCol()));
-//        updateObject.setAttackDetails(detailsAboutUpdate);
-//        List<String> updatesArray = room.getUpdateObjects();
-//        updatesArray.add(updateObject.convertObjectToString());
-//        room.setUpdateObjects(updatesArray);
-//        Tile.TileStatus tileStatus = board.getBoardTiles().get(userTurn.getRow()*Board.SIZE + userTurn.getCol()).getStatus();
-//        if (tileStatus.equals(Tile.TileStatus.Miss)){
-//            room.setCurrentPlayerIndex((room.getCurrentPlayerIndex()+1)%room.getPlayers().size());
-//        }
-//        //TODO if board's size === hittedSubmarines change status to win(currentPlayer) / loss (other players)
-//
-//    }
+    @Transactional(readOnly = true)
+    public void validateOnGame(Room room){
+        if (room.getStatus().equals(Room.RoomEnum.GAME_OVER))
+            throw new GameOver(GAME_OVER);
+    }
+    @Transactional
+    public void setUpdates(String currentUserName, UserTurn userTurn){
+        checkIfBothUsersAreInSameRoom(currentUserName, userTurn.getOpponentName());
+        validateTurn(currentUserName);
+        Room room = playerService.getRoomByUsername(currentUserName);
+        Board board = boardService.getUserBoardByUserName(userTurn.getOpponentName());
+        ArrayList<HashMap<String,String>> boardUpdates = board.getHitChanges(userTurn.getRow(), userTurn.getCol());
+        UpdateObject updateObject = new UpdateObject();
+        updateObject.setBoardChanges(boardUpdates);
+        HashMap<String, String> detailsAboutUpdate = new HashMap<>();
+        detailsAboutUpdate.put("attackerName", currentUserName);
+        detailsAboutUpdate.put("opponentName", userTurn.getOpponentName());
+        detailsAboutUpdate.put("row", Integer.toString(userTurn.getRow()));
+        detailsAboutUpdate.put("col", Integer.toString(userTurn.getCol()));
+        updateObject.setAttackDetails(detailsAboutUpdate);
+        List<String> updatesArray = room.getUpdateObjects();
+        updatesArray.add(updateObject.convertObjectToString());
+        room.setUpdateObjects(updatesArray);
+        Tile.TileStatus tileStatus = board.getBoardTiles().get(userTurn.getRow()*Board.SIZE + userTurn.getCol()).getStatus();
+        if (tileStatus.equals(Tile.TileStatus.Miss)){
+            room.setCurrentPlayerIndex((room.getCurrentPlayerIndex()+1)%room.getPlayers().size());
+        }
+        if (board.getExplodedSubmarine() == Board.SIZE){
+            room.getPlayers().forEach((player)->{
+                if (currentUserName.equals(player.getUsername()))
+                    player.setStatus(Player.PlayerStatus.WIN);
+                else
+                    player.setStatus(Player.PlayerStatus.LOSE);
+            });
+            room.setStatus(Room.RoomEnum.GAME_OVER);
+        }
+        //TODO if board's size === hittedSubmarines change status to win(currentPlayer) / loss (other players)
+
+    }
 
 //    @Transactional(readOnly = true)
 //    public String returnUpdates(int timestamp){

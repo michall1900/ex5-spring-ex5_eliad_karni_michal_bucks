@@ -1,5 +1,7 @@
 package hac.controllers;
 
+import hac.classes.customErrors.GameOver;
+import hac.classes.customErrors.InvalidChoiceError;
 import hac.classes.forGame.UserTurn;
 import hac.repo.room.Room;
 import hac.services.BoardService;
@@ -78,17 +80,28 @@ public class GameController {
         return output;
     }
     @PostMapping("/update")
-    public ResponseEntity<?> updateBoard(UserTurn userTurn){
+    public ResponseEntity<?> updateBoard(@RequestBody UserTurn userTurn, Principal principal){
         System.out.println("hereeeeeee");
         try{
-            //roomService.setUpdates(principal.getName(),userTurn);
+            roomService.setUpdates(principal.getName(),userTurn);
+            return new ResponseEntity<>(HttpStatus.OK);
         }
-        //TODO handle exception
+        catch (InvalidChoiceError e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (GameOver e){
+            return new ResponseEntity<>("/game/finish-page", HttpStatus.OK);
+        }
         catch (Exception e){
-            System.out.println(e.getMessage());
+            //TODO create this page.
+            return new ResponseEntity<>("/lobby/room-error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(HttpStatus.OK);
+
     }
-
-
+//    @GetMapping("/update")
+//    @ResponseBody
+//    public String test(){
+//        System.out.println("In getttttt");
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
 }

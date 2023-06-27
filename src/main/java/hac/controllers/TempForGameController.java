@@ -1,11 +1,17 @@
 package hac.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hac.classes.forGame.UserTurn;
+import hac.repo.board.Board;
 import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
+import hac.services.BoardService;
 import hac.services.PlayerService;
 import hac.services.RoomService;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Set;
 
 
 //TODO - delete this, it's a temporary route
@@ -34,23 +41,26 @@ public class TempForGameController {
 //    @Autowired
 //    private PlayerRepository playersRepo;
 
+    @Autowired
+    BoardService boardService;
 
     @GetMapping("")
     public String tempGame(Principal principal){
         try {
 
-            System.out.println("in /game");
             Player player1 = playerService.createNewPlayer("1");
             Player player2 = playerService.createNewPlayer("2");
-            System.out.println("Going to save player 1");
             Room room = roomService.createNewRoom(player1, 0);
-            System.out.println("Going to save player 2");
-            //long roomId = roomService.saveRoom(room).getId();
-//            roomService.addPlayerToRoom(roomId,player1);
             roomService.addPlayerToRoom(room.getId(),player2);
-            System.out.println("After saving both players, changing status");
             roomService.changeRoomStatus(room.getId(), Room.RoomEnum.WAITING_FOR_BOARDS);
-            System.out.println("Finish with room creation");
+            ObjectMapper objectMapper = new ObjectMapper();
+            Board board1 = objectMapper.readValue("{\"submarines\":[{\"firstRow\":0,\"firstCol\":1,\"lastRow\":1,\"lastCol\":1,\"size\":2},{\"firstRow\":3,\"firstCol\":0,\"lastRow\":3,\"lastCol\":2,\"size\":3},{\"firstRow\":6,\"firstCol\":0,\"lastRow\":8,\"lastCol\":0,\"size\":3},{\"firstRow\":0,\"firstCol\":5,\"lastRow\":0,\"lastCol\":8,\"size\":4},{\"firstRow\":4,\"firstCol\":4,\"lastRow\":8,\"lastCol\":4,\"size\":5}]}", Board.class);
+            Board board2 = objectMapper.readValue("{\"submarines\":[{\"firstRow\":3,\"firstCol\":4,\"lastRow\":4,\"lastCol\":4,\"size\":2},{\"firstRow\":6,\"firstCol\":2,\"lastRow\":6,\"lastCol\":4,\"size\":3},{\"firstRow\":0,\"firstCol\":8,\"lastRow\":2,\"lastCol\":8,\"size\":3},{\"firstRow\":3,\"firstCol\":6,\"lastRow\":6,\"lastCol\":6,\"size\":4},{\"firstRow\":0,\"firstCol\":0,\"lastRow\":0,\"lastCol\":4,\"size\":5}]}", Board.class);
+            boardService.saveNewBoard(board1, "1");
+            boardService.saveNewBoard(board2,"2");
+            roomService.updateRoomStatusByUsername("1");
+            roomService.updateRoomStatusByUsername("2");
+            return "game/waitingForStartGame";
         }
         catch (Exception e){
             System.out.println(e);
@@ -62,8 +72,7 @@ public class TempForGameController {
             System.out.println(e);
         }
 
-
-        return "redirect:/game/init";
+        return "game/waitingForStartGame";
     }
 
     @GetMapping("/test")

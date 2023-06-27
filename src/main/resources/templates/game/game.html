@@ -2,6 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:insert="~{fragments/head.html :: head}" ></head>
 <body>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
   <div th:insert="~{fragments/app-bar.html :: appBar}"></div>
   <div class="container">
     <div class="row justify-content-center">
