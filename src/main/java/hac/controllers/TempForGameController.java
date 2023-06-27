@@ -1,5 +1,6 @@
 package hac.controllers;
 
+import hac.classes.forGame.UserTurn;
 import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
@@ -66,7 +67,7 @@ public class TempForGameController {
     }
 
     @GetMapping("/test")
-    public String temp(){
+    public String temp(Principal principal){
 //        try {
 //            Player p = playerRepository.findByUsername("1");
 //            p.setStatus(Player.PlayerStatus.ON_GAME);
@@ -82,13 +83,8 @@ public class TempForGameController {
 //        catch (Exception e) {
 //            System.out.println(e);
 //        }
-        try{
-            playerService.removePlayer("1");
-            //List<Room> rooms = roomService.getAllRooms();
-        }
-        catch (Exception e){
-            System.out.println(e);
-        }
-        return "redirect:/game/init";
+//        UserTurn userTurn = new UserTurn(1,1, "2");
+//        roomService.setUpdates(principal.getName(), userTurn);
+        return "redirect:/game/on-game";
     }
 }

@@ -135,4 +135,8 @@ public class Submarine {
         }
     }
 
+    public void hitSubmarine(){
+        hits ++ ;
+    }
+
 }

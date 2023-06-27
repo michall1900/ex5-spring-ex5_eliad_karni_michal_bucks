@@ -1,11 +1,11 @@
 package hac.repo.board;
 
 
+import hac.classes.customErrors.InvalidChoiceError;
 import hac.repo.player.Player;
 import hac.repo.subamrine.Submarine;
 import hac.repo.tile.Tile;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -14,7 +14,7 @@ import java.util.*;
 
 @Entity
 public class Board {
-    final static String SUBMARINE_OPTION_ERROR="The submarines you are invalid.";
+    final static String SUBMARINE_OPTION_ERROR="The submarines you chose are invalid.";
     public enum Options{
         BASIC,
         ALTERNATIVE
@@ -106,6 +106,13 @@ public class Board {
         this.boardTiles = boardTiles;
     }
 
+    public int getExplodedSubmarine() {
+        return explodedSubmarine;
+    }
+
+    public void setExplodedSubmarine(int explodedSubmarine) {
+        this.explodedSubmarine = explodedSubmarine;
+    }
 
     public void makeBoard(Options option){
         Map<Integer,Integer> numberOfSubmarines = new HashMap<>();
@@ -120,11 +127,11 @@ public class Board {
             }
         });
         if (numberOfSubmarines.size()!= options.get(option.ordinal()).size())
-            throw new RuntimeException(SUBMARINE_OPTION_ERROR);
+            throw new InvalidChoiceError(SUBMARINE_OPTION_ERROR);
         for(Map.Entry<Integer, Integer> entry: options.get(option.ordinal()).entrySet()){
             Integer currentCounter = numberOfSubmarines.get(entry.getKey());
             if(currentCounter==null || !currentCounter.equals(entry.getValue()))
-                throw new RuntimeException(SUBMARINE_OPTION_ERROR);
+                throw new InvalidChoiceError(SUBMARINE_OPTION_ERROR);
         }
         for (int i=0; i< Board.SIZE*Board.SIZE; i++){
             Tile tile= new Tile();
@@ -144,10 +151,47 @@ public class Board {
                 for(int col = Math.max(submarine.getFirstCol()-1, 0); col<=Math.min(submarine.getLastCol()+1, SIZE-1); col++){
                     Submarine submarineToCompare = boardTiles.get(Board.SIZE*row + col).getSubmarine();
                     if (submarineToCompare!=null && submarineToCompare!=submarine)
-                        throw new RuntimeException(SUBMARINE_OPTION_ERROR);
+                        throw new InvalidChoiceError(SUBMARINE_OPTION_ERROR);
                 }
             }
         }));
+    }
+
+    public ArrayList<HashMap<String,String>> getHitChanges(int row, int col){
+        Tile tile = this.boardTiles.get(row*SIZE + col);
+        tile.hitTile();
+        if (tile.getStatus() == Tile.TileStatus.Hit){
+            return getListAfterHit(tile, tile.getSubmarine(), row, col);
+        }
+        ArrayList<HashMap<String,String>> hits = new ArrayList<>();
+        hits.add(makeHit(tile, row, col));
+        return hits;
+    }
+
+    private ArrayList<HashMap<String,String>> getListAfterHit(Tile tile, Submarine submarine, int hitRow, int hitCol){
+        ArrayList<HashMap<String,String>> hits = new ArrayList<>();
+        if (submarine.getHits() == submarine.getSize()) {
+            this.explodedSubmarine ++;
+            for (int row = Math.max(submarine.getFirstRow() - 1, 0); row <= Math.min(submarine.getLastRow() + 1, SIZE - 1); row++) {
+                for (int col = Math.max(submarine.getFirstCol() - 1, 0); col <= Math.min(submarine.getLastCol() + 1, SIZE - 1); col++) {
+                    Tile currentTile = this.boardTiles.get(row * SIZE + col);
+                    hits.add(makeHit(currentTile, row, col));
+                }
+            }
+        }
+        else{
+            hits.add(makeHit(tile, hitRow, hitCol));
+        }
+        return hits;
+    }
+
+    private HashMap<String,String> makeHit(Tile tile, int row, int col){
+        HashMap<String, String> hitsMap = new HashMap<>();
+        tile.setStatusWithoutChangeTheSubmarine();
+        hitsMap.put("row", Integer.toString(row));
+        hitsMap.put("col", Integer.toString(col));
+        hitsMap.put("status", String.valueOf(tile.getStatus()));
+        return hitsMap;
     }
 
 }

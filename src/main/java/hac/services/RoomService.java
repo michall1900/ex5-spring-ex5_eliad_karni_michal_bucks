@@ -1,17 +1,21 @@
 package hac.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hac.classes.customErrors.DbError;
+import hac.classes.customErrors.InvalidChoiceError;
+import hac.classes.forGame.UserTurn;
+import hac.embeddables.UpdateObject;
 import hac.repo.board.Board;
 import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
 import hac.repo.room.RoomRepository;
+import hac.repo.tile.Tile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -21,6 +25,9 @@ public class RoomService {
     static final String ROOM_NOT_FOUND ="Room not found";
     static final String PLAYER_IN_ROOM = "Player is already in the room";
 
+    static final String NOT_ENOUGH_PLAYERS = "Some of the players are disconnecter";
+    static final String NOT_USER_TURN = "It's not your turn";
+
     @Autowired
     private RoomRepository roomRepo;
 
@@ -29,6 +36,9 @@ public class RoomService {
 
     @Autowired
     private PlayerService playerService;
+
+    @Autowired
+    private BoardService boardService;
 //    @Resource(name="getRoomLock")
 //    ReentrantReadWriteLock roomLock;
 //
@@ -71,6 +81,7 @@ public class RoomService {
                 throw new RuntimeException(PLAYER_IN_ROOM);
             }
             room.add(newPlayer);
+
             //roomRepo.save(room);
         //}
 //        finally {
@@ -125,6 +136,8 @@ public class RoomService {
         });
         if (counterOfNotReady.get()==0){
             room.setStatus(Room.RoomEnum.ON_GAME);
+            Random random = new Random();
+            room.setCurrentPlayerIndex(random.nextInt(playersOnRoom.size()));
             playersOnRoom.forEach((player)->{
                 player.setStatus(Player.PlayerStatus.ON_GAME);
             });
@@ -142,5 +155,59 @@ public class RoomService {
         return namesList;
     }
 
+    @Transactional(readOnly = true)
+    public String getPlayerUsernameTurn(String username){
+        Room room = playerService.getRoomByUsername(username);
+        System.out.println(room.getPlayers());
+        System.out.println(room.getPlayers().size());
+        //TODO fix it.
+        if (room.getPlayers().size()!= 2)
+            throw new RuntimeException(NOT_ENOUGH_PLAYERS);
+        return room.getPlayers().get(room.getCurrentPlayerIndex()).getUsername();
+    }
+    @Transactional(readOnly = true)
+    public void checkIfBothUsersAreInSameRoom(String currentUserName, String opponentUserName){
+        Room room1 = playerService.getRoomByUsername(currentUserName);
+        Room room2 = playerService.getRoomByUsername(opponentUserName);
+        if(room1!=room2){
+            throw new DbError();
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public void validateTurn(String username){
+        if (!getPlayerUsernameTurn(username).equals(username))
+            throw new InvalidChoiceError(NOT_USER_TURN);
+    }
+//    @Transactional
+//    public void setUpdates(String currentUserName, UserTurn userTurn){
+//        checkIfBothUsersAreInSameRoom(currentUserName, userTurn.getOpponentName());
+//        validateTurn(currentUserName);
+//        Room room = playerService.getRoomByUsername(currentUserName);
+//        Board board = boardService.getUserBoardByUserName(userTurn.getOpponentName());
+//        ArrayList<HashMap<String,String>> boardUpdates = board.getHitChanges(userTurn.getRow(), userTurn.getCol());
+//        UpdateObject updateObject = new UpdateObject();
+//        updateObject.setBoardChanges(boardUpdates);
+//        HashMap<String, String> detailsAboutUpdate = new HashMap<>();
+//        detailsAboutUpdate.put("attackerName", currentUserName);
+//        detailsAboutUpdate.put("opponentName", userTurn.getOpponentName());
+//        detailsAboutUpdate.put("row", Integer.toString(userTurn.getRow()));
+//        detailsAboutUpdate.put("col", Integer.toString(userTurn.getCol()));
+//        updateObject.setAttackDetails(detailsAboutUpdate);
+//        List<String> updatesArray = room.getUpdateObjects();
+//        updatesArray.add(updateObject.convertObjectToString());
+//        room.setUpdateObjects(updatesArray);
+//        Tile.TileStatus tileStatus = board.getBoardTiles().get(userTurn.getRow()*Board.SIZE + userTurn.getCol()).getStatus();
+//        if (tileStatus.equals(Tile.TileStatus.Miss)){
+//            room.setCurrentPlayerIndex((room.getCurrentPlayerIndex()+1)%room.getPlayers().size());
+//        }
+//        //TODO if board's size === hittedSubmarines change status to win(currentPlayer) / loss (other players)
+//
+//    }
+
+//    @Transactional(readOnly = true)
+//    public String returnUpdates(int timestamp){
+//
+//    }
 }
 

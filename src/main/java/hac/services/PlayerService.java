@@ -91,6 +91,7 @@ public class PlayerService {
         Room room = player.getRoom();
         if (room!=null) {
             room.getPlayers().remove(player);
+            //TODO handle with more cases, it's not good to do this.
             room.setStatus(Room.RoomEnum.WAITING_FOR_NEW_PLAYER);
         }
         player.setRoom(null);

@@ -76,6 +76,7 @@ public class OnRoomFilter implements HandlerInterceptor {
             System.out.println(e);
         }
         try{
+
             String username = request.getUserPrincipal().getName();
             Room.RoomEnum roomStatus = playerService.getRoomStatusByUserName(username);
             Player.PlayerStatus playerStatus = playerService.getPlayerStatusByUsername(username);

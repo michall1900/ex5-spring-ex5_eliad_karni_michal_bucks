@@ -18,7 +18,7 @@ import java.util.Set;
 
 @Controller
 @RequestMapping("/game/init")
-public class GameInit {
+public class GameInitController {
 
     @Autowired
     BoardService boardService;
@@ -66,9 +66,9 @@ public class GameInit {
             return "game/waitingForStartGame";
 
         } catch (Exception e) {
-            //TODO = Add the error message;
-            e.printStackTrace();
-            return "redirect:/game/init";
+            //TODO handle different with db error and
+            model.addAttribute("error",e.getMessage());
+            return "/game/initGame";
         }
 
     }

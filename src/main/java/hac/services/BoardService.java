@@ -106,8 +106,13 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public ArrayList<ArrayList<String>> getUserBoardByUsername(String username){
+    public ArrayList<ArrayList<String>> getUserTwoDimensionalArrayBoardByUsername(String username){
         Player player = playerService.getPlayerByUsername(username,false);
         return getTwoDimensionalArrayByPlayer(player,true);
+    }
+
+    @Transactional(readOnly = true)
+    public Board getUserBoardByUserName(String username){
+        return playerService.getPlayerByUsername(username,false).getBoard();
     }
 }

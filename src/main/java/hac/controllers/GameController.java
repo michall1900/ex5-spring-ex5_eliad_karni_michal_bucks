@@ -1,7 +1,6 @@
 package hac.controllers;
 
-import hac.repo.board.Board;
-import hac.repo.player.Player;
+import hac.classes.forGame.UserTurn;
 import hac.repo.room.Room;
 import hac.services.BoardService;
 import hac.services.PlayerService;
@@ -11,36 +10,51 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.security.Principal;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+//TODO add error handler
 @Controller
 @RequestMapping("/game")
-public class Game {
+public class GameController {
+    final private ExecutorService executor = Executors.newSingleThreadExecutor();
+
     @Autowired
     private RoomService roomService;
 
     @Autowired
-    private PlayerService playerService;
-
-    @Autowired
     private BoardService boardService;
 
-    final private ExecutorService executor = Executors.newSingleThreadExecutor();
+    @Autowired
+    private PlayerService playerService;
 
     @GetMapping("/wait-to-start-page")
     public String getWaitToStartPage(){
         return "game/waitingForStartGame";
     }
 
-    @ResponseBody
-    @GetMapping("/wait-to-start")
+
+    @GetMapping("/on-game")
+    public String onGamePage(Model model, Principal principal){
+        //set opponent turn if needed.
+        try {
+            model.addAttribute("turn", roomService.getPlayerUsernameTurn(principal.getName()));
+            model.addAttribute("name", principal.getName());
+            model.addAttribute("opponentBoards", boardService.getOpponentBoardsByUsername(principal.getName()));
+            model.addAttribute("myBoard", boardService.getUserTwoDimensionalArrayBoardByUsername(principal.getName()));
+
+        }
+        //TODO handle errors
+        catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return "game/game";
+    }
+    @GetMapping( "/wait-to-start")
     public DeferredResult<ResponseEntity<?>> getRoomStatus(Principal principal) {
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>();
         executor.execute(() -> {
@@ -63,12 +77,18 @@ public class Game {
 
         return output;
     }
-
-    @GetMapping("/on-game")
-    public String onGamePage(Model model, Principal principal){
-        //set opponent turn if needed.
-        model.addAttribute("opponentBoards", boardService.getOpponentBoardsByUsername(principal.getName()));
-        model.addAttribute("myBoard", boardService.getUserBoardByUsername(principal.getName()));
-        return "game/game";
+    @PostMapping("/update")
+    public ResponseEntity<?> updateBoard(UserTurn userTurn){
+        System.out.println("hereeeeeee");
+        try{
+            //roomService.setUpdates(principal.getName(),userTurn);
+        }
+        //TODO handle exception
+        catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
+
+
 }

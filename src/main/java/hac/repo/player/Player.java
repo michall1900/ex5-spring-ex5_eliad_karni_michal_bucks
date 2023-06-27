@@ -19,7 +19,9 @@ public class Player {
     public enum PlayerStatus{
         NOT_READY,
         READY,
-        ON_GAME
+        ON_GAME,
+        WIN,
+        LOSE
     }
 
 

@@ -1,10 +1,11 @@
 package hac.repo.room;
 
+import hac.embeddables.UpdateObject;
 import hac.repo.board.Board;
 import hac.repo.player.Player;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-
+import javax.persistence.Converter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,6 +23,9 @@ public class Room {
     @Column(name="id", nullable = false)
     private long id;
 
+    @ElementCollection
+    @Column(name = "update_objects", columnDefinition = "TEXT")
+    private List<String> updateObjects;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @Size(max=SIZE, message="The number of players should not exceed "+ SIZE)
@@ -75,6 +79,14 @@ public class Room {
 
     public void setOption(Board.Options option) {
         this.option = option;
+    }
+
+    public List<String> getUpdateObjects() {
+        return updateObjects;
+    }
+
+    public void setUpdateObjects(List<String> updateObjects) {
+        this.updateObjects = updateObjects;
     }
 
     public void add(Player player){
