@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +22,8 @@ import java.util.Objects;
 @Controller
 public class LoginController {
 
+    @Autowired
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private static Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     @Autowired
@@ -57,12 +61,10 @@ public class LoginController {
     @PostMapping("/register")
     public String registerUser(NewUser user, Model model){
         try {
-            if(user.getPassword().equals(user.getConfirmpassword()))
+            if(!user.isPasswordsEqual())
                 throw new Exception("The two passwords that you have been entered are distinct.");
-            if(usersManager.userExists(user.getUsername()))
-                throw new Exception("The user is already exist!");
             usersManager.createUser(User.withUsername(user.getUsername())
-                    .password(user.getPassword())
+                    .password(passwordEncoder.encode(user.getPassword()))
                     .roles("USER")
                     .build());
             return "redirect:/login";

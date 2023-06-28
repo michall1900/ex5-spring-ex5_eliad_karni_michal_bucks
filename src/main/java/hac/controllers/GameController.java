@@ -1,5 +1,7 @@
 package hac.controllers;
 
+import hac.repo.board.Board;
+import hac.repo.player.Player;
 import hac.classes.customErrors.GameOver;
 import hac.classes.customErrors.InvalidChoiceError;
 import hac.classes.forGame.UserTurn;
@@ -142,5 +144,28 @@ public class GameController {
             output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
         }
         return output;
+    }
+
+    @GetMapping("/finish-page")
+    public String finishGame(Model model, Principal principal){
+        Player player = playerService.getPlayerByUsername(principal.getName(), true);
+        if(player.getStatus() == Player.PlayerStatus.WIN) {
+            model.addAttribute("status", "WIN");
+        }
+        else if(player.getStatus() == Player.PlayerStatus.LOSE){
+            Room room = playerService.getRoomByUsername(principal.getName());
+            for(Player checkedPlayer : room.getPlayers()){
+                if (checkedPlayer.getStatus() == Player.PlayerStatus.WIN) {
+                    model.addAttribute("winner", checkedPlayer.getUsername());
+                    break;
+                }
+            }
+            model.addAttribute("status", "LOSE");
+        }
+        else
+            return "redirect: /lobby";
+        model.addAttribute("status", "LOSE");
+        model.addAttribute("winner", "Eliad");
+        return "game/finishGame";
     }
 }

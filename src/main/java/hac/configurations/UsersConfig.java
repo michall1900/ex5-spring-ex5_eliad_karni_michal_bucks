@@ -50,7 +50,6 @@ public class UsersConfig {
         http
                 .cors(withDefaults())
                 .csrf(withDefaults())
-
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/register", "/login").anonymous()
                         .requestMatchers("/css/**","/images/**","/javascripts/**", "/", "/403", "/errorpage", "/how-to-play", "/simulateError").permitAll()
@@ -73,6 +72,9 @@ public class UsersConfig {
         return http.build();
 
     }
-
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers("/favicon.ico");
+    }
 
 }

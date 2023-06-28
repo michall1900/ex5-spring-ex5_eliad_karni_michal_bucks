@@ -1,6 +1,8 @@
 package hac.classes.user;
 
 import jakarta.validation.constraints.NotEmpty;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -9,19 +11,20 @@ import java.io.Serializable;
 
 @Component
 public class NewUser implements Serializable {
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    @NotEmpty(message = "Movie's title is mandatory")
+
+    @NotEmpty(message = "Username is mandatory")
     private String username;
-    @NotEmpty(message = "Movie's title is mandatory")
+    @NotEmpty(message = "Password is mandatory")
     private String password;
 
-    private String confirmpassword;
+    @NotEmpty(message = "Password is mandatory")
+    private String confirmPassword;
 
-    public NewUser(String username, String password, String confirmpassword) {
+    public NewUser(String username, String password, String confirmPassword) {
         this.username = username;
-        this.password = passwordEncoder.encode(password);
-        this.confirmpassword = confirmpassword;
+        setPassword(password);
+        setConfirmPassword(confirmPassword);
     }
 
     public NewUser() {
@@ -40,9 +43,15 @@ public class NewUser implements Serializable {
     }
 
     public void setPassword(String password) {
-        this.password = passwordEncoder.encode(password);
+        this.password = password;
     }
-    public String getConfirmpassword() {return confirmpassword;}
+    public String getConfirmPassword() {return confirmPassword;}
 
-    public void setConfirmpassword(String confirmpassword) { this.confirmpassword = confirmpassword;}
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
+    }
+
+    public Boolean isPasswordsEqual(){
+        return this.password.equals(this.confirmPassword);
+    }
 }
