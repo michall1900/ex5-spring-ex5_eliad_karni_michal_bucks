@@ -9,15 +9,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.List;
-
-public class InRoomFilter  implements HandlerInterceptor {
+public class GameFilter  implements HandlerInterceptor {
     PlayerService playerService;
 
     RoomService roomService;
 
 
-    public InRoomFilter(RoomService roomService, PlayerService playerService) {
+    public GameFilter(RoomService roomService, PlayerService playerService) {
         this.setRoomService(roomService);
         this.setPlayerService(playerService);
     }
@@ -46,12 +44,13 @@ public class InRoomFilter  implements HandlerInterceptor {
         try {
             if(request.isUserInRole("USER") || request.isUserInRole("ADMIN")) {
                 Player player = playerService.getPlayerByUsername(request.getUserPrincipal().getName(), true);
-                playerService.removePlayer(player.getUsername());
+                Room room = playerService.getRoomByUsername(request.getUserPrincipal().getName());
+                //if(room.getStatus() != Room.RoomEnum)
             }
-        }catch (Exception e){
             return true;
+        }catch (Exception e){
+            return false;
         }
-        return true; // continue with the request to next filter or to controller
     }
 
     @Override
