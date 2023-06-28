@@ -1,10 +1,11 @@
 package hac.repo.room;
 
-import hac.classes.GameBoard;
+import hac.embeddables.UpdateObject;
+import hac.repo.board.Board;
 import hac.repo.player.Player;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-
+import javax.persistence.Converter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -13,15 +14,19 @@ public class Room {
     public enum RoomEnum {
         WAITING_FOR_NEW_PLAYER,
         WAITING_FOR_BOARDS,
-        ON_GAME
+        ON_GAME,
+        GAME_OVER
     }
-    final static int SIZE = 2;
+    public final static int SIZE = 2;
     final static int DEFAULT_INDEX = -1;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="id", nullable = false)
     private long id;
 
+    @ElementCollection
+    @Column(name = "update_objects", columnDefinition = "TEXT")
+    private List<String> updateObjects;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @Size(max=SIZE, message="The number of players should not exceed "+ SIZE)
@@ -30,11 +35,11 @@ public class Room {
     @Column
     private int currentPlayerIndex = DEFAULT_INDEX;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private RoomEnum status;
 
-    @Enumerated(EnumType.ORDINAL)
-    private GameBoard.Options option;
+    @Enumerated(EnumType.STRING)
+    private Board.Options option;
 
 
     public long getId() {
@@ -69,17 +74,25 @@ public class Room {
         this.status = status;
     }
 
-    public GameBoard.Options getOption() {
+    public Board.Options getOption() {
         return option;
     }
 
-    public void setOption(GameBoard.Options option) {
+    public void setOption(Board.Options option) {
         this.option = option;
+    }
+
+    public List<String> getUpdateObjects() {
+        return updateObjects;
+    }
+
+    public void setUpdateObjects(List<String> updateObjects) {
+        this.updateObjects = updateObjects;
     }
 
     public void add(Player player){
         if (player!=null){
-            players.add(player);
+            this.players.add(player);
             player.setRoom(this);
         }
     }

@@ -1,6 +1,6 @@
 package hac.repo.tile;
 
-import hac.classes.GameBoard;
+import hac.classes.customErrors.InvalidChoiceError;
 import hac.repo.subamrine.Submarine;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
@@ -8,7 +8,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 public class Tile {
-
+    static final String HIT_ERROR = "Someone already hit this index";
     public enum TileStatus{
         Miss,
         Hit,
@@ -21,8 +21,8 @@ public class Tile {
     @Column(name="id", nullable = false)
     private long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "tutorial_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "submarine_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Submarine submarine;
 
@@ -42,6 +42,14 @@ public class Tile {
         return status;
     }
 
+    public Submarine getSubmarine() {
+        return submarine;
+    }
+
+    public void setSubmarine(Submarine submarine) {
+        this.submarine = submarine;
+    }
+
     public void setStatus(TileStatus status) {
         this.status = status;
     }
@@ -51,5 +59,26 @@ public class Tile {
 
     public Tile(TileStatus status, Submarine submarine){
         setStatus(status);
+    }
+
+    public void hitTile(){
+        //System.out.println(status);
+        if (status==TileStatus.Empty){
+            setStatus(TileStatus.Miss);
+        }
+        else if(status==TileStatus.Submarine){
+            setStatus(TileStatus.Hit);
+            submarine.hitSubmarine();
+        }
+        else
+            throw new InvalidChoiceError(HIT_ERROR);
+    }
+
+    public void setStatusWithoutChangeTheSubmarine(){
+        if (status == TileStatus.Submarine){
+            setStatus(TileStatus.Hit);
+        }
+        else if(status == TileStatus.Empty)
+            setStatus(TileStatus.Miss);
     }
 }

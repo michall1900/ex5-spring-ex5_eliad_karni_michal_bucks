@@ -5,6 +5,8 @@ import hac.repo.board.Board;
 import hac.repo.room.Room;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -17,7 +19,9 @@ public class Player {
     public enum PlayerStatus{
         NOT_READY,
         READY,
-        ON_GAME
+        ON_GAME,
+        WIN,
+        LOSE
     }
 
 
@@ -31,7 +35,8 @@ public class Player {
     @JoinColumn(name="room_id", nullable = false)
     private Room room;
 
-    @OneToOne
+
+    @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private Board board;
 
     @Column(unique = true)
@@ -52,15 +57,22 @@ public class Player {
     }
 
     public Room getRoom() {
-        return room;
+        return this.room;
     }
 
     public void setRoom(Room room) {
+//        if (room == null) {
+//            if (this.room != null) {
+//                this.room.getPlayers().remove(this);
+//            }
+//        } else if{
+//            room.getPlayers().add(this);
+//        }
         this.room = room;
     }
 
     public Board getBoard() {
-        return board;
+        return this.board;
     }
 
     public void setBoard(Board board) {
@@ -68,7 +80,7 @@ public class Player {
     }
 
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     public void setUsername(String username) {
@@ -76,7 +88,7 @@ public class Player {
     }
 
     public PlayerStatus getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(PlayerStatus status) {
@@ -90,9 +102,9 @@ public class Player {
     }
 
     public HashMap<String, String> getInfo(){
-        HashMap map = new HashMap<String,String>();
+        HashMap<String, String> map = new HashMap<>();
         map.put("name", this.username);
-        map.put("status", this.status);
+        map.put("status", this.status.toString());
         return map;
     }
 }
