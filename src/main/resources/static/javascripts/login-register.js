@@ -18,6 +18,9 @@
     }
     // listeners setting
     document.addEventListener("DOMContentLoaded", (e)=>{
-        document.getElementById("register-form").addEventListener("submit", validatePasswordForm)
+        let registerForm = document.getElementById("register-form");
+        if(registerForm){
+            registerForm.addEventListener("submit", validatePasswordForm);
+        }
     })
 })();

@@ -9,16 +9,14 @@
     });
 
     function checkAnswer(roomJson){
-        console.log("456")
         if( ! roomJson.hasOwnProperty("players")){
-            console.log("123");
             window.location.href = "/lobby";
         }
     }
     function checkGameStarted(roomJson){
         if(roomJson.hasOwnProperty("start_game")) {
             console.log("room is full");
-            //window.location.href = "/game/init/";
+            window.location.href = "/game/init";
         }
     }
 
@@ -28,7 +26,7 @@
         JSON.parse(roomsJson.players).forEach((player) => {
             roomPlayersTableBodyElement.innerHTML += `
                 <tr class="table-secondary">
-                    <td>${player[0]}</td>
+                    <td>${player}</td>
                 </tr>`;
         })
     }

@@ -30,6 +30,17 @@ public class LobbyController {
 
     private static Logger logger = LoggerFactory.getLogger(LoginController.class);
 
+    @GetMapping("")
+    public String getLobby() {
+        return "lobby/lobby";
+    }
+
+    @GetMapping("/error-message")
+    public String getErrorLobby(Model model) {
+        model.addAttribute("errorMessage", "The room been closed");
+        return "lobby/lobby";
+    }
+
     @GetMapping("/getRooms")
     public @ResponseBody List<Map<String,String>> getRooms() {
         List<Map<String, String>> ans = new ArrayList<Map<String, String>>();
@@ -52,12 +63,6 @@ public class LobbyController {
         }catch (Exception e){
             return new HashMap<String, String>();
         }
-    }
-
-
-    @GetMapping("")
-    public String getLobby(Model model) {
-        return "lobby/lobby";
     }
 
     @GetMapping("/create-room")

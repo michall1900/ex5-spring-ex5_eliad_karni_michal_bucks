@@ -36,6 +36,7 @@ public class PlayerService {
        // try {
 //            if(NeedToLock)
 //                playerLock.readLock().lock();
+        System.out.println(username);
             Player player = playersRepo.findByUsername(username);
             if(player == null){
                 System.out.println("Player not found");
