@@ -62,7 +62,7 @@ public class LobbyController {
 
     @GetMapping("/create-room")
     public String getRoomCreation(Model model) {
-        System.out.println(Board.options.get(Board.Options.BASIC.ordinal()));
+        //System.out.println(Board.options.get(Board.Options.BASIC.ordinal()));
         model.addAttribute("option1", Board.options.get(Board.Options.BASIC.ordinal()));
         model.addAttribute("option2", Board.options.get(Board.Options.ALTERNATIVE.ordinal()));
         return "/lobby/roomCreation";

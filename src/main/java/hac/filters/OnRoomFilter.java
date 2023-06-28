@@ -53,7 +53,7 @@ public class OnRoomFilter implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
-        System.out.println("INTERCEPTOR!!!!!");
+        //System.out.println("INTERCEPTOR!!!!!");
 //        if(request.isUserInRole("USER") || request.isUserInRole("ADMIN"))
 //            System.out.println(request.getUserPrincipal().getName());
 //        System.out.println("IN FILTERRR");

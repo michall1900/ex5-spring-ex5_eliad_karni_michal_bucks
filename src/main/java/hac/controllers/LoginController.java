@@ -68,7 +68,7 @@ public class LoginController {
      */
     @RequestMapping("/admin")
     public String adminIndex(Principal principal) {
-        System.out.println("Current logged user details: " + " (" + principal + ")" );
+        //System.out.println("Current logged user details: " + " (" + principal + ")" );
         return "admin/index";
     }
 
@@ -77,9 +77,9 @@ public class LoginController {
     public String sharedIndex() {
         // print current logged user details - withouth using the Principal parameter
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println("Current logged user details: "
-                + ((UserDetails) principal).getUsername()
-                + " (" + ((UserDetails) principal).getAuthorities() + ")");
+//        System.out.println("Current logged user details: "
+//                + ((UserDetails) principal).getUsername()
+//                + " (" + ((UserDetails) principal).getAuthorities() + ")");
 
 
         return "shared/index";

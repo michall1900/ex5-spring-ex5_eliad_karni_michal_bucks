@@ -46,4 +46,14 @@ public class UpdateObject {
             throw new DbError();
         }
     }
+
+    public static UpdateObject convertStringToObject(String jsonString){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(jsonString, UpdateObject.class);
+        }
+        catch (JsonProcessingException e){
+            throw new DbError();
+        }
+    }
 }

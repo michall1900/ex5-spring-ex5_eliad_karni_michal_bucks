@@ -17,7 +17,7 @@ public class Room {
         ON_GAME,
         GAME_OVER
     }
-    final static int SIZE = 2;
+    public final static int SIZE = 2;
     final static int DEFAULT_INDEX = -1;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

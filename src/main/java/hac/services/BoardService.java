@@ -78,11 +78,11 @@ public class BoardService {
                 Tile currentTile = tiles.get(row*Board.SIZE + col);
                 Tile.TileStatus status = currentTile.getStatus();
                 if (status == Tile.TileStatus.Hit) {
-                    System.out.println(status);
-                    System.out.println(row);
-                    System.out.println(col);
-                    System.out.println(player.getUsername());
-                    System.out.println(getSubmarine);
+                    //System.out.println(status);
+                    //System.out.println(row);
+                    //System.out.println(col);
+                    //System.out.println(player.getUsername());
+                    //System.out.println(getSubmarine);
                 }
                 if (status == Tile.TileStatus.Submarine){
                     if (getSubmarine){

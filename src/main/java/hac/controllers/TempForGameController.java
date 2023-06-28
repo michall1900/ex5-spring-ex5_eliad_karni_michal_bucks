@@ -64,15 +64,10 @@ public class TempForGameController {
         }
         catch (Exception e){
             System.out.println(e);
+            return "game/waitingForStartGame";
         }
-        try{
-            Player player = playerService.getPlayerByUsername("1", true);
-        }
-        catch (Exception e){
-            System.out.println(e);
-        }
-
-        return "game/waitingForStartGame";
+        //return "redirect:/game/init";
+        //return "game/waitingForStartGame";
     }
 
     @GetMapping("/test")

@@ -1,5 +1,5 @@
 (function(){
-    const TimeOut = 1000;
+    const TIME_OUT = 1000;
     const ERROR_BTN_ID = "errorBtn"
     const ERROR_BODY_ID = "error"
     const DEFAULT_ERROR = "There is a problem to connect to the server"
@@ -16,9 +16,9 @@
     async function waitForAllUsers(){
         try{
             let response = await fetch(URL);
-            if (response.status === 400){
+            if (response.status === 408){
                 //reconnect - waiting a lot of time
-                await new Promise(resolve => setTimeout(resolve, TimeOut))
+                await new Promise(resolve => setTimeout(resolve, TIME_OUT))
                 await waitForAllUsers();
             }
             else if(response.status!== 200){
@@ -30,7 +30,7 @@
                     window.location.href = data;
                 }
                 else{
-                    await new Promise(resolve => setTimeout(resolve, TimeOut))
+                    await new Promise(resolve => setTimeout(resolve, TIME_OUT))
                     await waitForAllUsers();
                 }
 
