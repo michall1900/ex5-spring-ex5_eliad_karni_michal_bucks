@@ -52,6 +52,7 @@ public class GameController {
     public String onGamePage(Model model, Principal principal){
         //set opponent turn if needed.
         try {
+            //TODO add roomService function that do all the gets under one lock action
             model.addAttribute("turn", roomService.getPlayerUsernameTurn(principal.getName()));
             model.addAttribute("name", principal.getName());
             model.addAttribute("opponentBoards", boardService.getOpponentBoardsByUsername(principal.getName()));
@@ -68,7 +69,9 @@ public class GameController {
     public DeferredResult<ResponseEntity<?>> getRoomStatus(Principal principal) {
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
         try {
+
             //TODO move functionality to one of the services.
+
             ExecutorService executorService = roomService.getExecutorServiceForRoom(principal.getName());
             Future<?> future = executorService.submit(() -> {
                 try {
@@ -131,6 +134,7 @@ public class GameController {
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
 
         try {
+            //TODO kill that monster!!!!
             ExecutorService executorService = roomService.getExecutorServiceForRoom(principal.getName());
             Future<?> future = executorService.submit(() -> {
                 try {

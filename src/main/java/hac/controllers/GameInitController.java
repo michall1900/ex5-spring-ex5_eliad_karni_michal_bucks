@@ -42,7 +42,7 @@ public class GameInitController {
 
             System.out.println(e);
         }
-
+        //TODO add roomService a function that do all information in one lock
         try{
             model.addAttribute("names", roomService.getAllOpponentNamesByUsername(principal.getName()));
             model.addAttribute("endValue", Board.SIZE-1);

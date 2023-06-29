@@ -34,60 +34,62 @@ public class PlayerService {
     }
 
     public Player getPlayerByUsername(String username, Boolean needToLockDB, Boolean needToLockRoom) throws RuntimeException{
+        try {
+            if(needToLockDB)
+                DBLock.readLock().lock();
             Player player = playersRepo.findByUsername(username);
             if(player == null){
                 System.out.println("Player not found");
                 throw new RuntimeException(NO_PLAYER);
             }
             return player;
+        }finally {
+            if(needToLockDB)
+                DBLock.readLock().unlock();
+        }
+
     }
 
-    public Room getRoomByUsername(String username) throws RuntimeException{
-//        try{
-//            roomLock.readLock().lock();
-//            playerLock.readLock().lock();
+    public Room getRoomByUsername(String username, Boolean toLockDB) throws RuntimeException{
+        try{
+            if(toLockDB)
+                DBLock.readLock().lock();
             Room room = getPlayerByUsername(username, false).getRoom();
             if (room == null) {
                 System.out.println("Room not found");
                 throw new RuntimeException(NO_ROOM);
             }
             return room;
-//        }
-//        finally {
-//            roomLock.readLock().unlock();
-//            playerLock.readLock().unlock();
-//        }
+        }
+        finally {
+            if (toLockDB)
+                DBLock.readLock().unlock();
+        }
     }
 
     public Room.RoomEnum getRoomStatusByUserName(String username){
-        return getRoomByUsername(username).getStatus();
+        return getRoomByUsername(username, true).getStatus();
     }
 
-    public List<Player> getAllPlayers(){
-//        try{
-//            playerLock.readLock().lock();
-            return playersRepo.findAll();
-//        }
-//        finally {
-//            playerLock.readLock().unlock();
-//        }
-    }
-
-    @Transactional
-    public Player.PlayerStatus getPlayerStatusByUsername(String username){
-        return getPlayerByUsername(username, true).getStatus();
-    }
+//    public Player.PlayerStatus getPlayerStatusByUsername(String username){
+//        return getPlayerByUsername(username, true).getStatus();
+//    }
 
     @Transactional
     public void removePlayer(String username) throws RuntimeException{
-        Player player = getPlayerByUsername(username, false);
-        Room room = player.getRoom();
-        if (room!=null) {
-            room.getPlayers().remove(player);
-            //TODO handle with more cases, it's not good to do this.
-            room.setStatus(Room.RoomEnum.WAITING_FOR_NEW_PLAYER);
+        try {
+            DBLock.writeLock().lock();
+            Player player = getPlayerByUsername(username, false);
+            Room room = player.getRoom();
+            if (room!=null) {
+                room.getPlayers().remove(player);
+                //TODO handle with more cases, it's not good to do this.
+                room.setStatus(Room.RoomEnum.WAITING_FOR_NEW_PLAYER);
+            }
+            player.setRoom(null);
+            playersRepo.delete(player);
+        }finally {
+            DBLock.writeLock().unlock();
         }
-        player.setRoom(null);
-        playersRepo.delete(player);
     }
 }

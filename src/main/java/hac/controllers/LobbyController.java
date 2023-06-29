@@ -50,8 +50,7 @@ public class LobbyController {
     @GetMapping("/getRoom")
     public @ResponseBody Map<String,String> getRoom(Model model, Principal principal) {
         try {
-            Player player = playerService.getPlayerByUsername(principal.getName(), true);
-            Room room = player.getRoom();
+            Room room = playerService.getRoomByUsername(principal.getName(), true);
             Map<String, String> ans = room.getInfo();
             if(room.full()){
                 ans.put("start_game", "True");
