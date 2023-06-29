@@ -4,6 +4,7 @@
     const ERROR_BTN_ID = "errorBtn"
     const ERROR_BODY_ID = "error"
     const DEFAULT_ERROR = "There is a problem to connect to the server"
+    const NOT_YOUR_TURN = "It's not your turn"
     const TURN_ID = "turnOf"
     const LAST_STEP_ID = "lastStep";
     const URL_TO_UPDATE = "/game/update"
@@ -18,7 +19,8 @@
     let ERROR_ELEMENT;
     let ERROR_BTN;
     let MY_NAME;
-
+    let isMyTurn;
+    //TODO - disabled buttons when the turn is not mine.
     const displayError = (errorMsg)=>{
         ERROR_ELEMENT.innerHTML = errorMsg
         ERROR_BTN.click();
@@ -26,6 +28,7 @@
 
     const checkResponse = async (response) =>{
         if (!response.ok) {
+            console.log(response.status);
             const err = await getErrorMessage(response);
             throw new Error(`Some error occurred ${response.status}. ${err}`);
         }
@@ -34,6 +37,7 @@
         console.log(response);
         if (response.status !== 400){
             //TODO need to change to error page
+            isNeedToPoll=false;
             //window.location.href = "/lobby/room-error"
             console.log("Need to move to error page");
         }
@@ -51,7 +55,11 @@
         let [opponentName, row, col] = buttonIdString.split(".");
         row = +row
         col= +col
-
+        if (!isMyTurn) {
+            displayError(NOT_YOUR_TURN)
+            btn.removeAttribute("disabled","");
+            return;
+        }
         console.log(opponentName, row, col)
         try {
             let response = await fetch(URL_TO_UPDATE, {
@@ -66,14 +74,13 @@
             let data = await response.text();
             if (!!data && data.startsWith("/")) {
                 console.log("Relocation to game over")
-                //window.location.href = data
+                window.location.href = data
             }
 
         }
         catch(e){
-            isNeedToPoll = false;
             btn.removeAttribute("disabled","");
-            displayError(DEFAULT_ERROR);
+            displayError(e);
             console.log(e);
         }
 
@@ -85,16 +92,17 @@
         sendClickToServer(btn.id, btn);
     }
      async function getUpdates (){
+
         if(isNeedToPoll) {
             try {
                 let response = await fetch(`${URL_TO_UPDATE}/${timestamp}`,{
                     method:"GET",
-                    credentials:"include",
                     headers:{
                         [csrfHeader]: csrfToken
                     }
                 });
-                if (response.status === 408) {
+                console.log(response.status);
+                if (response.status === 504) {
                     //reconnect - waiting a lot of time
                     await new Promise(resolve => setTimeout(resolve, TIME_OUT))
                     await getUpdates();
@@ -126,11 +134,11 @@
                     catch{
                         isNeedToPoll=false;
                         console.log("Need to move to finish game")
+                        window.location.href = "/game/finish-page"
                     }
                 }
             } catch (e) {
                 displayError(DEFAULT_ERROR);
-                isNeedToPoll=false;
             }
         }
     }
@@ -138,9 +146,8 @@
         //TODO needs to validate data + check if the ids correct.
         timestamp += jsonData.length;
         let usernameTurn = jsonData[jsonData.length-1].attackDetails.nextTurn;
-        console.log(usernameTurn)
-        console.log(MY_NAME)
-        TURN_ELEMENT.innerHTML = (usernameTurn !== MY_NAME)? `'${usernameTurn}'`: "Your";
+        isMyTurn = usernameTurn === MY_NAME;
+        TURN_ELEMENT.innerHTML = (!isMyTurn)? `'${usernameTurn}'`: "Your";
         let attackDetailsObject = jsonData[jsonData.length-1].attackDetails;
         LAST_STEP_ELEMENT.innerHTML = `User '${attackDetailsObject.attackerName}' hit on 
             '${attackDetailsObject.opponentName}''s board in index row=${attackDetailsObject.row} col = ${attackDetailsObject.col}`;
@@ -174,6 +181,8 @@
         csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
         LAST_STEP_ELEMENT = document.getElementById(LAST_STEP_ID)
         TURN_ELEMENT = document.getElementById(TURN_ID)
+        isMyTurn = (TURN_ELEMENT.innerText === "Your")
+
         const name = document.getElementById(MY_NAME_ID);
         console.log(name.innerText);
         MY_NAME = (!!name)? name.innerText : "";

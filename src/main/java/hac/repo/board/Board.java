@@ -6,6 +6,8 @@ import hac.repo.player.Player;
 import hac.repo.subamrine.Submarine;
 import hac.repo.tile.Tile;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -49,16 +51,17 @@ public class Board {
 
     @OneToOne
     @JoinColumn(name = "player_id", referencedColumnName = "id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Player player;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "board_id")
+    @NotEmpty
     private List<Submarine> submarines ;
 
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "board_id")
+    @NotEmpty
     private List<Tile> boardTiles = new ArrayList<>();
 
     @Column

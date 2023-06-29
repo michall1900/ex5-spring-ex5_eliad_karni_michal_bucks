@@ -16,13 +16,20 @@
     async function waitForAllUsers(){
         try{
             let response = await fetch(URL);
-            if (response.status === 408){
+            if (response.status === 504){
                 //reconnect - waiting a lot of time
                 await new Promise(resolve => setTimeout(resolve, TIME_OUT))
                 await waitForAllUsers();
             }
             else if(response.status!== 200){
-                displayError(response.text());
+                try{
+                    //TODO go to error page instead.
+                    displayError(await response.text());
+                }
+                catch (e){
+                    displayError(DEFAULT_ERROR);
+                }
+
             }
             else{
                 let data = await response.text();

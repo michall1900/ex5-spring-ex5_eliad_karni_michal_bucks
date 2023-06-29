@@ -11,6 +11,9 @@ import hac.services.BoardService;
 import hac.services.PlayerService;
 import hac.services.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,6 +24,9 @@ import org.springframework.web.context.request.async.DeferredResult;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 //TODO add error handler
@@ -62,9 +68,9 @@ public class GameController {
     @GetMapping( "/wait-to-start")
     public DeferredResult<ResponseEntity<?>> getRoomStatus(Principal principal) {
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
-        output.onTimeout(() -> output.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Service Unavailable")));
         try {
-            roomService.getExecutorServiceForRoom(principal.getName()).execute(() -> {
+            ExecutorService executorService = roomService.getExecutorServiceForRoom(principal.getName());
+            Future<?> future = executorService.submit(() -> {
                 try {
                     Room.RoomEnum status;
                     do {
@@ -73,13 +79,23 @@ public class GameController {
                             Thread.sleep(1000);
                         }
                     } while (status != Room.RoomEnum.ON_GAME);
-                    output.setResult(ResponseEntity.ok("/game/on-game"));
-                } catch (InterruptedException e) {
+                    if (!Thread.currentThread().isInterrupted())
+                        output.setResult(ResponseEntity.ok("/game/on-game"));
+                }
+                catch (GameOver e){
+                    output.setResult(ResponseEntity.ok("/game/finish-page"));
+                }
+                catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    output.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Service Unavailable"));
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
                 }
+            });
+            output.onTimeout(() -> {
+                future.cancel(true);
+                System.out.println("Timeout! Sent to" + principal.getName());
+                output.setErrorResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Service Unavailable"));
             });
         }
         catch (Exception e) {
@@ -113,18 +129,20 @@ public class GameController {
         System.out.println("In getttttt");
 
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
-        output.onTimeout(() -> output.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Service Unavailable")));
+
         try {
-            roomService.getExecutorServiceForRoom(principal.getName()).execute(() -> {
+            ExecutorService executorService = roomService.getExecutorServiceForRoom(principal.getName());
+            Future<?> future = executorService.submit(() -> {
                 try {
-                    AtomicReference<List<UpdateObject>> updates = new AtomicReference<>();
-                    do {
-                        updates.set(roomService.getUpdates(principal.getName(), timestamp));
-                        if (updates.get().isEmpty()) {
+                    List<UpdateObject> updates = new ArrayList<>();
+                    while(updates.isEmpty() && !Thread.currentThread().isInterrupted()) {
+                        updates = roomService.getUpdates(principal.getName(), timestamp);
+                        if (updates.isEmpty()) {
                             Thread.sleep(1000);
                         }
-                    } while (updates.get().isEmpty());
-                    output.setResult(ResponseEntity.ok(updates.get()));
+                    }
+                    if (!Thread.currentThread().isInterrupted())
+                        output.setResult(ResponseEntity.ok(updates));
                 }
                 catch (InvalidChoiceError e){
                     output.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage()));
@@ -134,17 +152,24 @@ public class GameController {
                 }
                 catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    output.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Service Unavailable"));
+                    //output.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Service Unavailable"));
                 }
                 catch (Exception e) {
                     output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
                 }
             });
+            output.onTimeout(() -> {
+                future.cancel(true);
+                System.out.println("Timeout! Sent to" + principal.getName());
+                output.setErrorResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Service Unavailable"));
+            });
         } catch (Exception e) {
             output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
         }
+
         return output;
     }
+
 
     @GetMapping("/finish-page")
     public String finishGame(Model model, Principal principal){
@@ -164,8 +189,8 @@ public class GameController {
         }
         else
             return "redirect: /lobby";
-        model.addAttribute("status", "LOSE");
-        model.addAttribute("winner", "Eliad");
+//        model.addAttribute("status", "LOSE");
+//        model.addAttribute("winner", "Eliad");
         return "game/finishGame";
     }
 }

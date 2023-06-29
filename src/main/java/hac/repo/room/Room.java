@@ -24,11 +24,11 @@ public class Room {
     @Column(name="id", nullable = false)
     private long id;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "update_objects", columnDefinition = "TEXT")
     private List<String> updateObjects;
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @Size(max=SIZE, message="The number of players should not exceed "+ SIZE)
     private List<Player> players = new ArrayList<>();
 
@@ -112,6 +112,7 @@ public class Room {
     }
 
     public Map<String,String> getInfo(){
+        //TODO ask eliad about that - there is a change and after it redeclaration.
         StringBuilder players = new StringBuilder("[");
         for (Player player : this.players){
             players.append( "\"" + player.getUsername() + "\"").append(",");

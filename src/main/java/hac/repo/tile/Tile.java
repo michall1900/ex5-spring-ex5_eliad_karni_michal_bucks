@@ -3,6 +3,7 @@ package hac.repo.tile;
 import hac.classes.customErrors.InvalidChoiceError;
 import hac.repo.subamrine.Submarine;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -21,12 +22,12 @@ public class Tile {
     @Column(name="id", nullable = false)
     private long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "submarine_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Submarine submarine;
 
     @Enumerated (EnumType.ORDINAL)
+    @NotNull
     private TileStatus status;
 
     public long getId() {

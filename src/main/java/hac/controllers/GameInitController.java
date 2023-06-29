@@ -36,17 +36,25 @@ public class GameInitController {
     @GetMapping("")
     public String gameInit(Model model, Principal principal){
         try{
+
+        }
+        catch(Exception e){
+
+            System.out.println(e);
+        }
+
+        try{
             model.addAttribute("names", roomService.getAllOpponentNamesByUsername(principal.getName()));
+            model.addAttribute("endValue", Board.SIZE-1);
+            model.addAttribute("imgPath", Board.imgType.get(String.valueOf(Tile.TileStatus.Empty)));
+            model.addAttribute("option", Board.options.get(roomService.getBoardOptionByUsername(principal.getName()).ordinal()));
+            model.addAttribute("url","/game/init");
         }
         catch(Exception e){
             model.addAttribute("error",e.getMessage());
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
-        model.addAttribute("endValue", Board.SIZE-1);
-        model.addAttribute("imgPath", Board.imgType.get(String.valueOf(Tile.TileStatus.Empty)));
-        //we will get the option from the db.
-        model.addAttribute("option", Board.options.get(0));
-        model.addAttribute("url","/game/init");
+
 
         return "game/initGame";
     }
@@ -57,10 +65,10 @@ public class GameInitController {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Board board = objectMapper.readValue(boardString, Board.class);
-            Set<ConstraintViolation<Board>> violations = validator.validate(board);
-            if (!violations.isEmpty()) {
-                throw new ConstraintViolationException(violations);
-            }
+//            Set<ConstraintViolation<Board>> violations = validator.validate(board);
+//            if (!violations.isEmpty()) {
+//                throw new ConstraintViolationException(violations);
+//            }
             boardService.saveNewBoard(board, principal.getName());
             roomService.updateRoomStatusByUsername(principal.getName());
             return "game/waitingForStartGame";

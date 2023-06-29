@@ -31,12 +31,11 @@ public class PlayerService {
         player.setStatus(Player.PlayerStatus.NOT_READY);
         return player;
     }
-    @Transactional(readOnly = true)
+
     public Player getPlayerByUsername(String username, Boolean NeedToLock) throws RuntimeException{
        // try {
 //            if(NeedToLock)
 //                playerLock.readLock().lock();
-        System.out.println(username);
             Player player = playersRepo.findByUsername(username);
             if(player == null){
                 System.out.println("Player not found");
@@ -48,7 +47,7 @@ public class PlayerService {
 //                playerLock.readLock().unlock();
 //        }
     }
-    @Transactional(readOnly = true)
+
     public Room getRoomByUsername(String username) throws RuntimeException{
 //        try{
 //            roomLock.readLock().lock();
@@ -66,11 +65,10 @@ public class PlayerService {
 //        }
     }
 
-    @Transactional(readOnly = true)
     public Room.RoomEnum getRoomStatusByUserName(String username){
         return getRoomByUsername(username).getStatus();
     }
-    @Transactional(readOnly = true)
+
     public List<Player> getAllPlayers(){
 //        try{
 //            playerLock.readLock().lock();

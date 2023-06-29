@@ -66,7 +66,7 @@ public class BoardService {
         boardRepository.save(board);
     }
 
-    @Transactional(readOnly = true)
+
     public ArrayList<ArrayList<String>> getTwoDimensionalArrayByPlayer(Player player, Boolean getSubmarine){
 
         Board board = player.getBoard();
@@ -77,13 +77,6 @@ public class BoardService {
             for(int col =0; col<Board.SIZE; col++){
                 Tile currentTile = tiles.get(row*Board.SIZE + col);
                 Tile.TileStatus status = currentTile.getStatus();
-                if (status == Tile.TileStatus.Hit) {
-                    //System.out.println(status);
-                    //System.out.println(row);
-                    //System.out.println(col);
-                    //System.out.println(player.getUsername());
-                    //System.out.println(getSubmarine);
-                }
                 if (status == Tile.TileStatus.Submarine){
                     if (getSubmarine){
                         rowToSend.add(Board.imgType.get(String.valueOf(status)));
@@ -100,7 +93,6 @@ public class BoardService {
         return boardToSend;
     }
 
-    @Transactional(readOnly = true)
     public HashMap<String, ArrayList<ArrayList<String>>>  getOpponentBoardsByUsername(String username){
         HashMap<String,  ArrayList<ArrayList<String>>> allBoards = new HashMap<>();
         Room room = playerService.getRoomByUsername(username);
@@ -113,13 +105,11 @@ public class BoardService {
         return allBoards;
     }
 
-    @Transactional(readOnly = true)
     public ArrayList<ArrayList<String>> getUserTwoDimensionalArrayBoardByUsername(String username){
         Player player = playerService.getPlayerByUsername(username,false);
         return getTwoDimensionalArrayByPlayer(player,true);
     }
 
-    @Transactional(readOnly = true)
     public Board getUserBoardByUserName(String username){
         return playerService.getPlayerByUsername(username,false).getBoard();
     }

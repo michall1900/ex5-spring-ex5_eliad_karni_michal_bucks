@@ -31,8 +31,9 @@ public class Player {
     private long id;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name="room_id", nullable = false)
+    @NotNull
     private Room room;
 
 
@@ -40,7 +41,7 @@ public class Player {
     private Board board;
 
     @Column(unique = true)
-    @NotNull(message = "Username is required.")
+    @NotNull(message = "Username is mandatory")
     private String username;
 
     @Column

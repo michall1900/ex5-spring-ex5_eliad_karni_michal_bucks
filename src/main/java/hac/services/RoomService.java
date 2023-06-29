@@ -1,6 +1,5 @@
 package hac.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import hac.classes.customErrors.DbError;
 import hac.classes.customErrors.GameOver;
 import hac.classes.customErrors.InvalidChoiceError;
@@ -14,7 +13,6 @@ import hac.repo.room.RoomRepository;
 import hac.repo.tile.Tile;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +32,8 @@ public class RoomService {
     static final String GAME_OVER = "The game end";
     static final String NOT_ENOUGH_PLAYERS = "Some of the players are disconnecter";
     static final String NOT_USER_TURN = "It's not your turn";
+
+    static final String INVALID_TIME_STAMP = "Your timestamp is invalid";
 
     @Autowired
     private RoomRepository roomRepo;
@@ -128,16 +128,16 @@ public class RoomService {
 //            roomLock.readLock().unlock();
 //        }
     }
-    @Transactional(readOnly = true)
-    public List<String> getAllNotReadyPlayersNameInRoomByUsername(String username){
-        List<String> waitingPlayersList = new ArrayList<>();
-        List<Player> playersOnRoom = playerService.getRoomByUsername(username).getPlayers();
-        playersOnRoom.forEach((player)->{
-            if(player.getStatus() == Player.PlayerStatus.NOT_READY)
-                waitingPlayersList.add(player.getUsername());
-        });
-        return waitingPlayersList;
-    }
+//    @Transactional(readOnly = true)
+//    public List<String> getAllNotReadyPlayersNameInRoomByUsername(String username){
+//        List<String> waitingPlayersList = new ArrayList<>();
+//        List<Player> playersOnRoom = playerService.getRoomByUsername(username).getPlayers();
+//        playersOnRoom.forEach((player)->{
+//            if(player.getStatus() == Player.PlayerStatus.NOT_READY)
+//                waitingPlayersList.add(player.getUsername());
+//        });
+//        return waitingPlayersList;
+//    }
 
     @Transactional
     public void updateRoomStatusByUsername(String username){
@@ -152,14 +152,12 @@ public class RoomService {
             room.setStatus(Room.RoomEnum.ON_GAME);
             Random random = new Random();
             room.setCurrentPlayerIndex(random.nextInt(playersOnRoom.size()));
-            playersOnRoom.forEach((player)->{
-                player.setStatus(Player.PlayerStatus.ON_GAME);
-            });
+            playersOnRoom.forEach((player)-> player.setStatus(Player.PlayerStatus.ON_GAME));
         }
     }
 
 
-    @Transactional(readOnly = true)
+
     public List<String> getAllOpponentNamesByUsername(String username){
         List<String> namesList = new ArrayList<>();
         List<Player> playersOnRoom = playerService.getRoomByUsername(username).getPlayers();
@@ -170,7 +168,7 @@ public class RoomService {
         return namesList;
     }
 
-    @Transactional(readOnly = true)
+
     public String getPlayerUsernameTurn(String username){
         Room room = playerService.getRoomByUsername(username);
         //System.out.println(room.getPlayers());
@@ -179,7 +177,7 @@ public class RoomService {
             throw new RuntimeException(NOT_ENOUGH_PLAYERS);
         return room.getPlayers().get(room.getCurrentPlayerIndex()).getUsername();
     }
-    @Transactional(readOnly = true)
+
     public void checkIfBothUsersAreInSameRoom(String currentUserName, String opponentUserName){
         Room room1 = playerService.getRoomByUsername(currentUserName);
         Room room2 = playerService.getRoomByUsername(opponentUserName);
@@ -188,12 +186,12 @@ public class RoomService {
         }
     }
 
-    @Transactional(readOnly = true)
+
     public void validateTurn(String username){
         if (!getPlayerUsernameTurn(username).equals(username))
             throw new InvalidChoiceError(NOT_USER_TURN);
     }
-    @Transactional(readOnly = true)
+
     public void validateOnGame(Room room){
         if (room.getStatus().equals(Room.RoomEnum.GAME_OVER))
             throw new GameOver(GAME_OVER);
@@ -202,9 +200,9 @@ public class RoomService {
     public void  setUpdates(String currentUserName, UserTurn userTurn){
         synchronized(this) {
             checkIfBothUsersAreInSameRoom(currentUserName, userTurn.getOpponentName());
-            validateTurn(currentUserName);
             Room room = playerService.getRoomByUsername(currentUserName);
             validateOnGame(room);
+            validateTurn(currentUserName);
             Board board = boardService.getUserBoardByUserName(userTurn.getOpponentName());
             ArrayList<HashMap<String, String>> boardUpdates = board.getHitChanges(userTurn.getRow(), userTurn.getCol());
             UpdateObject updateObject = new UpdateObject();
@@ -232,12 +230,14 @@ public class RoomService {
         }
     }
     //TODO change the synchronized section to a room lock.
-    @Transactional(readOnly = true)
+
     public List<UpdateObject> getUpdates(String username, int timestamp){
         synchronized (this){
             Room room = playerService.getRoomByUsername(username);
             validateOnGame(room);
             List<String> updatesStringArray= room.getUpdateObjects();
+            if (timestamp> updatesStringArray.size())
+                throw new InvalidChoiceError(INVALID_TIME_STAMP);
             List<UpdateObject> updateObjectList = new ArrayList<>();
             for (int i = timestamp; i< updatesStringArray.size(); i++){
                 updateObjectList.add(UpdateObject.convertStringToObject(updatesStringArray.get(i)));
@@ -293,6 +293,11 @@ public class RoomService {
             executorsLock.writeLock().unlock();
         }
 
+    }
+
+    public Board.Options getBoardOptionByUsername(String username){
+        Room room = playerService.getRoomByUsername(username);
+        return room.getOption();
     }
 
     //TODO when room closed, shut down its executor.
