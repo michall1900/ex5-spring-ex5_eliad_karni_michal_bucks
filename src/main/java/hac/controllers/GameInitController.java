@@ -69,8 +69,9 @@ public class GameInitController {
 //            if (!violations.isEmpty()) {
 //                throw new ConstraintViolationException(violations);
 //            }
+            //TODO put it in the same method.
             boardService.saveNewBoard(board, principal.getName());
-            roomService.updateRoomStatusByUsername(principal.getName());
+
             return "game/waitingForStartGame";
 
         } catch (Exception e) {

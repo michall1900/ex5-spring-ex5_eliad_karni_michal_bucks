@@ -1,11 +1,13 @@
 package hac.services;
 
+import hac.beans.RoomLockHandler;
 import hac.repo.board.Board;
 import hac.repo.board.BoardRepository;
 import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
 import hac.repo.tile.Tile;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 
 @Service
 public class BoardService {
@@ -27,6 +29,14 @@ public class BoardService {
     @Autowired
     private BoardRepository boardRepository;
 
+    @Autowired
+    private RoomService roomService;
+
+    @Resource(name = "getLockForAllDb")
+    private ReentrantReadWriteLock DBLock;
+
+    @Resource(name = "getRoomLock")
+    private RoomLockHandler roomsLock;
 
     public BoardService() {
     }
@@ -36,38 +46,31 @@ public class BoardService {
         this.boardRepository = boardRepository;
     }
 
-    public PlayerService getPlayersRepo() {
-        return playerService;
-    }
-
-    public void setPlayersRepo(PlayerService playersRepo) {
-        this.playerService = playersRepo;
-    }
-
-    public BoardRepository getBoardRepository() {
-        return boardRepository;
-    }
-
-    public void setBoardRepository(BoardRepository boardRepository) {
-        this.boardRepository = boardRepository;
-    }
 
     @Transactional
     public void saveNewBoard(Board board, String username){
-        //TODO order the code.
-        Player p = playerService.getPlayerByUsername(username,true);
-        Room r = playerService.getRoomByUsername(username);
-        if (p.getBoard()!=null)
-            throw new RuntimeException(ALREADY_HAVE_BOARD);
-        board.makeBoard(r.getOption());
-        p.setBoard(board);
-        p.setStatus(Player.PlayerStatus.READY);
-        board.setPlayer(p);
-        boardRepository.save(board);
+        try {
+            DBLock.writeLock().lock();
+            //TODO order the code.
+            Player p = playerService.getPlayerByUsername(username,false);
+            Room r = p.getRoom();
+            if (p.getBoard()!=null)
+                throw new RuntimeException(ALREADY_HAVE_BOARD);
+            board.makeBoard(r.getOption());
+            p.setBoard(board);
+            p.setStatus(Player.PlayerStatus.READY);
+            board.setPlayer(p);
+            boardRepository.save(board);
+            roomService.updateRoomStatusByUsername(username);
+        }
+        finally {
+            DBLock.writeLock().unlock();
+        }
+
     }
 
 
-    public ArrayList<ArrayList<String>> getTwoDimensionalArrayByPlayer(Player player, Boolean getSubmarine){
+    private ArrayList<ArrayList<String>> getTwoDimensionalArrayByPlayer(Player player, Boolean getSubmarine){
 
         Board board = player.getBoard();
         List<Tile> tiles= board.getBoardTiles();
@@ -94,23 +97,45 @@ public class BoardService {
     }
 
     public HashMap<String, ArrayList<ArrayList<String>>>  getOpponentBoardsByUsername(String username){
-        HashMap<String,  ArrayList<ArrayList<String>>> allBoards = new HashMap<>();
-        Room room = playerService.getRoomByUsername(username);
-        List<Player> players = room.getPlayers();
-        players.forEach((player)->{
-            String playerName = player.getUsername();
-            if (!Objects.equals(playerName, username))
-                allBoards.put(playerName,getTwoDimensionalArrayByPlayer(player, false));
-        });
-        return allBoards;
+        try{
+            DBLock.readLock().lock();
+            Room room = playerService.getRoomByUsername(username);
+            roomsLock.getRoomLock(room.getId()).readLock().lock();
+            try {
+
+                HashMap<String, ArrayList<ArrayList<String>>> allBoards = new HashMap<>();
+                List<Player> players = room.getPlayers();
+                players.forEach((player) -> {
+                    String playerName = player.getUsername();
+                    if (!Objects.equals(playerName, username))
+                        allBoards.put(playerName, getTwoDimensionalArrayByPlayer(player, false));
+                });
+                return allBoards;
+            }
+            finally {
+                roomsLock.getRoomLock(room.getId()).readLock().unlock();
+            }
+        }
+        finally {
+            DBLock.readLock().unlock();
+        }
     }
 
     public ArrayList<ArrayList<String>> getUserTwoDimensionalArrayBoardByUsername(String username){
-        Player player = playerService.getPlayerByUsername(username,false);
-        return getTwoDimensionalArrayByPlayer(player,true);
+        try {
+            DBLock.readLock().lock();
+            Player player = playerService.getPlayerByUsername(username, false);
+            roomsLock.getRoomLock(player.getRoom().getId()).readLock().lock();
+            try {
+                return getTwoDimensionalArrayByPlayer(player, true);
+            }
+            finally {
+                roomsLock.getRoomLock(player.getRoom().getId()).readLock().unlock();
+            }
+        }
+        finally {
+            DBLock.readLock().unlock();
+        }
     }
 
-    public Board getUserBoardByUserName(String username){
-        return playerService.getPlayerByUsername(username,false).getBoard();
-    }
 }

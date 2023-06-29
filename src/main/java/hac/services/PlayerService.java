@@ -1,5 +1,6 @@
 package hac.services;
 
+import hac.beans.RoomLockHandler;
 import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
@@ -19,11 +20,11 @@ public class PlayerService {
     @Autowired
     private PlayerRepository playersRepo;
 
-//    @Resource(name="getPlayerLock")
-//    ReentrantReadWriteLock playerLock;
-//
-//    @Resource(name="getRoomLock")
-//    ReentrantReadWriteLock roomLock;
+    @Resource(name = "getLockForAllDb")
+    private ReentrantReadWriteLock DBLock;
+
+    @Resource(name = "getRoomLock")
+    private RoomLockHandler roomsLock;
 
     public Player createNewPlayer(String username){
         Player player = new Player();
@@ -32,20 +33,13 @@ public class PlayerService {
         return player;
     }
 
-    public Player getPlayerByUsername(String username, Boolean NeedToLock) throws RuntimeException{
-       // try {
-//            if(NeedToLock)
-//                playerLock.readLock().lock();
+    public Player getPlayerByUsername(String username, Boolean needToLockDB, Boolean needToLockRoom) throws RuntimeException{
             Player player = playersRepo.findByUsername(username);
             if(player == null){
                 System.out.println("Player not found");
                 throw new RuntimeException(NO_PLAYER);
             }
             return player;
-//        }finally {
-//            if(NeedToLock)
-//                playerLock.readLock().unlock();
-//        }
     }
 
     public Room getRoomByUsername(String username) throws RuntimeException{

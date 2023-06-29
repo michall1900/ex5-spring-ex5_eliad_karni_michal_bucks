@@ -1,16 +1,8 @@
 package hac.repo.player;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonView;
 import hac.repo.board.Board;
 import hac.repo.room.Room;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import java.util.concurrent.atomic.AtomicReference;
-
-
 import java.util.HashMap;
 
 @Entity

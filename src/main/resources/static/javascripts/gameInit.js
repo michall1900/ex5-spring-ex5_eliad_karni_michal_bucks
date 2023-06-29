@@ -36,20 +36,43 @@
     let isDeletePressed = false;
     let isAddPressed = false;
 
+    /**
+     * A function that handle with error, it opens a modal and display the error message.
+     * @param errorMsg The error that the function should display.
+     */
     const displayError = (errorMsg)=>{
         ERROR_ELEMENT.innerHTML = errorMsg
         ERROR_BTN.click();
     }
+
+    /**
+     * This function is changing the view of the add and delete button.
+     * @param btnElement The button that it's text and class name should be replaced.
+     * @param newClassName The new class name for the button.
+     * @param newText The text that should be inside the button.
+     */
     const changeButtonView = (btnElement, newClassName, newText)=>{
         btnElement.innerText = newText;
         btnElement.className = newClassName;
     }
 
+    /**
+     * This function is extract the src to compare with the one in the map.
+     * It could start with ".." if the image displayed from the js and not from the server.
+     * @param imageElement - The image that should be checked.
+     * @returns {string|string} - The src to compare with the ones in the IMG_PATH map.
+     */
     const getSrcToCompare= (imageElement)=>{
         let src = imageElement.getAttribute("src")
         return (src.startsWith("..")? src: `..${src}`);
     }
 
+    /**
+     * This function handle with a case that user adds or deletes submarine.
+     * It changes the tables' relevant value and also the Add button if needed.
+     * @param size the size of the submarine.
+     * @param isIncrease Telling if there need to increase the number of submarines in table or decrease.
+     */
     const handelSubmarineAddButton = (size, isIncrease)=>{
         let haveElem = document.getElementById(`have_${size}`)
         let neededElem = document.getElementById(`needed_${size}`)
@@ -63,6 +86,9 @@
             addBtn.removeAttribute("disabled");
     }
 
+    /**
+     * A class that holds the submarines.
+     */
     class Submarine{
         INVALID_SUBMARINE = "The submarine you trying to insert is invalid.";
         #size
@@ -71,6 +97,13 @@
         #isVertical
         #relevantElements = []
 
+        /**
+         * Receive the first chosen index of the submarine, the last one, and the size of the submarine and create a
+         * new submarine.
+         * @param firstChosenIndex - The first index that the user chose for the current submarine.
+         * @param lastChosenIndex - The last index that the user chose for the current submarine.
+         * @param size The size that the submarine should be with.
+         */
         constructor(firstChosenIndex, lastChosenIndex,size) {
             this.#validateSubmarine(firstChosenIndex, lastChosenIndex, size);
             [this.#firstIndex, this.#lastIndex] = this.#getRealFirstAndLastIndex(firstChosenIndex, lastChosenIndex);
@@ -78,6 +111,10 @@
             this.#isVertical = (firstChosenIndex.row > lastChosenIndex.row || firstChosenIndex.row < lastChosenIndex.row);
         }
 
+        /**
+         * This function is displaying the submarine on the board.
+         * @param controller - the controller to handle with the delete listener.
+         */
         displaySubmarine(controller){
             for(let row = Math.max(this.#firstIndex.row-1,0);
                 row<=Math.min(this.#lastIndex.row +1, BOARD_SIZE-1);
@@ -87,20 +124,22 @@
                      col++){
                     const relevantButton = document.getElementById(`${row}.${col}`)
                     let imageElement = document.getElementById(`image_${row}.${col}`)
-                    let clonedButton
+                    //let clonedButton
                     if ((this.#isVertical?
                         (col=== this.#firstIndex.col && this.#firstIndex.row<= row && row<= this.#lastIndex.row):
                         (row === this.#firstIndex.row && this.#firstIndex.col<= col && col<= this.#lastIndex.col))){
-                        imageElement.setAttribute("src", IMG_SOURCES_MAP.get("submarineCell"))
-                        clonedButton = relevantButton.cloneNode(true)
-                        clonedButton.addEventListener("click", (_) =>{this.#handleDelete(controller)})
-                        relevantButton.parentNode.replaceChild(clonedButton,relevantButton)
+                        this.#displaySubmarineCell(imageElement, relevantButton, controller);
+                        // imageElement.setAttribute("src", IMG_SOURCES_MAP.get("submarineCell"))
+                        // clonedButton = relevantButton.cloneNode(true)
+                        // clonedButton.addEventListener("click", (_) =>{this.#handleDelete(controller)})
+                        // relevantButton.parentNode.replaceChild(clonedButton,relevantButton)
                     }
                     else{
-                        imageElement.setAttribute("src", IMG_SOURCES_MAP.get("noShip"))
-                        clonedButton = relevantButton.cloneNode(true)
-                        clonedButton.setAttribute("disabled","")
-                        relevantButton.parentNode.replaceChild(clonedButton,relevantButton)
+                        this.#displayNoShipCell(imageElement,relevantButton);
+                        // imageElement.setAttribute("src", IMG_SOURCES_MAP.get("noShip"))
+                        // let clonedButton = relevantButton.cloneNode(true)
+                        // clonedButton.setAttribute("disabled","")
+                        // relevantButton.parentNode.replaceChild(clonedButton,relevantButton)
                     }
                     this.#relevantElements.push({btnId: `${row}.${col}`, imgId:`image_${row}.${col}`,
                         row:row, col:col});
@@ -110,6 +149,40 @@
             }
         }
 
+        /**
+         * This function is displaying a submarine cell on the board by the relevant image element and the relevant button.
+         * @param imageElement The current img element.
+         * @param relevantButton The relevant button that needs to handel with.
+         * @param controller The controller to take from him the "add submarine" listener.
+         */
+        #displaySubmarineCell(imageElement, relevantButton, controller){
+            imageElement.setAttribute("src", IMG_SOURCES_MAP.get("submarineCell"))
+            let clonedButton = relevantButton.cloneNode(true)
+            clonedButton.addEventListener("click", (_) =>{this.#handleDelete(controller)})
+            relevantButton.parentNode.replaceChild(clonedButton,relevantButton)
+        }
+
+        /**
+         * This function is displaying an empty cell on the board by the relevant image element and the relevant button.
+         * @param imageElement The current img element.
+         * @param relevantButton The relevant button that needs to handel with.
+         */
+        #displayNoShipCell(imageElement, relevantButton){
+            imageElement.setAttribute("src", IMG_SOURCES_MAP.get("noShip"))
+            let clonedButton = relevantButton.cloneNode(true)
+            clonedButton.setAttribute("disabled","")
+            relevantButton.parentNode.replaceChild(clonedButton,relevantButton)
+        }
+
+        /**
+         * This function validates that the submarine that has been displayed is valid (means the submarine displayed
+         * horizontally or vertically, matches the size that user picked, and there are no submarines near to this
+         * submarine [in distance of 1])
+         * @param firstChosenIndex the first index that the user chose.
+         * @param lastChosenIndex the last index the user chose.
+         * @param size the submarine's size.
+         * @throws Error if the submarine is invalid
+         */
         #validateSubmarine(firstChosenIndex, lastChosenIndex, size){
             if(!((firstChosenIndex.row === lastChosenIndex.row && (Math.abs(firstChosenIndex.col- lastChosenIndex.col )+ 1) === size) ||
                 (firstChosenIndex.col === lastChosenIndex.col && (Math.abs(firstChosenIndex.row-lastChosenIndex.row ) + 1)=== size)))
@@ -123,6 +196,15 @@
 
         }
 
+        /**
+         * This function checks if the submarine is only in empty cells and there are no submarines/ invalid indexes
+         * that the submarine is on them.
+         * @param firstIndex The real first index of the submarine (means its column and row value are the lowest).
+         * @param lastIndex The real last index of the submarine (means its column and row value are the highest).
+         * @param firstChosenIndex The first index the user chose.
+         * @param isVertical The last index the user chose.
+         * @throws Error if the submarine is invalid
+         */
         #checkIfSubmarineInEmptyCells(firstIndex,lastIndex,firstChosenIndex, isVertical){
             for(let index = (isVertical? firstIndex.row: firstIndex.col);
                 index < (isVertical? lastIndex.row: lastIndex.col); index++){
@@ -136,11 +218,22 @@
             }
         }
 
+        /**
+         * Return the real first index of the submarine and the real last index of the submarine in an array.
+         * @param firstChosenIndex - The first index the user chose.
+         * @param lastChosenIndex - The last index the user chose.
+         * @returns {*[]} Array when the first index is the real first index of the submarine and the second is the
+         * real index of the last index in the submarine.
+         */
         #getRealFirstAndLastIndex(firstChosenIndex, lastChosenIndex){
             return (firstChosenIndex.col < lastChosenIndex.col || firstChosenIndex.row < lastChosenIndex.row)?
                 [firstChosenIndex, lastChosenIndex]: [lastChosenIndex, firstChosenIndex];
         }
 
+        /**
+         * This function is handle with delete
+         * @param controller
+         */
         #handleDelete(controller){
             if (isAddPressed)
                 displayError(YOU_CANT_CHOOSE_THIS_CELL_ERROR)
@@ -330,7 +423,7 @@
         }
 
     }
-    const handleDeleteClick = (event)=>{
+    const handleDeleteClick = (_)=>{
         if (isAddPressed)
             displayError(ADD_ON_DELETE_ERROR)
         else{

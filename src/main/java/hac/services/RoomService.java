@@ -94,28 +94,12 @@ public class RoomService {
     }
     @Transactional
     public void changeRoomStatus(long roomId, Room.RoomEnum status){
-    //    try{
-      //      roomLock.writeLock().lock();
-            Room room = roomRepo.findById(roomId).orElseThrow(() -> new RuntimeException(ROOM_NOT_FOUND));
-            //System.out.println(room.getId());
-            //System.out.println(room.getStatus());
-            //System.out.println(status);
-            room.setStatus(status);
-            //roomRepo.save(room);
-  //      }
-//        finally {
-//            roomLock.writeLock().unlock();
-//        }
+        Room room = roomRepo.findById(roomId).orElseThrow(() -> new RuntimeException(ROOM_NOT_FOUND));
+        room.setStatus(status);
+
     }
-    @Transactional(readOnly = true)
     public List<Room> getAllRooms(){
-        //try{
-            //roomLock.readLock().lock();
-            return roomRepo.findAll();
-        //}
-//        finally {
-//            roomLock.readLock().unlock();
-//        }
+        return roomRepo.findAll();
     }
 //    @Transactional(readOnly = true)
 //    public List<String> getAllNotReadyPlayersNameInRoomByUsername(String username){
@@ -192,7 +176,7 @@ public class RoomService {
             Room room = playerService.getRoomByUsername(currentUserName);
             validateOnGame(room);
             validateTurn(currentUserName);
-            Board board = boardService.getUserBoardByUserName(userTurn.getOpponentName());
+            Board board = playerService.getPlayerByUsername(userTurn.getOpponentName(),false).getBoard();
             ArrayList<HashMap<String, String>> boardUpdates = board.getHitChanges(userTurn.getRow(), userTurn.getCol());
             UpdateObject updateObject = new UpdateObject();
             updateObject.setBoardChanges(boardUpdates);

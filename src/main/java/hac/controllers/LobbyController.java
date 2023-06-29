@@ -10,8 +10,6 @@ import hac.repo.room.Room;
 
 import hac.services.PlayerService;
 import hac.services.RoomService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Controller;
@@ -28,7 +26,6 @@ public class LobbyController {
     @Autowired
     private PlayerService playerService;
 
-    private static Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     @GetMapping("")
     public String getLobby() {
@@ -43,7 +40,7 @@ public class LobbyController {
 
     @GetMapping("/getRooms")
     public @ResponseBody List<Map<String,String>> getRooms() {
-        List<Map<String, String>> ans = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> ans = new ArrayList<>();
         for(Room room : roomService.getAllRooms()){
             ans.add(room.getInfo());
         }
