@@ -61,7 +61,7 @@ public class BoardService {
             p.setStatus(Player.PlayerStatus.READY);
             board.setPlayer(p);
             boardRepository.save(board);
-            roomService.updateRoomStatusByUsername(username);
+            roomService.updateRoomStatusByUsername(username, false);
         }
         finally {
             DBLock.writeLock().unlock();
