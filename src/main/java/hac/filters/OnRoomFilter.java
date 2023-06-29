@@ -78,6 +78,7 @@ public class OnRoomFilter implements HandlerInterceptor {
         try{
 
             String username = request.getUserPrincipal().getName();
+            //TODO move the functionality to one of the services
             Room.RoomEnum roomStatus = playerService.getRoomStatusByUserName(username);
             Player.PlayerStatus playerStatus = playerService.getPlayerStatusByUsername(username);
             //If the player is not ready and the game is waiting for boards, it's ok to get into this path.

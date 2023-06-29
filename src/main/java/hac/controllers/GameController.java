@@ -68,6 +68,7 @@ public class GameController {
     public DeferredResult<ResponseEntity<?>> getRoomStatus(Principal principal) {
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
         try {
+            //TODO move functionality to one of the services.
             ExecutorService executorService = roomService.getExecutorServiceForRoom(principal.getName());
             Future<?> future = executorService.submit(() -> {
                 try {
