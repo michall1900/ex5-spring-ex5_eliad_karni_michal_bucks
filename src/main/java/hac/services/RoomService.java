@@ -63,23 +63,12 @@ public class RoomService {
     private ReentrantReadWriteLock executorsLock;
 
     @Transactional
-    public Room saveRoom(Room room) {
-        //try {
-            //lockAll();
-            return roomRepo.save(room);
-        //}
-//        finally {
-//            roomLock.writeLock().unlock();
-//            playerLock.writeLock().unlock();
-//        }
-    }
-    @Transactional
     public Room createNewRoom(Player player, int type){
         Room room = new Room();
         room.setStatus(Room.RoomEnum.WAITING_FOR_NEW_PLAYER);
         room.setOption(Board.Options.values()[type]);
         room.add(player);
-        return saveRoom(room);
+        return roomRepo.save(room);
     }
 
     @Transactional

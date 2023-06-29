@@ -9,6 +9,8 @@
     const LAST_STEP_ID = "lastStep";
     const URL_TO_UPDATE = "/game/update"
     const MY_NAME_ID = "name";
+    const ERROR_PATH = "/room-error"
+    const FINISH_PAGE = "/game/finish-page";
     const IMAGES_PATHS = new Map([["Miss","../images/noShip.png"],["Hit","../images/explodeShip.jpg"]])
     let csrfToken
     let csrfHeader
@@ -20,7 +22,8 @@
     let ERROR_BTN;
     let MY_NAME;
     let isMyTurn;
-    //TODO - disabled buttons when the turn is not mine.
+
+
     const displayError = (errorMsg)=>{
         ERROR_ELEMENT.innerHTML = errorMsg
         ERROR_BTN.click();
@@ -36,10 +39,8 @@
     const getErrorMessage = async (response) =>{
         console.log(response);
         if (response.status !== 400){
-            //TODO need to change to error page
             isNeedToPoll=false;
-            //window.location.href = "/lobby/room-error"
-            console.log("Need to move to error page");
+            window.location.href = ERROR_PATH
         }
         else{
             try {
@@ -73,7 +74,6 @@
             await checkResponse(response);
             let data = await response.text();
             if (!!data && data.startsWith("/")) {
-                console.log("Relocation to game over")
                 window.location.href = data
             }
 
@@ -119,9 +119,8 @@
                     await getUpdates();
                 }
                 else if (response.status !== 200) {
-                    console.log("need to move error page");
                     isNeedToPoll=false;
-                    //displayError(response.text());
+                    window.location.href = ERROR_PATH
                 } else {
                     let data = await response.text();
                     try{
@@ -133,8 +132,7 @@
                     }
                     catch{
                         isNeedToPoll=false;
-                        console.log("Need to move to finish game")
-                        window.location.href = "/game/finish-page"
+                        window.location.href = FINISH_PAGE
                     }
                 }
             } catch (e) {

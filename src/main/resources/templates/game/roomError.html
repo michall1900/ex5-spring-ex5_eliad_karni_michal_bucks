@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<head th:insert="~{fragments/head.html :: head}" ></head>
+<body>
+  <div th:insert="~{fragments/app-bar.html :: appBar}"></div>
+  <div class="container">
+    <div th:insert="~{fragments/main-pic.html :: main-pic}"></div>
+    <div class="row justify-content-center">
+      <div class="col-12 text-center text-danger my-2">
+        Error: The room you're trying to enter to has been closed for some reason.
+      </div>
+      <div class="col-12 my-2">
+        <a class="btn btn-outline-danger" th:href="@{/lobby}" role="button">Back to lobby</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -15,13 +15,12 @@
     const DATA_TO_SERVER_ID = "boardName"
 
     const ADD_NOT_CLICKED_ERROR = "To select a submarine, you must first click an 'Add' button."
-    const HAVE_NO_SUBMARINE_TO_DISPLAY = "All submarines are already displayed. Click 'Ready' or delete a submarine to relocate it."
     const YOU_SHOULD_CLICK_DELETE_FIRST_ERROR = "Click on a submarine. To delete it, click 'Delete' first."
     const YOU_CANT_CHOOSE_THIS_CELL_ERROR = "This location cannot be chosen to display the submarine."
     const EMPTY_ON_DELETE_ERROR = "You clicked on empty place. Please click on a submarine."
     const ADD_ON_DELETE_ERROR = "After clicking 'Delete,' you can't click 'Add'."
     const DELETE_ON_ADD_ERROR = "While adding a new submarine, you can't click 'Delete.'"
-    const DELETE_ON_READY_ERROR = "While adding a new submarine, you can't click 'Delete.'"
+    const ADD_WHILE_ADD_PRESSED_ERROR = "Please cancel first the submarine you selected. After that, you can choose another submarine to display."
 
     const INIT_INSTRUCTION = "Click 'Add' to create a new submarine, 'Delete' to remove an existing submarine, or 'Ready' once you've selected positions for all submarines."
     const AFTER_ADD_INSTRUCTION = "Choose the first cell on the game board as the first corner of the submarine, or click 'Cancel' to cancel the current selection."
@@ -313,6 +312,9 @@
     const handleAddClick = (event, btn, controller)=>{
         if (isDeletePressed)
             displayError(DELETE_ON_ADD_ERROR)
+        else if (isAddPressed && btn.innerHTML !== CANCEL_BUTTON_VIEW.name){
+            displayError(ADD_WHILE_ADD_PRESSED_ERROR)
+        }
         else{
             if (!isAddPressed){
                 changeButtonView(btn, CANCEL_BUTTON_VIEW.class, CANCEL_BUTTON_VIEW.name)

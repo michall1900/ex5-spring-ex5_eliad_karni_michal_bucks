@@ -4,6 +4,7 @@
     const ERROR_BODY_ID = "error"
     const DEFAULT_ERROR = "There is a problem to connect to the server"
     const URL = "/game/wait-to-start"
+    const ERROR_PATH = "/room-error"
 
     let ERROR_ELEMENT;
     let ERROR_BTN;
@@ -22,13 +23,7 @@
                 await waitForAllUsers();
             }
             else if(response.status!== 200){
-                try{
-                    //TODO go to error page instead.
-                    displayError(await response.text());
-                }
-                catch (e){
-                    displayError(DEFAULT_ERROR);
-                }
+                window.location.href = ERROR_PATH
 
             }
             else{

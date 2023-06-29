@@ -26,8 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
+
 
 //TODO add error handler
 @Controller
@@ -119,7 +118,7 @@ public class GameController {
         }
         catch (Exception e){
             //TODO create this page.
-            return new ResponseEntity<>("/lobby/room-error", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("/room-error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
