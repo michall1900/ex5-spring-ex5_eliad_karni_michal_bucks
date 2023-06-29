@@ -22,6 +22,7 @@
     let ERROR_BTN;
     let MY_NAME;
     let isMyTurn;
+    let isStillProcessing;
 
 
     const displayError = (errorMsg)=>{
@@ -83,6 +84,7 @@
             displayError(e);
             console.log(e);
         }
+
 
 
     }

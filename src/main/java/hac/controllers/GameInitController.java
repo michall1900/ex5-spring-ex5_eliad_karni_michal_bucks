@@ -35,20 +35,9 @@ public class GameInitController {
 
     @GetMapping("")
     public String gameInit(Model model, Principal principal){
+        //TODO handle error
         try{
-
-        }
-        catch(Exception e){
-
-            System.out.println(e);
-        }
-        //TODO add roomService a function that do all information in one lock
-        try{
-            model.addAttribute("names", roomService.getAllOpponentNamesByUsername(principal.getName()));
-            model.addAttribute("endValue", Board.SIZE-1);
-            model.addAttribute("imgPath", Board.imgType.get(String.valueOf(Tile.TileStatus.Empty)));
-            model.addAttribute("option", Board.options.get(roomService.getBoardOptionByUsername(principal.getName()).ordinal()));
-            model.addAttribute("url","/game/init");
+            roomService.setGameInitModel(model, principal.getName());
         }
         catch(Exception e){
             model.addAttribute("error",e.getMessage());
@@ -69,8 +58,8 @@ public class GameInitController {
 //            if (!violations.isEmpty()) {
 //                throw new ConstraintViolationException(violations);
 //            }
-            //TODO put it in the same method.
-            boardService.saveNewBoard(board, principal.getName());
+
+            roomService.saveNewBoard(board, principal.getName());
 
             return "game/waitingForStartGame";
 

@@ -36,5 +36,6 @@ public class RoomLockHandler implements Serializable {
         ReentrantReadWriteLock readWriteLock = roomsLock.get(id);
         if (readWriteLock != null)
             throw new RuntimeException("The lock already exist");
+        roomsLock.put(id, new ReentrantReadWriteLock());
     }
 }

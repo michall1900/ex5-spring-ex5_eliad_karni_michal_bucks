@@ -52,12 +52,7 @@ public class GameController {
     public String onGamePage(Model model, Principal principal){
         //set opponent turn if needed.
         try {
-            //TODO add roomService function that do all the gets under one lock action
-            model.addAttribute("turn", roomService.getPlayerUsernameTurn(principal.getName()));
-            model.addAttribute("name", principal.getName());
-            model.addAttribute("opponentBoards", boardService.getOpponentBoardsByUsername(principal.getName()));
-            model.addAttribute("myBoard", boardService.getUserTwoDimensionalArrayBoardByUsername(principal.getName()));
-
+            roomService.setOnGameModel(model, principal.getName());
         }
         //TODO handle errors
         catch (Exception e){
@@ -68,44 +63,7 @@ public class GameController {
     @GetMapping( "/wait-to-start")
     public DeferredResult<ResponseEntity<?>> getRoomStatus(Principal principal) {
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
-        try {
-
-            //TODO move functionality to one of the services.
-
-            ExecutorService executorService = roomService.getExecutorServiceForRoom(principal.getName());
-            Future<?> future = executorService.submit(() -> {
-                try {
-                    Room.RoomEnum status;
-                    do {
-                        status = playerService.getRoomStatusByUserName(principal.getName());
-                        if (status != Room.RoomEnum.ON_GAME) {
-                            Thread.sleep(1000);
-                        }
-                    } while (status != Room.RoomEnum.ON_GAME);
-                    if (!Thread.currentThread().isInterrupted())
-                        output.setResult(ResponseEntity.ok("/game/on-game"));
-                }
-                catch (GameOver e){
-                    output.setResult(ResponseEntity.ok("/game/finish-page"));
-                }
-                catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                catch (Exception e) {
-                    output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
-                }
-            });
-            output.onTimeout(() -> {
-                future.cancel(true);
-                System.out.println("Timeout! Sent to" + principal.getName());
-                output.setErrorResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Service Unavailable"));
-            });
-        }
-        catch (Exception e) {
-            output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
-        }
-
-        return output;
+        return roomService.handleStatusRoomPolling(principal,output);
     }
     @PostMapping("/update")
     public ResponseEntity<?> updateBoard(@RequestBody UserTurn userTurn, Principal principal){
@@ -130,71 +88,21 @@ public class GameController {
     @ResponseBody
     public DeferredResult<ResponseEntity<?>> test(@PathVariable("timestamp") int timestamp, Principal principal) {
         System.out.println("In getttttt");
-
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
+        return roomService.handleUpdatePolling(principal, output, timestamp);
 
-        try {
-            //TODO kill that monster!!!!
-            ExecutorService executorService = roomService.getExecutorServiceForRoom(principal.getName());
-            Future<?> future = executorService.submit(() -> {
-                try {
-                    List<UpdateObject> updates = new ArrayList<>();
-                    while(updates.isEmpty() && !Thread.currentThread().isInterrupted()) {
-                        updates = roomService.getUpdates(principal.getName(), timestamp);
-                        if (updates.isEmpty()) {
-                            Thread.sleep(1000);
-                        }
-                    }
-                    if (!Thread.currentThread().isInterrupted())
-                        output.setResult(ResponseEntity.ok(updates));
-                }
-                catch (InvalidChoiceError e){
-                    output.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage()));
-                }
-                catch (GameOver e){
-                    output.setResult(ResponseEntity.status(HttpStatus.OK).body("/game/finish-page"));
-                }
-                catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    //output.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Service Unavailable"));
-                }
-                catch (Exception e) {
-                    output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
-                }
-            });
-            output.onTimeout(() -> {
-                future.cancel(true);
-                System.out.println("Timeout! Sent to" + principal.getName());
-                output.setErrorResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Service Unavailable"));
-            });
-        } catch (Exception e) {
-            output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
-        }
-
-        return output;
     }
 
 
     @GetMapping("/finish-page")
     public String finishGame(Model model, Principal principal){
-        Player player = playerService.getPlayerByUsername(principal.getName(), true);
-        if(player.getStatus() == Player.PlayerStatus.WIN) {
-            model.addAttribute("status", "WIN");
-        }
-        else if(player.getStatus() == Player.PlayerStatus.LOSE){
-            Room room = playerService.getRoomByUsername(principal.getName());
-            for(Player checkedPlayer : room.getPlayers()){
-                if (checkedPlayer.getStatus() == Player.PlayerStatus.WIN) {
-                    model.addAttribute("winner", checkedPlayer.getUsername());
-                    break;
-                }
-            }
-            model.addAttribute("status", "LOSE");
-        }
+        //TODO catch errors.
+        if(playerService.setWinnersInModelReturnIfNotFound(principal.getName(), model))
+            return "game/finishGame";
         else
             return "redirect: /lobby";
 //        model.addAttribute("status", "LOSE");
 //        model.addAttribute("winner", "Eliad");
-        return "game/finishGame";
+
     }
 }

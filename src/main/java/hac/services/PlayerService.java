@@ -8,8 +8,8 @@ import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
-import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
@@ -33,7 +33,7 @@ public class PlayerService {
         return player;
     }
 
-    public Player getPlayerByUsername(String username, Boolean needToLockDB, Boolean needToLockRoom) throws RuntimeException{
+    public Player getPlayerByUsername(String username, Boolean needToLockDB) throws RuntimeException{
         try {
             if(needToLockDB)
                 DBLock.readLock().lock();
@@ -67,13 +67,24 @@ public class PlayerService {
         }
     }
 
+    /**
+     *
+     * Assumption - the function who called this function locked the needed locks.
+     * @param username
+     * @return
+     */
     public Room.RoomEnum getRoomStatusByUserName(String username){
         return getRoomByUsername(username, true).getStatus();
     }
 
-//    public Player.PlayerStatus getPlayerStatusByUsername(String username){
-//        return getPlayerByUsername(username, true).getStatus();
-//    }
+    /**
+     * Assumption - the function who called this function locked the needed locks.
+     * @param username
+     * @return
+     */
+    public Player.PlayerStatus getPlayerStatusByUsername(String username){
+        return getPlayerByUsername(username, true).getStatus();
+    }
 
     @Transactional
     public void removePlayer(String username) throws RuntimeException{
@@ -90,6 +101,39 @@ public class PlayerService {
             playersRepo.delete(player);
         }finally {
             DBLock.writeLock().unlock();
+        }
+    }
+
+    public Boolean setWinnersInModelReturnIfNotFound(String username, Model model){
+        try {
+            DBLock.readLock().lock();
+            Player player = getPlayerByUsername(username, false);
+            roomsLock.getRoomLock(player.getRoom().getId()).readLock().lock();
+            try {
+
+                if (player.getStatus() == Player.PlayerStatus.WIN) {
+                    model.addAttribute("status", "WIN");
+                    return true;
+                }
+                if (player.getStatus() == Player.PlayerStatus.LOSE) {
+                    Room room = player.getRoom();
+                    for (Player checkedPlayer : room.getPlayers()) {
+                        if (checkedPlayer.getStatus() == Player.PlayerStatus.WIN) {
+                            model.addAttribute("winner", checkedPlayer.getUsername());
+                            break;
+                        }
+                    }
+                    model.addAttribute("status", "LOSE");
+                    return true;
+                }
+                return false;
+            }
+            finally {
+                roomsLock.getRoomLock(player.getRoom().getId()).readLock().unlock();
+            }
+        }
+        finally {
+            DBLock.readLock().unlock();
         }
     }
 }

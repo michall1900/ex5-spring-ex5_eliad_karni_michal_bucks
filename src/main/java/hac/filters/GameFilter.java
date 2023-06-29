@@ -41,16 +41,17 @@ public class GameFilter  implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
-        try {
-            if(request.isUserInRole("USER") || request.isUserInRole("ADMIN")) {
-                Player player = playerService.getPlayerByUsername(request.getUserPrincipal().getName(), true);
-                Room room = playerService.getRoomByUsername(request.getUserPrincipal().getName());
-                //if(room.getStatus() != Room.RoomEnum)
-            }
-            return true;
-        }catch (Exception e){
-            return false;
-        }
+        return true;
+//        try {
+//            if(request.isUserInRole("USER") || request.isUserInRole("ADMIN")) {
+//                Player player = playerService.getPlayerByUsername(request.getUserPrincipal().getName(), true);
+//                Room room = playerService.getRoomByUsername(request.getUserPrincipal().getName());
+//                //if(room.getStatus() != Room.RoomEnum)
+//            }
+//            return true;
+//        }catch (Exception e){
+//            return false;
+//        }
     }
 
     @Override

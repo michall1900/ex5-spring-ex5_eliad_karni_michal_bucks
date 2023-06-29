@@ -21,16 +21,16 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
 public class BoardService {
-    final static String ALREADY_HAVE_BOARD = "You already have a board";
+
 
     @Autowired
     private PlayerService playerService;
 
-    @Autowired
-    private BoardRepository boardRepository;
-
-    @Autowired
-    private RoomService roomService;
+//    @Autowired
+//    private BoardRepository boardRepository;
+//
+//    @Autowired
+//    private RoomService roomService;
 
     @Resource(name = "getLockForAllDb")
     private ReentrantReadWriteLock DBLock;
@@ -41,33 +41,6 @@ public class BoardService {
     public BoardService() {
     }
 
-    public BoardService(PlayerService playersRepo, BoardRepository boardRepository) {
-        this.playerService = playersRepo;
-        this.boardRepository = boardRepository;
-    }
-
-
-    @Transactional
-    public void saveNewBoard(Board board, String username){
-        try {
-            DBLock.writeLock().lock();
-            //TODO order the code.
-            Player p = playerService.getPlayerByUsername(username,false);
-            Room r = p.getRoom();
-            if (p.getBoard()!=null)
-                throw new RuntimeException(ALREADY_HAVE_BOARD);
-            board.makeBoard(r.getOption());
-            p.setBoard(board);
-            p.setStatus(Player.PlayerStatus.READY);
-            board.setPlayer(p);
-            boardRepository.save(board);
-            roomService.updateRoomStatusByUsername(username, false);
-        }
-        finally {
-            DBLock.writeLock().unlock();
-        }
-
-    }
 
 
     private ArrayList<ArrayList<String>> getTwoDimensionalArrayByPlayer(Player player, Boolean getSubmarine){
@@ -96,46 +69,32 @@ public class BoardService {
         return boardToSend;
     }
 
+    /**
+     * Assumption - The function who used this method locked the dbLock + room's lock for reading.
+     * @param username
+     * @return
+     */
     public HashMap<String, ArrayList<ArrayList<String>>>  getOpponentBoardsByUsername(String username){
-        try{
-            DBLock.readLock().lock();
-            Room room = playerService.getRoomByUsername(username);
-            roomsLock.getRoomLock(room.getId()).readLock().lock();
-            try {
-
-                HashMap<String, ArrayList<ArrayList<String>>> allBoards = new HashMap<>();
-                List<Player> players = room.getPlayers();
-                players.forEach((player) -> {
-                    String playerName = player.getUsername();
-                    if (!Objects.equals(playerName, username))
-                        allBoards.put(playerName, getTwoDimensionalArrayByPlayer(player, false));
-                });
-                return allBoards;
-            }
-            finally {
-                roomsLock.getRoomLock(room.getId()).readLock().unlock();
-            }
-        }
-        finally {
-            DBLock.readLock().unlock();
-        }
+        Room room = playerService.getRoomByUsername(username, false);
+        HashMap<String, ArrayList<ArrayList<String>>> allBoards = new HashMap<>();
+        List<Player> players = room.getPlayers();
+        players.forEach((player) -> {
+            String playerName = player.getUsername();
+            if (!Objects.equals(playerName, username))
+                allBoards.put(playerName, getTwoDimensionalArrayByPlayer(player, false));
+        });
+        return allBoards;
     }
 
+    /**
+     * Assumption - the function who used this method already locked db + room's lock for reading.
+     * @param username
+     * @return
+     */
     public ArrayList<ArrayList<String>> getUserTwoDimensionalArrayBoardByUsername(String username){
-        try {
-            DBLock.readLock().lock();
-            Player player = playerService.getPlayerByUsername(username, false);
-            roomsLock.getRoomLock(player.getRoom().getId()).readLock().lock();
-            try {
-                return getTwoDimensionalArrayByPlayer(player, true);
-            }
-            finally {
-                roomsLock.getRoomLock(player.getRoom().getId()).readLock().unlock();
-            }
-        }
-        finally {
-            DBLock.readLock().unlock();
-        }
+        Player player = playerService.getPlayerByUsername(username, false);
+        return getTwoDimensionalArrayByPlayer(player, true);
+
     }
 
 }

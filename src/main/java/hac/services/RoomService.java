@@ -6,7 +6,9 @@ import hac.classes.customErrors.GameOver;
 import hac.classes.customErrors.InvalidChoiceError;
 import hac.classes.forGame.UserTurn;
 import hac.embeddables.UpdateObject;
+import hac.filters.OnRoomFilter;
 import hac.repo.board.Board;
+import hac.repo.board.BoardRepository;
 import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
@@ -14,12 +16,18 @@ import hac.repo.room.RoomRepository;
 import hac.repo.tile.Tile;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.web.context.request.async.DeferredResult;
 
+import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -33,6 +41,8 @@ public class RoomService {
     static final String GAME_OVER = "The game end";
     static final String NOT_ENOUGH_PLAYERS = "Some of the players are disconnecter";
     static final String NOT_USER_TURN = "It's not your turn";
+
+    final static String ALREADY_HAVE_BOARD = "You already have a board";
 
     static final String INVALID_TIME_STAMP = "Your timestamp is invalid";
 
@@ -60,6 +70,9 @@ public class RoomService {
     @Resource(name = "getRoomLock")
     private RoomLockHandler roomsLock;
 
+    @Autowired
+    private BoardRepository boardRepository;
+
     @Transactional
     public Room createNewRoom(Player player, int type){
         try {
@@ -70,6 +83,7 @@ public class RoomService {
             room.add(player);
             Room room2 = roomRepo.save(room);
             roomsLock.setNewRoomLock(room2.getId());
+            setExecutor(room2.getId());
             return room2;
         }finally {
             DBLock.writeLock().unlock();
@@ -266,27 +280,25 @@ public class RoomService {
         }
     }
 
-    public List<UpdateObject> getUpdates(String username, int timestamp){
-        try {
-            DBLock.readLock().lock();
-            Room room = playerService.getRoomByUsername(username, false);
-            roomsLock.getRoomLock(room.getId()).readLock().lock();
-            try {
-                validateOnGame(room);
-                List<String> updatesStringArray= room.getUpdateObjects();
-                if (timestamp> updatesStringArray.size())
-                    throw new InvalidChoiceError(INVALID_TIME_STAMP);
-                List<UpdateObject> updateObjectList = new ArrayList<>();
-                for (int i = timestamp; i< updatesStringArray.size(); i++){
-                    updateObjectList.add(UpdateObject.convertStringToObject(updatesStringArray.get(i)));
-                }
-                return updateObjectList;
-            }finally {
-                roomsLock.getRoomLock(room.getId()).readLock().unlock();
-            }
-        }finally {
-            DBLock.readLock().unlock();
+    /**
+     * The assumption is the dblock and the room's lock are locked.
+     * @param username
+     * @param timestamp
+     * @return
+     */
+    private List<UpdateObject> getUpdates(String username, int timestamp){
+
+        Room room = playerService.getRoomByUsername(username, false);
+        validateOnGame(room);
+        List<String> updatesStringArray= room.getUpdateObjects();
+        if (timestamp> updatesStringArray.size())
+            throw new InvalidChoiceError(INVALID_TIME_STAMP);
+        List<UpdateObject> updateObjectList = new ArrayList<>();
+        for (int i = timestamp; i< updatesStringArray.size(); i++){
+            updateObjectList.add(UpdateObject.convertStringToObject(updatesStringArray.get(i)));
         }
+        return updateObjectList;
+
     }
 
     @Transactional
@@ -315,51 +327,282 @@ public class RoomService {
 
     }
 
-
-    public ExecutorService getExecutorServiceForRoom(String username) {
-        try {
-            executorsLock.writeLock().lock();
-            DBLock.readLock().lock();
-            Long roomId = playerService.getRoomByUsername(username).getId();
-            int numPlayers = Room.SIZE;
-            ExecutorService executorService = roomExecutors.get(roomId);
-            if (executorService == null) {
-                executorService = Executors.newFixedThreadPool(numPlayers);
-                roomExecutors.put(roomId, executorService);
-            }
-            return executorService;
-        }
-        finally {
-            DBLock.readLock().unlock();
-            executorsLock.writeLock().unlock();
-        }
-    }
-
-    private void shutdownExecutorServiceForRoom(String username) {
-        executorsLock.writeLock().lock();
-        try{
-            Long roomId = playerService.getRoomByUsername(username).getId();
-            ExecutorService executorService = roomExecutors.remove(roomId);
-            executorService.shutdown();
-            try {
-                if (!executorService.awaitTermination(800, TimeUnit.MILLISECONDS)) {
-                    executorService.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                executorService.shutdownNow();
-            }
-        }
-        finally {
-            executorsLock.writeLock().unlock();
-        }
-
-    }
-
+    /**
+     * The assumption is dbLock + room db is locked for reading.
+     * @param
+     * @return
+     */
     private Board.Options getBoardOptionByUsername(String username){
-        Room room = playerService.getRoomByUsername(username);
+        Room room = playerService.getRoomByUsername(username, true);
         return room.getOption();
     }
 
+    /**
+     * The assumption is dbLock is locked for writing.
+     * @param
+     * @return
+     */
+
+    private void setExecutor(Long roomId){
+
+        ExecutorService executorService = roomExecutors.get(roomId);
+        int numPlayers = Room.SIZE;
+        if (executorService != null) {
+            throw new DbError();
+        }
+        executorService = Executors.newFixedThreadPool(numPlayers);
+        roomExecutors.put(roomId, executorService);
+
+
+    }
+
+    /**
+     *
+     * Assumption - the method who locks this locked the db for reading.
+     * @param username
+     * @return
+     */
+    private ExecutorService getExecutorServiceForRoom(String username) {
+
+        Long roomId = playerService.getRoomByUsername(username,false).getId();
+
+        ExecutorService executorService = roomExecutors.get(roomId);
+        if (executorService == null) {
+            throw new DbError();
+        }
+        return executorService;
+
+    }
+
+    /**
+     * Assumption - the method who locks this locked the db for writing.
+     * @param username
+     */
+    private void shutdownExecutorServiceForRoom(String username) {
+        Long roomId = playerService.getRoomByUsername(username,false).getId();
+        ExecutorService executorService = roomExecutors.remove(roomId);
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(800, TimeUnit.MILLISECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+        }
+
+
+    }
+
+    public DeferredResult<ResponseEntity<?>> handleStatusRoomPolling(Principal principal, DeferredResult<ResponseEntity<?>> output){
+        try {
+            DBLock.readLock().lock();
+            Long roomId = playerService.getRoomByUsername(principal.getName(),false).getId();
+            //TODO maybe it is not great that the room itself is not blocked when we get this. need to be aware.
+            Future<?> future = getExecutorServiceForRoom(principal.getName()).submit(() -> {
+                try {
+                    Room.RoomEnum status;
+                    do {
+                        roomsLock.getRoomLock(roomId).readLock().lock();
+                        try{
+
+                            status = playerService.getRoomStatusByUserName(principal.getName());
+                            if (status != Room.RoomEnum.ON_GAME) {
+                                roomsLock.getRoomLock(roomId).readLock().unlock();
+                                Thread.sleep(1000);
+                            }
+                        }
+                        finally {
+                            try {
+                                roomsLock.getRoomLock(roomId).readLock().unlock();
+                            }
+                            catch(IllegalMonitorStateException e){
+                                ;
+                            }
+                        }
+                    } while (status != Room.RoomEnum.ON_GAME);
+                    if (!Thread.currentThread().isInterrupted())
+                        output.setResult(ResponseEntity.ok("/game/on-game"));
+                }
+                catch (GameOver e){
+                    output.setResult(ResponseEntity.ok("/game/finish-page"));
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                catch (Exception e) {
+                    output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
+                }
+            });
+            output.onTimeout(() -> {
+                future.cancel(true);
+                System.out.println("Timeout! Sent to" + principal.getName());
+                output.setErrorResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Service Unavailable"));
+            });
+        }
+        catch (Exception e) {
+            output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
+        }
+        finally {
+            DBLock.readLock().unlock();
+        }
+
+        return output;
+    }
+
+    public DeferredResult<ResponseEntity<?>> handleUpdatePolling(Principal principal, DeferredResult<ResponseEntity<?>> output, int timestamp){
+        try {
+            DBLock.readLock().lock();
+            Long roomId = playerService.getRoomByUsername(principal.getName(),false).getId();
+            Future<?> future = getExecutorServiceForRoom(principal.getName()).submit(() -> {
+                try {
+                    List<UpdateObject> updates = new ArrayList<>();
+                    while(updates.isEmpty() && !Thread.currentThread().isInterrupted()) {
+                        roomsLock.getRoomLock(roomId).readLock().lock();
+                        try{
+                            updates = getUpdates(principal.getName(), timestamp);
+                            if (updates.isEmpty()) {
+                                roomsLock.getRoomLock(roomId).readLock().unlock();
+                                Thread.sleep(1000);
+                            }
+                        }
+                        finally {
+                            try {
+                                roomsLock.getRoomLock(roomId).readLock().unlock();
+                            }
+                            catch(IllegalMonitorStateException e){
+                                ;
+                            }
+                        }
+                    }
+                    if (!Thread.currentThread().isInterrupted())
+                        output.setResult(ResponseEntity.ok(updates));
+                }
+                catch (InvalidChoiceError e){
+                    output.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage()));
+                }
+                catch (GameOver e){
+                    output.setResult(ResponseEntity.status(HttpStatus.OK).body("/game/finish-page"));
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    //output.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Service Unavailable"));
+                }
+                catch (Exception e) {
+                    output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
+                }
+            });
+            output.onTimeout(() -> {
+                future.cancel(true);
+                System.out.println("Timeout! Sent to" + principal.getName());
+                output.setErrorResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Service Unavailable"));
+            });
+        } catch (Exception e) {
+            output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
+        }
+        finally {
+            DBLock.readLock().unlock();
+        }
+
+        return output;
+    }
+    public void setOnGameModel(Model model, String username) {
+        try {
+            DBLock.readLock().lock();
+            Long Id = playerService.getRoomByUsername(username, false).getId();
+            roomsLock.getRoomLock(Id).readLock().lock();
+            try {
+                model.addAttribute("turn", getPlayerUsernameTurn(username, false,false));
+                model.addAttribute("name", username);
+                model.addAttribute("opponentBoards", boardService.getOpponentBoardsByUsername(username));
+                model.addAttribute("myBoard", boardService.getUserTwoDimensionalArrayBoardByUsername(username));
+            }
+            finally {
+                roomsLock.getRoomLock(Id).readLock().unlock();
+            }
+        }
+        finally {
+            DBLock.readLock().unlock();
+        }
+    }
+    public void setGameInitModel(Model model, String username){
+        try {
+            DBLock.readLock().lock();
+            Long Id = playerService.getRoomByUsername(username, false).getId();
+            roomsLock.getRoomLock(Id).readLock().lock();
+            try {
+                model.addAttribute("names", getAllOpponentNamesByUsername(username, false, false));
+                model.addAttribute("endValue", Board.SIZE-1);
+                model.addAttribute("imgPath", Board.imgType.get(String.valueOf(Tile.TileStatus.Empty)));
+                model.addAttribute("option", Board.options.get(getBoardOptionByUsername(username).ordinal()));
+                model.addAttribute("url","/game/init");
+            }
+            finally {
+                roomsLock.getRoomLock(Id).readLock().unlock();
+            }
+        }
+        finally {
+            DBLock.readLock().unlock();
+        }
+    }
+    public String getValidationErrorForInitGame( String username){
+        try {
+            DBLock.readLock().lock();
+            Long Id = playerService.getRoomByUsername(username, false).getId();
+            roomsLock.getRoomLock(Id).readLock().lock();
+            try {
+                Room.RoomEnum roomStatus = playerService.getRoomStatusByUserName(username);
+                Player.PlayerStatus playerStatus = playerService.getPlayerStatusByUsername(username);
+                //If the player is not ready and the game is waiting for boards, it's ok to get into this path.
+                if (roomStatus == Room.RoomEnum.WAITING_FOR_BOARDS && playerStatus == Player.PlayerStatus.NOT_READY)
+                    return null;
+                    //TODO change the location of the other fields and the errors about them. It's something more global.
+                    //If player ready and the game is waiting for boards, that's mean that he tries to get to initial room again
+                    // when he needs to be in waiting room
+                else {
+                    if (roomStatus == Room.RoomEnum.WAITING_FOR_BOARDS && playerStatus == Player.PlayerStatus.READY) {
+                        return OnRoomFilter.BOARD_ALREADY_SENT;
+                    }
+                    //If the game is on and the player already in game, the user should get to the game path.
+                    else if (roomStatus == Room.RoomEnum.ON_GAME && playerStatus == Player.PlayerStatus.ON_GAME) {
+                        return OnRoomFilter.BOARD_ALREADY_SENT;
+
+                    } else {
+                        System.out.println("Invalid room status");
+                        //TODO remove player from db + from room list. If we got there it's already exist
+                        return OnRoomFilter.INVALID_STATUS;
+                    }
+                }
+            }
+            finally {
+                roomsLock.getRoomLock(Id).readLock().unlock();
+            }
+        }
+        finally {
+            DBLock.readLock().unlock();
+        }
+    }
+
+    @Transactional
+    public void saveNewBoard(Board board, String username){
+        try {
+            DBLock.writeLock().lock();
+            //TODO order the code.
+            Player p = playerService.getPlayerByUsername(username,false);
+            Room r = p.getRoom();
+            if (p.getBoard()!=null)
+                throw new RuntimeException(ALREADY_HAVE_BOARD);
+            board.makeBoard(r.getOption());
+            p.setBoard(board);
+            p.setStatus(Player.PlayerStatus.READY);
+            board.setPlayer(p);
+            boardRepository.save(board);
+            updateRoomStatusByUsername(username, false, false);
+        }
+        finally {
+            DBLock.writeLock().unlock();
+        }
+
+    }
     //TODO when room closed, shut down its executor.
 }
 

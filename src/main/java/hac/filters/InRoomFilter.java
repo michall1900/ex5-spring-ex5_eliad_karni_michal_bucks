@@ -43,14 +43,14 @@ public class InRoomFilter  implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
-        try {
-            if(request.isUserInRole("USER") || request.isUserInRole("ADMIN")) {
-                Player player = playerService.getPlayerByUsername(request.getUserPrincipal().getName(), true);
-                playerService.removePlayer(player.getUsername());
-            }
-        }catch (Exception e){
-            return true;
-        }
+//        try {
+//            if(request.isUserInRole("USER") || request.isUserInRole("ADMIN")) {
+//                Player player = playerService.getPlayerByUsername(request.getUserPrincipal().getName(), true);
+//                playerService.removePlayer(player.getUsername());
+//            }
+//        }catch (Exception e){
+//            return true;
+//        }
         return true; // continue with the request to next filter or to controller
     }
 
