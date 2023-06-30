@@ -1,5 +1,7 @@
 package hac.configurations;
 
+import hac.filters.FinishGameFilter;
+import hac.filters.GameFilter;
 import hac.filters.InRoomFilter;
 import hac.filters.OnRoomFilter;
 import hac.services.PlayerService;
@@ -33,6 +35,9 @@ public class FiltersConfig implements WebMvcConfigurer {
                 .addPathPatterns("/game/init");
         registry.addInterceptor(new InRoomFilter(roomService, playerService))
                 .addPathPatterns("/lobby", "/how-to-play", "/logout");
-
+        registry.addInterceptor(new GameFilter(roomService, playerService))
+                .addPathPatterns("/game/**");
+        registry.addInterceptor(new FinishGameFilter(roomService, playerService))
+                .addPathPatterns("/game/finish-game");
     }
 }

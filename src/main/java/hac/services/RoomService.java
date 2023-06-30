@@ -627,5 +627,24 @@ public class RoomService {
         }
     }
     //TODO when room closed, shut down its executor.
+
+    public void validatePlayerInRoomStatus(String username) throws Exception{
+        try {
+            DBLock.readLock().lock();
+            Long Id = playerService.getRoomByUsername(username, false).getId();
+            roomsLock.getRoomLock(Id).readLock().lock();
+            try {
+                Room.RoomEnum roomStatus = playerService.getRoomStatusByUserName(username);
+                if(roomStatus != Room.RoomEnum.WAITING_FOR_NEW_PLAYER)
+                    throw new Exception("Player tried to enter the wrong room");
+            }
+            finally {
+                roomsLock.getRoomLock(Id).readLock().unlock();
+            }
+        }
+        finally {
+            DBLock.readLock().unlock();
+        }
+    }
 }
 
