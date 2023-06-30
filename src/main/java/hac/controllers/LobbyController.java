@@ -20,24 +20,41 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/lobby")
 public class LobbyController {
+    /**
+     * The member service acts like an api to the rooms DB.
+     */
     @Autowired
     private RoomService roomService;
-
+    /**
+     * The member service acts like an api to the players DB.
+     */
     @Autowired
     private PlayerService playerService;
 
-
+    /**
+     * The rest returns the lobby home page.
+     * @return The lobby page html.
+     */
     @GetMapping("")
     public String getLobby() {
         return "lobby/lobby";
     }
 
+    /**
+     * The rest returns a lobby page with The room been closed error message.
+     * @param model To add the parameters to the thymeleaf page generation.
+     * @return The lobby Html with the error message.
+     */
     @GetMapping("/error-message")
     public String getErrorLobby(Model model) {
         model.addAttribute("errorMessage", "The room been closed");
         return "lobby/lobby";
     }
 
+    /**
+     * The rest return a JSON that contains all the rooms in the database which their status is: WAITING_FOR_NEW_PLAYER.
+     * @return All the rooms in the database which their status is: WAITING_FOR_NEW_PLAYER.
+     */
     @GetMapping("/getRooms")
     public @ResponseBody List<Map<String,String>> getRooms() {
         List<Map<String, String>> ans = new ArrayList<>();
@@ -48,6 +65,13 @@ public class LobbyController {
         return ans;
     }
 
+    /**
+     * The function returns a list of all the players in the room, if the room is full, an informative message added to
+     * the JSON.
+     * @param model To add parameters to the thymeleaf.
+     * @param principal To get info about the user.
+     * @return A list of the players in the room, and if the room is full.
+     */
     @GetMapping("/getRoom")
     public @ResponseBody Map<String,String> getRoom(Model model, Principal principal) {
         try {
@@ -62,6 +86,11 @@ public class LobbyController {
         }
     }
 
+    /**
+     * The rest return a create room page.
+     * @param model To add parameters to the thymeleaf.
+     * @return create room page's html.
+     */
     @GetMapping("/create-room")
     public String getRoomCreation(Model model) {
         //System.out.println(Board.options.get(Board.Options.BASIC.ordinal()));
@@ -70,6 +99,13 @@ public class LobbyController {
         return "/lobby/roomCreation";
     }
 
+    /**
+     * The function creates a new room receiving a post with the new room type.
+     * @param type The new room's type.
+     * @param principal For info about the user.
+     * @param model To add parameters to the thymeleaf.
+     * @return redirection to the wait room or the roomCreation html in case of errors.
+     */
     @PostMapping("/create-room")
     public String addRoom(@RequestParam("type") int type, Principal principal, Model model){
         //TODO validate type
@@ -83,11 +119,23 @@ public class LobbyController {
         }
     }
 
+    /**
+     * The rest returns the waiting room html.
+     * @param model To add parameters to the thymeleaf.
+     * @return The waiting room html.
+     */
     @GetMapping("/wait")
     public String wait(Model model) {
         return "/lobby/waitingRoom";
     }
 
+    /**
+     * The function adds the sender to the received id's room.
+     * @param id The room the user wanted to be added to.
+     * @param model To add parameters to the thymeleaf.
+     * @param principal For info about the user.
+     * @return HTML to the waiting room. redirect to the lobby if the addition failed.
+     */
     @GetMapping("/enter-room/{id}")
     public String enterRoom(@PathVariable("id")  long id, Model model, Principal principal) {
         try{
@@ -98,12 +146,5 @@ public class LobbyController {
             model.addAttribute("errorMessage", "failed to enter the room");
             return "redirect: /lobby";
         }
-    }
-
-
-    @PostMapping("/print-rooms")
-    public String printRooms(){
-        //lobby.printRooms();
-        return "/index";
     }
 }

@@ -22,30 +22,55 @@ public class OnRoomFilter implements HandlerInterceptor {
     public final static String INVALID_STATUS = "Invalid request to get into the initialize game page.";
 
     public final static String BOARD_ALREADY_SENT = "You already sent the board, please wait";
-    RoomService roomService;
+    /**
+     * The member service acts like an api to the rooms DB.
+     */
+    private RoomService roomService;
+    /**
+     * The member service acts like an api to the players DB.
+     */
+    private PlayerService playerService;
 
-    PlayerService playerService;
 
-    PlayerRepository playerRepository;
-    public OnRoomFilter(RoomService roomService, PlayerService playerService){
+    /**
+     * Ctor of the filter.
+     * @param roomService The member service acts like an api to the rooms DB.
+     * @param playerService The member service acts like an api to the players DB.
+     */
+    public OnRoomFilter(RoomService roomService, PlayerService playerService) {
         this.setRoomService(roomService);
         this.setPlayerService(playerService);
     }
 
-    public OnRoomFilter(){}
-
+    /**
+     * The room service getter.
+     * @return The room service.
+     */
     public RoomService getRoomService() {
         return roomService;
     }
 
+    /**
+     * The room service setter.
+     * @return The room setter.
+     */
     public void setRoomService(RoomService roomService) {
         this.roomService = roomService;
     }
 
+
+    /**
+     * The player service getter.
+     * @return The player service.
+     */
     public PlayerService getPlayerService() {
         return playerService;
     }
 
+    /**
+     * The player service setter.
+     * @return The player setter.
+     */
     public void setPlayerService(PlayerService playerService) {
         this.playerService = playerService;
     }

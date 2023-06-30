@@ -22,7 +22,7 @@ import java.util.Set;
 
 
 /**
- * A controller that handles with game rest requests.
+ *  The controller manages the rests related to the game.
  * Some important things about the returned error messages/ statuses:
  * status ok: If game over, the answer is also ok and including in the body the path to game finish page.
  * More relevant status codes:
