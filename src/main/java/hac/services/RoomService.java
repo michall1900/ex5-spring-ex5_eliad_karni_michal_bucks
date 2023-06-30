@@ -5,7 +5,7 @@ import hac.classes.customErrors.DbError;
 import hac.classes.customErrors.GameOver;
 import hac.classes.customErrors.InvalidChoiceError;
 import hac.classes.forGame.UserTurn;
-import hac.embeddables.UpdateObject;
+import hac.classes.UpdateObject;
 import hac.filters.OnRoomFilter;
 import hac.repo.board.Board;
 import hac.repo.board.BoardRepository;

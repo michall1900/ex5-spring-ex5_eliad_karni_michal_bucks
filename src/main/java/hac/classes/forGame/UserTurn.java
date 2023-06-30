@@ -55,6 +55,11 @@ public class UserTurn implements Serializable {
         return row;
     }
 
+    /**
+     * Setting the new row in the object. Validate it first.
+     * @param row an integer
+     * @throws InvalidChoiceError when row is invalid
+     */
     public void setRow(int row) {
         validateIndex(row);
         this.row = row;
@@ -65,11 +70,15 @@ public class UserTurn implements Serializable {
      * @return The col's member value.
      */
     public int getCol() {
-        validateIndex(col);
         return col;
     }
-
+    /**
+     * Setting the new col in the object. Validate it first.
+     * @param col an integer
+     * @throws InvalidChoiceError when col is invalid
+     */
     public void setCol(int col) {
+        validateIndex(col);
         this.col = col;
     }
 
@@ -81,6 +90,10 @@ public class UserTurn implements Serializable {
         return opponentName;
     }
 
+    /**
+     * A setter for opponent name.
+     * @param opponentName The opponent name
+     */
     public void setOpponentName(String opponentName) {
         this.opponentName = opponentName;
     }

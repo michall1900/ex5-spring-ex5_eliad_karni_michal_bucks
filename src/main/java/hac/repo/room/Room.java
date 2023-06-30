@@ -1,11 +1,10 @@
 package hac.repo.room;
 
-import hac.embeddables.UpdateObject;
 import hac.repo.board.Board;
 import hac.repo.player.Player;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import javax.persistence.Converter;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
