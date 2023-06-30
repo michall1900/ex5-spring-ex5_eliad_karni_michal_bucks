@@ -41,17 +41,14 @@ public class InRoomFilter  implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
         try {
-            if(request.isUserInRole("USER") || request.isUserInRole("ADMIN")) {
+            System.out.println("in in game filter");
                 try {
                     roomService.removePlayer(request.getUserPrincipal().getName());
                 }catch (Exception e){}
-            }
-            else
-                return false;
-            return true; // continue with the request to next filter or to controller
         }catch (Exception e){
             return false;
         }
+        return true; // continue with the request to next filter or to controller
     }
 
     @Override
