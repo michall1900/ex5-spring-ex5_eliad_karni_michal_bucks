@@ -65,7 +65,6 @@ public class RestGameController {
         System.out.println("In getttttt");
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
         return roomService.handleUpdatePolling(principal, output, timestamp);
-
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)

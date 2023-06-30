@@ -44,9 +44,12 @@ public class GameFilter implements HandlerInterceptor {
             if(request.isUserInRole("USER") || request.isUserInRole("ADMIN")) {
                 roomService.validatePlayerInRoomStatus(request.getUserPrincipal().getName());
             }
-            else
+            else {
+                response.sendRedirect("/lobby/error-message");
                 return false;
+            }
         }catch (Exception e){
+            response.sendRedirect("/lobby/error-message");
             return false;
         }
         return true;
