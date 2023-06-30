@@ -138,6 +138,38 @@ public class Room {
     }
 
     /**
+     * Returns the option associated of the board.
+     * @return The option.
+     */
+    public Board.Options getOption() {
+        return option;
+    }
+
+    /**
+     * Sets the option for the board.
+     * @param option The option to set.
+     */
+    public void setOption(Board.Options option) {
+        this.option = option;
+    }
+
+    /**
+     * Returns the list of update objects of with the board.
+     * @return The list of update objects.
+     */
+    public List<String> getUpdateObjects() {
+        return updateObjects;
+    }
+
+    /**
+     * Sets the list of update objects for the board.
+     * @param updateObjects The list of update objects to set.
+     */
+    public void setUpdateObjects(List<String> updateObjects) {
+        this.updateObjects = updateObjects;
+    }
+
+    /**
      * Adds a player to the room.
      * @param player The player to add.
      */
@@ -150,6 +182,7 @@ public class Room {
 
     /**
      * Returns a string representation of the Room object.
+     *
      * @return The string representation of the Room object.
      */
     @Override
@@ -168,6 +201,7 @@ public class Room {
 
     /**
      * Returns a map containing information about the room.
+     *
      * @return A map containing information about the room.
      */
     public Map<String, String> getInfo(){
@@ -185,6 +219,7 @@ public class Room {
 
     /**
      * Checks if the room is full.
+     *
      * @return true if the room is full, false otherwise.
      */
     public boolean full(){
