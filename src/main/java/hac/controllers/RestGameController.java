@@ -25,15 +25,23 @@ import java.util.Map;
 import java.util.Set;
 
 
-//TODO add error handler
+/**
+ * The controller manages the rests related to the game.
+ */
 @RestController
 @RequestMapping("/game")
 public class RestGameController {
-
+    /**
+     * The member service acts like an api to the rooms DB.
+     */
     @Autowired
     private RoomService roomService;
 
-
+    /**
+     * The
+     * @param principal
+     * @return
+     */
     @GetMapping( "/wait-to-start")
     public DeferredResult<ResponseEntity<?>> getRoomStatus(Principal principal) {
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
