@@ -6,7 +6,7 @@
     // The amount of seconds between each update fetch.
     let UPDATE_RATE = 1;
     // The variable counts the strike of the bad response from the server.
-    const badResponseCounter = 0;
+    let badResponseCounter = 0;
     // The max strike of bad response from the server. when reached, the page moves to lobby.
     const MAX_BAD_RESPONSE = 10;
 
