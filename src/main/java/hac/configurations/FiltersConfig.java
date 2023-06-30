@@ -12,8 +12,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 @Configuration
 public class FiltersConfig implements WebMvcConfigurer {
 
@@ -34,7 +32,7 @@ public class FiltersConfig implements WebMvcConfigurer {
         registry.addInterceptor(new OnRoomFilter(roomService, playerService))
                 .addPathPatterns("/game/init");
         registry.addInterceptor(new InRoomFilter(roomService, playerService))
-                .addPathPatterns("/lobby", "/how-to-play", "/logout");
+                .addPathPatterns("/lobby","/lobby/error-message", "/how-to-play", "/logout");
         registry.addInterceptor(new GameFilter(roomService, playerService))
                 .addPathPatterns("/game/**");
         registry.addInterceptor(new FinishGameFilter(roomService, playerService))

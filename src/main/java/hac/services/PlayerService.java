@@ -1,6 +1,7 @@
 package hac.services;
 
 import hac.beans.RoomLockHandler;
+import hac.classes.customErrors.DbError;
 import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
@@ -86,7 +87,7 @@ public class PlayerService {
      * @return
      */
     public Player.PlayerStatus getPlayerStatusByUsername(String username){
-        return getPlayerByUsername(username, true).getStatus();
+        return getPlayerByUsername(username, false).getStatus();
     }
 
 
@@ -97,7 +98,8 @@ public class PlayerService {
             Player player = getPlayerByUsername(username, false);
             roomsLock.getRoomLock(player.getRoom().getId()).readLock().lock();
             try {
-
+                if (player.getRoom().getStatus()!= Room.RoomEnum.GAME_OVER)
+                    throw new DbError();
                 if (player.getStatus() == Player.PlayerStatus.WIN) {
                     model.addAttribute("status", "WIN");
                     return true;
