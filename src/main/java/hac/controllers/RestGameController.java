@@ -99,15 +99,18 @@ public class RestGameController {
     }
     @ExceptionHandler(InvalidChoiceError.class)
     public ResponseEntity<String> handleAllExceptions(InvalidChoiceError e) {
+        System.out.println("IN INVALID CHOICE!!");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
     @ExceptionHandler(GameOver.class)
     public ResponseEntity<String> handleAllExceptions(GameOver e) {
+        System.out.println("IN GAME OVER!!!");
         return ResponseEntity.status(HttpStatus.OK).body("/game/finish-page");
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleAllExceptions(Exception e) {
+        System.out.println("THROW INTERNAL SERVER ERROR!!!");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 

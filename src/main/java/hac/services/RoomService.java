@@ -257,8 +257,8 @@ public class RoomService {
             Room room = playerService.getRoomByUsername(currentUserName, false);
             roomsLock.getRoomLock(room.getId()).writeLock().lock();
             try {
-                checkIfBothUsersAreInSameRoom(currentUserName, userTurn.getOpponentName());
                 checkIfGameFinished(room);
+                checkIfBothUsersAreInSameRoom(currentUserName, userTurn.getOpponentName());
                 validateTurn(currentUserName);
                 Board board = playerService.getPlayerByUsername(userTurn.getOpponentName(),false).getBoard();
                 ArrayList<HashMap<String, String>> boardUpdates = board.getHitChanges(userTurn.getRow(), userTurn.getCol());
@@ -492,19 +492,19 @@ public class RoomService {
                     if (!Thread.currentThread().isInterrupted())
                         output.setResult(ResponseEntity.ok(updates));
                 }
-//                catch (InvalidChoiceError e){
-//                    output.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage()));
-//                }
-//                catch (GameOver e){
-//                    output.setResult(ResponseEntity.status(HttpStatus.OK).body("/game/finish-page"));
-//                }
+                catch (InvalidChoiceError e){
+                    output.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage()));
+                }
+                catch (GameOver e){
+                    output.setResult(ResponseEntity.status(HttpStatus.OK).body("/game/finish-page"));
+                }
                 catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     //output.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Service Unavailable"));
                 }
-//                catch (Exception e) {
-//                    output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
-//                }
+                catch (Exception e) {
+                    output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
+                }
             });
             output.onTimeout(() -> {
                 future.cancel(true);
@@ -512,9 +512,9 @@ public class RoomService {
                 output.setErrorResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Service Unavailable"));
             });
         }
-//        catch (Exception e) {
-//            output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
-//        }
+        catch (Exception e) {
+            output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
+        }
         finally {
             DBLock.readLock().unlock();
         }
