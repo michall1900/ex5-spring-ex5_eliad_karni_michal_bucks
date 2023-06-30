@@ -53,32 +53,10 @@ public class OnRoomFilter implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
-        //System.out.println("INTERCEPTOR!!!!!");
-//        if(request.isUserInRole("USER") || request.isUserInRole("ADMIN"))
-//            System.out.println(request.getUserPrincipal().getName());
-//        System.out.println("IN FILTERRR");
-//        try{
-//            List<Room> rooms = roomService.getAllRooms();
-//            for (Room r : rooms)
-//                System.out.println(r);
-//        }
-//        catch (Exception e){
-//            System.out.println("error while iterate over rooms");
-//            System.out.println(e);
-//        }
-//        try{
-//            List<Player> players = playerService.getAllPlayers();
-//            for (Player r : players)
-//                System.out.println(r);
-//        }
-//        catch (Exception e){
-//            System.out.println("error while iterate over players");
-//            System.out.println(e);
-//        }
         try{
             String username = request.getUserPrincipal().getName();
             //TODO move the functionality to one of the services
-            String res = roomService.getValidationErrorForInitGame(username);
+            String res = roomService.getValidationErrorForInitGame(username, true, true);
             //If the player is not ready and the game is waiting for boards, it's ok to get into this path.
             if (res==null || res.isEmpty())
                 return true;
@@ -91,20 +69,13 @@ public class OnRoomFilter implements HandlerInterceptor {
                     response.sendRedirect("/game/wait-to-start-page");
                 }
                 else {
-                    System.out.println("Invalid room status");
-                    //TODO remove player from db + from room list. If we got there it's already exist
-                    request.setAttribute("error", INVALID_STATUS);
-                    response.sendRedirect("/lobby");
+                    response.sendRedirect("/lobby/error-message");
                 }
                 return false;
             }
         }
         catch (Exception e){
-            System.out.println("Invalid room/ player");
-            System.out.println(e.getMessage());
-            //TODO if e == NO_ROOM this is an error in the db and we need to delete player from players db.
-            request.setAttribute("error", e.getMessage());
-            response.sendRedirect("/lobby");
+            response.sendRedirect("/lobby/error-message");
             return false;
         }
 
