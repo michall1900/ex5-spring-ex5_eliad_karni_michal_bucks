@@ -34,9 +34,6 @@ public class RestGameController {
     private RoomService roomService;
 
 
-    @Autowired
-    private PlayerService playerService;
-
     @GetMapping( "/wait-to-start")
     public DeferredResult<ResponseEntity<?>> getRoomStatus(Principal principal) {
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
@@ -44,25 +41,12 @@ public class RestGameController {
     }
     @PostMapping("/update")
     public ResponseEntity<?> updateBoard(@RequestBody UserTurn userTurn, Principal principal){
-        //try{
         roomService.setUpdates(principal.getName(),userTurn);
         return new ResponseEntity<>(HttpStatus.OK);
-        //}
-//        catch (InvalidChoiceError e){
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-//        }
-//        catch (GameOver e){
-//            return new ResponseEntity<>("/game/finish-page", HttpStatus.OK);
-//        }
-//        catch (Exception e){
-//            //TODO create this page.
-//            return new ResponseEntity<>("/room-error", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
 
     }
     @GetMapping("/update/{timestamp}")
     public DeferredResult<ResponseEntity<?>> test(@PathVariable("timestamp") int timestamp, Principal principal) {
-        System.out.println("In getttttt");
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
         return roomService.handleUpdatePolling(principal, output, timestamp);
 
@@ -99,18 +83,15 @@ public class RestGameController {
     }
     @ExceptionHandler(InvalidChoiceError.class)
     public ResponseEntity<String> handleAllExceptions(InvalidChoiceError e) {
-        System.out.println("IN INVALID CHOICE!!");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
     @ExceptionHandler(GameOver.class)
     public ResponseEntity<String> handleAllExceptions(GameOver e) {
-        System.out.println("IN GAME OVER!!!");
         return ResponseEntity.status(HttpStatus.OK).body("/game/finish-page");
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleAllExceptions(Exception e) {
-        System.out.println("THROW INTERNAL SERVER ERROR!!!");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 
