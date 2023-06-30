@@ -11,12 +11,9 @@
 
     function setRoomsTable(roomsJson){
         //TODO validate answer.
-        //TODO long polling
-        console.log(roomsJson);
         roomsTableBodyElement.innerHTML = "";
         roomsJson.forEach((room) => {
             let owner = JSON.parse(room.players)[0]
-            console.log(room)
             roomsTableBodyElement.innerHTML += `
                 <tr class="table-secondary">
                     <td>${room.type}</td>
@@ -39,22 +36,18 @@
                 await new Promise(resolve => setTimeout(resolve, POLLING_RATE * 1000));
                 await subscribe();
             } else if (response.status !== 200) {
-                // An error - let's show it
-                console.log(response.statusText);
                 // Reconnect in one second
                 await new Promise(resolve => setTimeout(resolve, POLLING_RATE * 1000));
                 await subscribe();
             } else {
                 // Get and show the message
                 let message = await response.json();
-                console.log(message);
                 // Call subscribe() again to get the next message
                 setRoomsTable(message);
                 await new Promise(resolve => setTimeout(resolve, POLLING_RATE * 1000));
                 await subscribe()
             }
         }catch (e){
-            console.log(e)
             await new Promise(resolve => setTimeout(resolve, POLLING_RATE * 1000));
             await subscribe()
         }

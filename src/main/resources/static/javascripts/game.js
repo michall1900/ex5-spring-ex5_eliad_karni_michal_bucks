@@ -34,13 +34,11 @@
 
     const checkResponse = async (response) =>{
         if (!response.ok) {
-            console.log(response.status);
             const err = await getErrorMessage(response);
             throw new Error(`Some error occurred ${response.status}. ${err}`);
         }
     }
     const getErrorMessage = async (response) =>{
-        console.log(response);
         if (response.status !== 400){
             isNeedToPoll=false;
             window.location.href = ERROR_PATH
@@ -86,7 +84,6 @@
             btn.removeAttribute("disabled","");
             displayError(e);
             isStillProcessing = false;
-            console.log(e);
         }
 
 
@@ -107,7 +104,6 @@
                         [csrfHeader]: csrfToken
                     }
                 });
-                console.log(response.status);
                 if (response.status === 504) {
                     //reconnect - waiting a lot of time
                     await new Promise(resolve => setTimeout(resolve, TIME_OUT))
@@ -131,7 +127,6 @@
                     let data = await response.text();
                     try{
                         let json  = JSON.parse(data);
-                        console.log(json)
                         handleReceivedData(json);
                         await new Promise(resolve => setTimeout(resolve, TIME_OUT))
                         await getUpdates();
@@ -161,11 +156,6 @@
         jsonData.forEach((change)=>{
             let boardChange = change.boardChanges;
             attackDetailsObject = change.attackDetails
-            console.log(attackDetailsObject, lastStep)
-            console.log(attackDetailsObject.row, lastStep.row)
-            console.log(attackDetailsObject.col, lastStep.col)
-            console.log(attackDetailsObject.opponentName, lastStep.opponentName)
-            console.log(attackDetailsObject.attackerName, MY_NAME)
             if (attackDetailsObject.row === lastStep.row && attackDetailsObject.col === lastStep.col
                 && attackDetailsObject.attackerName === MY_NAME && attackDetailsObject.opponentName === lastStep.opponentName)
                 isStillProcessing = false;
@@ -200,7 +190,6 @@
         isMyTurn = (TURN_ELEMENT.innerText === "Your")
 
         const name = document.getElementById(MY_NAME_ID);
-        console.log(name.innerText);
         MY_NAME = (!!name)? name.innerText : "";
     })
 })();

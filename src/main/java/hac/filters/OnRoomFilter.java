@@ -91,7 +91,6 @@ public class OnRoomFilter implements HandlerInterceptor {
                     response.sendRedirect("/game/wait-to-start-page");
                 }
                 else {
-                    System.out.println("Invalid room status");
                     //TODO remove player from db + from room list. If we got there it's already exist
                     request.setAttribute("error", INVALID_STATUS);
                     response.sendRedirect("/lobby");
@@ -100,8 +99,6 @@ public class OnRoomFilter implements HandlerInterceptor {
             }
         }
         catch (Exception e){
-            System.out.println("Invalid room/ player");
-            System.out.println(e.getMessage());
             //TODO if e == NO_ROOM this is an error in the db and we need to delete player from players db.
             request.setAttribute("error", e.getMessage());
             response.sendRedirect("/lobby");

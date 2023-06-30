@@ -56,7 +56,7 @@ public class GameController {
         }
         //TODO handle errors
         catch (Exception e){
-            System.out.println(e.getMessage());
+            //TODO something with the exception.
         }
         return "game/game";
     }
@@ -87,7 +87,6 @@ public class GameController {
     @GetMapping("/update/{timestamp}")
     @ResponseBody
     public DeferredResult<ResponseEntity<?>> test(@PathVariable("timestamp") int timestamp, Principal principal) {
-        System.out.println("In getttttt");
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
         return roomService.handleUpdatePolling(principal, output, timestamp);
 

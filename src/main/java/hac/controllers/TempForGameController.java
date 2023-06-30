@@ -88,34 +88,4 @@ public class TempForGameController {
 
         return "redirect:/game/test/print";
     }
-
-    @GetMapping("/print")
-    public String print(Principal principal){
-        System.out.println("Rooms\n===================================================\n\n");
-        for (Room room: roomRepo.findAll()){
-            System.out.println(room);
-        }
-        System.out.println("\n\n===================================================\n\n");
-        System.out.println("Players\n===================================================\n\n");
-        for (Player player: playerRepository.findAll()){
-            System.out.println(player);
-        }
-        System.out.println("\n\n===================================================\n\n");
-        System.out.println("Boards\n===================================================\n\n");
-        for (Board board: boardRepository.findAll()){
-            System.out.println(board);
-        }
-        System.out.println("\n\n===================================================\n\n");
-        System.out.println("Tiles\n===================================================\n\n");
-        for (Tile tile: tileRepository.findAll()){
-            System.out.println(tile);
-        }
-        System.out.println("\n\n===================================================\n\n");
-        System.out.println("Submarines\n===================================================\n\n");
-        for (Submarine submarine: submarineRepository.findAll()){
-            System.out.println(submarine);
-        }
-        System.out.println("\n\n===================================================\n\n");
-        return "redirect:/lobby";
-    }
 }

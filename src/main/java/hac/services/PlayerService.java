@@ -42,7 +42,6 @@ public class PlayerService {
                 DBLock.readLock().lock();
             Player player = playersRepo.findByUsername(username);
             if(player == null){
-                System.out.println("Player not found");
                 throw new RuntimeException(NO_PLAYER);
             }
             return player;
@@ -59,7 +58,6 @@ public class PlayerService {
                 DBLock.readLock().lock();
             Room room = getPlayerByUsername(username, false).getRoom();
             if (room == null) {
-                System.out.println("Room not found");
                 throw new RuntimeException(NO_ROOM);
             }
             return room;

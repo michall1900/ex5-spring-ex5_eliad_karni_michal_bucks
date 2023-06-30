@@ -357,7 +357,6 @@
             this.setCurrentSize(DEFAULT_VALUE)
             this.#submarineMap.set(submarine.getFirstIndexString(), submarine);
             if (this.#submarineMap.size === this.#numberOfNeededSubmarines) {
-                console.log(JSON.stringify(this.#getDataToSend()))
                 DATA_TO_SERVER_ELEMENT.value = JSON.stringify(this.#getDataToSend())
                 READY_BTN_ELEMENT.removeAttribute("disabled")
             }
@@ -397,7 +396,6 @@
             this.#submarineMap.forEach((submarine)=>{
                 dataToSend.submarines.push(submarine.getDataToSend())
             })
-            console.log(dataToSend)
             return dataToSend;
         }
     }

@@ -437,7 +437,6 @@ public class RoomService {
             });
             output.onTimeout(() -> {
                 future.cancel(true);
-                System.out.println("Timeout! Sent to" + principal.getName());
                 output.setErrorResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Service Unavailable"));
             });
         }
@@ -496,7 +495,6 @@ public class RoomService {
             });
             output.onTimeout(() -> {
                 future.cancel(true);
-                System.out.println("Timeout! Sent to" + principal.getName());
                 output.setErrorResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Service Unavailable"));
             });
         } catch (Exception e) {
@@ -570,7 +568,6 @@ public class RoomService {
                         return OnRoomFilter.BOARD_ALREADY_SENT;
 
                     } else {
-                        System.out.println("Invalid room status");
                         //TODO remove player from db + from room list. If we got there it's already exist
                         return OnRoomFilter.INVALID_STATUS;
                     }

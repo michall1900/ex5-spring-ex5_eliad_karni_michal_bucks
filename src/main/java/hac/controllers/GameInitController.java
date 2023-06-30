@@ -41,7 +41,6 @@ public class GameInitController {
         }
         catch(Exception e){
             model.addAttribute("error",e.getMessage());
-            System.out.println(e.getMessage());
         }
 
 

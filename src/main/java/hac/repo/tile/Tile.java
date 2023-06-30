@@ -63,7 +63,6 @@ public class Tile {
     }
 
     public void hitTile(){
-        //System.out.println(status);
         if (status==TileStatus.Empty){
             setStatus(TileStatus.Miss);
         }
