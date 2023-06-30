@@ -5,7 +5,7 @@ import hac.classes.customErrors.DbError;
 import hac.classes.customErrors.GameOver;
 import hac.classes.customErrors.InvalidChoiceError;
 import hac.classes.forGame.UserTurn;
-import hac.classes.UpdateObject;
+import hac.classes.forGame.UpdateObject;
 import hac.filters.OnRoomFilter;
 import hac.repo.board.Board;
 import hac.repo.board.BoardRepository;
@@ -230,7 +230,13 @@ public class RoomService {
         }
     }
 
-
+    /**
+     * Retrieves the username of the player whose turn it is in the room of the specified user.
+     * @param username The username of the user whose room's current player's username is to be retrieved.
+     * @param toLockDB Boolean indicating if database lock is required.
+     * @param toLockRoom Boolean indicating if room lock is required.
+     * @return The username of the player whose turn it is.
+     */
     public String getPlayerUsernameTurn(String username, boolean toLockDB, boolean toLockRoom){
         try {
             if(toLockDB)
@@ -250,7 +256,12 @@ public class RoomService {
                 DBLock.readLock().unlock();
         }
     }
-
+    /**
+     * Checks if two users are in the same room. If not, throws a DbError.
+     * @param currentUserName The username of the first user.
+     * @param opponentUserName The username of the second user.
+     * @throws DbError If the two users are not in the same room.
+     */
     private void checkIfBothUsersAreInSameRoom(String currentUserName, String opponentUserName){
         Room room1 = playerService.getRoomByUsername(currentUserName, false);
         Room room2 = playerService.getRoomByUsername(opponentUserName, false);
@@ -259,15 +270,21 @@ public class RoomService {
         }
     }
 
-
+    /**
+     * Validates if it is the turn of the specified user. If not, throws an InvalidChoiceError.
+     * @param username The username of the user to validate.
+     * @throws InvalidChoiceError If it's not the user's turn.
+     */
     private void validateTurn(String username){
         if (!getPlayerUsernameTurn(username, false, false).equals(username))
             throw new InvalidChoiceError(NOT_USER_TURN);
     }
 
     /**
-     * Assumption - The function who called this function locked dbLock + room's lock.
-     * @param room
+     * Checks if the game in the specified room has finished. Throws a GameOver exception if the game is over.
+     * This function assumes that the calling function has locked the DBLock and the room's lock.
+     * @param room The room where the game to check is located.
+     * @throws GameOver If the game is over.
      */
     private void checkIfGameFinished(Room room){
         if (room.getStatus().equals(Room.RoomEnum.GAME_OVER))
@@ -275,13 +292,21 @@ public class RoomService {
     }
 
     /**
-     * Assumption - both room look and dblock are locked.
-     * @param room
+     * Validates that all players in the specified room are in game. Throws a RuntimeException if not all players are in game.
+     * This function assumes that both the DBLock and the room's lock are locked.
+     * @param room The room where the game to validate is located.
+     * @throws RuntimeException If not all players are in game.
      */
     private void validatePlayersOnGame(Room room){
         if (!room.full())
             throw new RuntimeException(NOT_ENOUGH_PLAYERS);
     }
+
+    /**
+     * Processes and applies the updates of the game based on a user's turn.
+     * @param currentUserName The username of the current player.
+     * @param userTurn The user's turn details.
+     */
     @Transactional
     public void setUpdates(String currentUserName, UserTurn userTurn){
         try {
@@ -328,10 +353,11 @@ public class RoomService {
     }
 
     /**
-     * The assumption is the dblock and the room's lock are locked.
-     * @param username
-     * @param timestamp
-     * @return
+     * Retrieves a list of update objects for the specified user starting from a specific timestamp.
+     * The function assumes that the DBLock and the room's lock are locked.
+     * @param username The username of the user whose updates are to be retrieved.
+     * @param timestamp The timestamp from where to start retrieving the updates.
+     * @return A list of UpdateObject instances.
      */
     private List<UpdateObject> getUpdates(String username, int timestamp){
 
@@ -352,6 +378,14 @@ public class RoomService {
 
     }
 
+    /**
+     * Sets the game over status for the room and updates player statuses.
+     * The function can lock database and room based on passed parameters.
+     * @param room The room where the game has ended.
+     * @param winnerName The name of the winning player.
+     * @param toLockDB Boolean indicating if database lock is required.
+     * @param toLockRoom Boolean indicating if room lock is required.
+     */
     @Transactional
     public void setGameOver(Room room, String winnerName, boolean toLockDB, boolean toLockRoom){
         try {
@@ -379,9 +413,9 @@ public class RoomService {
     }
 
     /**
-     * The assumption is dbLock + room db is locked for reading.
-     * @param
-     * @return
+     * Retrieves the board option by username. The function assumes that DBLock and room DB are locked for reading.
+     * @param username The username of the player whose board option is to be retrieved.
+     * @return The board option of the user.
      */
     private Board.Options getBoardOptionByUsername(String username){
         Room room = playerService.getRoomByUsername(username, true);
@@ -389,9 +423,10 @@ public class RoomService {
     }
 
     /**
-     * The assumption is dbLock is locked for writing.
-     * @param
-     * @return
+     * Sets the executor service for the room with the given ID.
+     * The function assumes that DBLock is locked for writing.
+     * @param roomId The ID of the room for which the executor service is to be set.
+     * @throws DbError If the key is already in the map.
      */
 
     private void setExecutor(Long roomId){
@@ -408,10 +443,10 @@ public class RoomService {
     }
 
     /**
-     *
-     * Assumption - the method who locks this locked the db for reading.
-     * @param username
-     * @return
+     * Retrieves the executor service for the room where the user with the specified username is located.
+     * The function assumes that the method that locks this has locked the DB for reading.
+     * @param username The username of the user whose room's executor service is to be retrieved.
+     * @return The executor service of the room.
      */
     private ExecutorService getExecutorServiceForRoom(String username) {
 
@@ -426,8 +461,9 @@ public class RoomService {
     }
 
     /**
-     * Assumption - the method who locks this locked the db for writing.
-     * @param roomId
+     * Shuts down the executor service for the room with the given ID.
+     * The function assumes that the method that locks this has locked the DB for writing.
+     * @param roomId The ID of the room for which the executor service is to be shut down.
      */
     private void shutdownExecutorServiceForRoom(Long roomId) {
         ExecutorService executorService = roomExecutors.get(roomId);
@@ -445,7 +481,12 @@ public class RoomService {
 
 
     }
-
+    /**
+     * Handles the status room polling.
+     * @param principal The authenticated user.
+     * @param output The deferred result for the polling.
+     * @return The deferred result with the updated status.
+     */
     public DeferredResult<ResponseEntity<?>> handleStatusRoomPolling(Principal principal, DeferredResult<ResponseEntity<?>> output){
         try {
             DBLock.readLock().lock();
@@ -508,7 +549,13 @@ public class RoomService {
 
         return output;
     }
-
+    /**
+     * Handles the update polling.
+     * @param principal The authenticated user.
+     * @param output The deferred result for the polling.
+     * @param timestamp The timestamp of the last update.
+     * @return The deferred result with the updates.
+     */
     public DeferredResult<ResponseEntity<?>> handleUpdatePolling(Principal principal, DeferredResult<ResponseEntity<?>> output, int timestamp){
         try {
             DBLock.readLock().lock();
@@ -565,6 +612,11 @@ public class RoomService {
 
         return output;
     }
+    /**
+     * Sets up the game model for a specific user.
+     * @param model The Model in which the game details will be stored.
+     * @param username The name of the user for whom the model will be set.
+     */
     public void setOnGameModel(Model model, String username) {
         try {
             DBLock.readLock().lock();
@@ -587,7 +639,9 @@ public class RoomService {
     }
 
     /**
-     * Assumption - DbLock and room's lock locked before
+     * Validates the game mode. This function assumes that DBLock and the room's lock are both locked.
+     * @param room The room for which the game mode will be validated.
+     * @throws DbError if the room is not on_game status.
      */
     private void validateGameMode(Room room){
         checkIfGameFinished(room);
@@ -596,6 +650,12 @@ public class RoomService {
             throw new DbError();
         }
     }
+
+    /**
+     * Sets up the game initialization model for a specific user.
+     * @param model The Model in which the game initialization details will be stored.
+     * @param username The name of the user for whom the model will be set.
+     */
     public void setGameInitModel(Model model, String username){
         try {
             DBLock.readLock().lock();
@@ -619,6 +679,13 @@ public class RoomService {
             DBLock.readLock().unlock();
         }
     }
+    /**
+     * Validates the state in /game/init for a specific user.
+     * @param username The name of the user to validate.
+     * @param lockDb Flag to determine whether the database should be locked for this operation.
+     * @param lockRoom Flag to determine whether the room should be locked for this operation.
+     * @return A String message indicating any validation errors. Null if no errors are found.
+     */
     public String getValidationErrorForInitGame( String username, Boolean lockDb, Boolean lockRoom){
         try {
             if (lockDb)
@@ -661,11 +728,16 @@ public class RoomService {
         }
     }
 
+    /**
+     * Saves a new board for a specific user.
+     * This method is annotated with @Transactional, meaning it should be run in a transaction context.
+     * @param board The board to be saved.
+     * @param username The name of the user for whom the board will be saved.
+     */
     @Transactional
     public void saveNewBoard(Board board, String username){
         try {
             DBLock.writeLock().lock();
-            //TODO order the code.
             Player player = playerService.getPlayerByUsername(username,false);
             Room room = player.getRoom();
             validatePlayersOnGame(room);
@@ -681,11 +753,13 @@ public class RoomService {
         finally {
             DBLock.writeLock().unlock();
         }
-
-
-
     }
 
+    /**
+     * Removes a player from the game.
+     * This method is annotated with @Transactional, meaning it should be run in a transaction context.
+     * @param username The name of the player to be removed.
+     */
     @Transactional
     public void removePlayer(String username) throws RuntimeException{
         try {
@@ -702,8 +776,12 @@ public class RoomService {
             DBLock.writeLock().unlock();
         }
     }
-    //TODO when room closed, shut down its executor.
 
+    /**
+     * Validates the status of a player in a room.
+     * @param username The name of the player to be validated.
+     * @throws Exception If the player tries to enter an incorrect room.
+     */
     public void validatePlayerInRoomStatus(String username) throws Exception{
         try {
             DBLock.readLock().lock();

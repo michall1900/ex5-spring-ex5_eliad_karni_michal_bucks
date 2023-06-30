@@ -108,7 +108,6 @@ public class LobbyController {
      */
     @PostMapping("/create-room")
     public String addRoom(@RequestParam("type") int type, Principal principal, Model model){
-        //TODO validate type
         try {
             Player player = playerService.createNewPlayer(principal.getName());
             roomService.createNewRoom(player, type);

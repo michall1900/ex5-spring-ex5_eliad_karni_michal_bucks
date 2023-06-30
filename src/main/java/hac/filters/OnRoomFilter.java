@@ -93,12 +93,10 @@ public class OnRoomFilter implements HandlerInterceptor {
             throws Exception {
         try{
             String username = request.getUserPrincipal().getName();
-            //TODO move the functionality to one of the services
             String res = roomService.getValidationErrorForInitGame(username, true, true);
             //If the player is not ready and the game is waiting for boards, it's ok to get into this path.
             if (res==null || res.isEmpty())
                 return true;
-            //TODO change the location of the other fields and the errors about them. It's something more global.
             //If player ready and the game is waiting for boards, that's mean that he tries to get to initial room again
             // when he needs to be in waiting room
             else {
