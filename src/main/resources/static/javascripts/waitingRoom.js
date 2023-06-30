@@ -5,7 +5,10 @@
     let roomPlayersTableBodyElement;
     // The amount of seconds between each update fetch.
     let UPDATE_RATE = 1;
-    let badResponseCounter = 0;
+    // The variable counts the strike of the bad response from the server.
+    const badResponseCounter = 0;
+    // The max strike of bad response from the server. when reached, the page moves to lobby.
+    const MAX_BAD_RESPONSE = 10;
 
     document.addEventListener("DOMContentLoaded", ()=>{
         // Init the room's player table element.
@@ -63,13 +66,13 @@
                 // may happen when the connection was pending for too long,
                 // and the remote server or a proxy closed it
                 // let's reconnect
-                await new Promise(resolve => setTimeout(resolve, 1000 * UPDATE_RAT));
+                await new Promise(resolve => setTimeout(resolve, 1000 * UPDATE_RATE));
                 await subscribe();
             } else if (response.status !== 200) {
                 // An error - let's show it
                 console.log(response.statusText);
                 // Reconnect in one second
-                await new Promise(resolve => setTimeout(resolve, 1000 * UPDATE_RAT));
+                await new Promise(resolve => setTimeout(resolve, 1000 * UPDATE_RATE));
                 await subscribe();
             } else {
                 // Get and show the message
@@ -78,17 +81,17 @@
                 checkAnswer(message);
                 setRoomTable(message);
                 checkGameStarted(message);
-                await new Promise(resolve => setTimeout(resolve, 1000 * UPDATE_RAT));
+                await new Promise(resolve => setTimeout(resolve, 1000 * UPDATE_RATE));
                 await subscribe()
             }
         }catch (e){
             console.log(e);
             badResponseCounter++;
             console.log(badResponseCounter);
-            if(badResponseCounter === 3){
+            if(badResponseCounter === MAX_BAD_RESPONSE){
                 window.location.href = "/lobby";
             }
-            await new Promise(resolve => setTimeout(resolve, 1000 * UPDATE_RAT));
+            await new Promise(resolve => setTimeout(resolve, 1000 * UPDATE_RATE));
             await subscribe()
         }
     }
