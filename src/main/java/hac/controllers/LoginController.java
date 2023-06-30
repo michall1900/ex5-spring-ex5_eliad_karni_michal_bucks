@@ -60,7 +60,7 @@ public class LoginController {
     public String registerUser(NewUser user, Model model){
         try {
             String validation = user.validate();
-            if(validation.equals("Valid"))
+            if(!validation.equals("Valid"))
                 throw new Exception(validation);
             usersManager.createUser(User.withUsername(user.getUsername())
                     .password(passwordEncoder.encode(user.getPassword()))
