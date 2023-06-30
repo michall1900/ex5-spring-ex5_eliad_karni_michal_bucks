@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
+/**
+ * The member service acts like an api to the players DB.
+ */
 @Service
 public class PlayerService {
 

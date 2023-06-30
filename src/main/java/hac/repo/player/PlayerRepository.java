@@ -7,8 +7,11 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface PlayerRepository extends JpaRepository<Player, Long> {
+    /**
+     * Lasy player find by the player's username.
+     * @param username The player's username.
+     * @return The found player.
+     */
     Player findByUsername(String username);
-
-    @Query("SELECT p FROM Player p JOIN p.room r WHERE p.id = :playerId AND r.id = :roomId")
-    Optional<Player> findByPlayerIdAndRoomId(@Param("playerId") long playerId, @Param("roomId") long roomId);
+    
 }
