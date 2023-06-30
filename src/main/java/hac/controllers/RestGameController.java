@@ -49,7 +49,6 @@ public class RestGameController {
     public DeferredResult<ResponseEntity<?>> test(@PathVariable("timestamp") int timestamp, Principal principal) {
         DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
         return roomService.handleUpdatePolling(principal, output, timestamp);
-
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
