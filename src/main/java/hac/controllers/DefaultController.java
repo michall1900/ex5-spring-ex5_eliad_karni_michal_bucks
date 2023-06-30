@@ -5,12 +5,25 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-/** this is a test controller, delete/replace it when you start working on your project */
+/**
+ * The controller handles the root requests.
+ */
 @Controller
 public class DefaultController {
-    /** Home page. */
+    /**
+     * Home page.
+     * @return The home page's html
+     */
     @RequestMapping("/")
-    public String index() {return "index";}
+    public String index() {
+        return "index";
+    }
+
+    /**
+     * The how to play page.
+     * @param model Model that used for the
+     * @return The how to play page's html.
+     */
     @RequestMapping("/how-to-play")
     public String howToPlay(Model model) {
         //System.out.println(Board.options.get(Board.Options.BASIC.ordinal()));
