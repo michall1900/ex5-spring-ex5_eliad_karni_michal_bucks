@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,9 +12,16 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import static org.springframework.security.config.Customizer.withDefaults;
 
+/**
+ * The config manages the user registration, login, and users permissions.
+ */
 @Configuration
 public class UsersConfig {
-
+    /**
+     * A singleton bean of the users manager.
+     * @param bCryptPasswordEncoder The wanted password encoder.
+     * @return The users' manager.
+     */
     @Bean
     @Scope("singleton")
     public InMemoryUserDetailsManager userDetailsService(PasswordEncoder bCryptPasswordEncoder) {
@@ -39,12 +45,21 @@ public class UsersConfig {
         return manager;
     }
 
+    /**
+     * The password's encoder of the manager, which is BCryptPasswordEncoder.
+     * @return The BCryptPasswordEncoder encoder.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-
+    /**
+     * A bean of the resets permissions of each users' role.
+     * @param http Http security object to add the security action to.
+     * @return The built httpSecurity handler.
+     * @throws Exception If the build has failed an exception is thrown.
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -72,9 +87,4 @@ public class UsersConfig {
         return http.build();
 
     }
-//    @Bean
-//    public WebSecurityCustomizer webSecurityCustomizer() {
-//        return (web) -> web.ignoring().requestMatchers("/favicon.ico");
-//    }
-
 }
