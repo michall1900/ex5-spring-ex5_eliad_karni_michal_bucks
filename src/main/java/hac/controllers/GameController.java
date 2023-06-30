@@ -1,43 +1,26 @@
 package hac.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hac.repo.board.Board;
-import hac.repo.player.Player;
-import hac.classes.customErrors.GameOver;
-import hac.classes.customErrors.InvalidChoiceError;
-import hac.classes.forGame.UserTurn;
-import hac.embeddables.UpdateObject;
-import hac.repo.room.Room;
 import hac.services.BoardService;
 import hac.services.PlayerService;
 import hac.services.RoomService;
+import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.async.DeferredResult;
-
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
-
-//TODO add error handler
 @Controller
 @RequestMapping("/game")
 public class GameController {
 
     @Autowired
-    private RoomService roomService;
+    BoardService boardService;
 
     @Autowired
-    private BoardService boardService;
+    private RoomService roomService;
 
     @Autowired
     private PlayerService playerService;
@@ -46,7 +29,6 @@ public class GameController {
     public String getWaitToStartPage(){
         return "game/waitingForStartGame";
     }
-
 
     @GetMapping("/on-game")
     public String onGamePage(Model model, Principal principal){
@@ -60,40 +42,43 @@ public class GameController {
         }
         return "game/game";
     }
-    @GetMapping( "/wait-to-start")
-    public DeferredResult<ResponseEntity<?>> getRoomStatus(Principal principal) {
-        DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
-        return roomService.handleStatusRoomPolling(principal,output);
-    }
-    @PostMapping("/update")
-    public ResponseEntity<?> updateBoard(@RequestBody UserTurn userTurn, Principal principal){
-        //System.out.println("hereeeeeee");
+    @GetMapping("/init")
+    public String gameInit(Model model, Principal principal){
+        //TODO handle error
         try{
-            roomService.setUpdates(principal.getName(),userTurn);
-            return new ResponseEntity<>(HttpStatus.OK);
+            roomService.setGameInitModel(model, principal.getName());
         }
-        catch (InvalidChoiceError e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        catch(Exception e){
+            model.addAttribute("error",e.getMessage());
+            System.out.println(e.getMessage());
         }
-        catch (GameOver e){
-            return new ResponseEntity<>("/game/finish-page", HttpStatus.OK);
-        }
-        catch (Exception e){
-            //TODO create this page.
-            return new ResponseEntity<>("/room-error", HttpStatus.INTERNAL_SERVER_ERROR);
+
+
+        return "game/initGame";
+    }
+
+    //TODO handle board error
+    @PostMapping("/init")
+    public String postBoard(@RequestParam("boardName") String boardString, Model model, Principal principal){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Board board = objectMapper.readValue(boardString, Board.class);
+//            Set<ConstraintViolation<Board>> violations = validator.validate(board);
+//            if (!violations.isEmpty()) {
+//                throw new ConstraintViolationException(violations);
+//            }
+
+            roomService.saveNewBoard(board, principal.getName());
+
+            return "game/waitingForStartGame";
+
+        } catch (Exception e) {
+            //TODO handle different with db error and
+            model.addAttribute("error",e.getMessage());
+            return "/game/initGame";
         }
 
     }
-    @GetMapping("/update/{timestamp}")
-    @ResponseBody
-    public DeferredResult<ResponseEntity<?>> test(@PathVariable("timestamp") int timestamp, Principal principal) {
-        System.out.println("In getttttt");
-        DeferredResult<ResponseEntity<?>> output = new DeferredResult<>(5000L);
-        return roomService.handleUpdatePolling(principal, output, timestamp);
-
-    }
-
-
     @GetMapping("/finish-page")
     public String finishGame(Model model, Principal principal){
         //TODO catch errors.

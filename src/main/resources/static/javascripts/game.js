@@ -3,7 +3,7 @@
     const BUTTON_CLASS_NAME = ".boardBtn"
     const ERROR_BTN_ID = "errorBtn"
     const ERROR_BODY_ID = "error"
-    const DEFAULT_ERROR = "There is a problem to connect to the server"
+    const DEFAULT_ERROR = "There is a problem to with server's response"
     const STILL_PROCESSING_ERROR = "Your last click is still not updated. Please wait until it will update."
     const NOT_YOUR_TURN = "It's not your turn"
     const TURN_ID = "turnOf"
@@ -13,6 +13,7 @@
     const ERROR_PATH = "/lobby/error-message"
     const FINISH_PAGE = "/game/finish-page";
     const IMAGES_PATHS = new Map([["Miss","../images/noShip.png"],["Hit","../images/explodeShip.jpg"]])
+    const BOARD_SIZE = 10
     let csrfToken
     let csrfHeader
     let timestamp = 0;
@@ -71,7 +72,6 @@
                     'Content-Type': 'application/json; charset=utf-8',
                     [csrfHeader]: csrfToken
                 },
-                // body: JSON.stringify({"row": row, "col": col, "opponentName": opponentName})
                 body: JSON.stringify(lastStep)
 
             })
@@ -131,8 +131,13 @@
                     let data = await response.text();
                     try{
                         let json  = JSON.parse(data);
-                        console.log(json)
-                        handleReceivedData(json);
+                        try{
+                            handleReceivedData(json);
+                        }
+                        catch{
+                            displayError(DEFAULT_ERROR);
+                            isStillProcessing = false;
+                        }
                         await new Promise(resolve => setTimeout(resolve, TIME_OUT))
                         await getUpdates();
                     }
@@ -148,9 +153,8 @@
         }
     }
     const handleReceivedData = (jsonData)=>{
-        //TODO needs to validate data + check if the ids correct.
+        validateResponse(jsonData)
         timestamp += jsonData.length;
-
         let usernameTurn = jsonData[jsonData.length-1].attackDetails.nextTurn;
         isMyTurn = usernameTurn === MY_NAME;
         TURN_ELEMENT.innerHTML = (!isMyTurn)? `'${usernameTurn}'`: "Your";
@@ -161,11 +165,6 @@
         jsonData.forEach((change)=>{
             let boardChange = change.boardChanges;
             attackDetailsObject = change.attackDetails
-            console.log(attackDetailsObject, lastStep)
-            console.log(attackDetailsObject.row, lastStep.row)
-            console.log(attackDetailsObject.col, lastStep.col)
-            console.log(attackDetailsObject.opponentName, lastStep.opponentName)
-            console.log(attackDetailsObject.attackerName, MY_NAME)
             if (attackDetailsObject.row === lastStep.row && attackDetailsObject.col === lastStep.col
                 && attackDetailsObject.attackerName === MY_NAME && attackDetailsObject.opponentName === lastStep.opponentName)
                 isStillProcessing = false;
@@ -184,6 +183,31 @@
         })
 
     }
+
+    const validateResponse = (jsonData)=>{
+        if (!Array.isArray(jsonData) || !jsonData.every((data)=>
+            isValidAttackDetails(data.attackDetails) && isValidBoardChanges(data.boardChanges)
+        ))
+            throw new Error(DEFAULT_ERROR);
+    }
+    const isValidAttackDetails = (attackDetails)=>{
+        return (!!attackDetails && !!attackDetails.attackerName && !!attackDetails.opponentName &&
+            isStringIsAValidIndex(attackDetails.row) && isStringIsAValidIndex(attackDetails.col)
+        )
+    }
+
+    const isValidBoardChanges = (boardChanges)=>{
+        return (!!boardChanges  && Array.isArray(boardChanges) && boardChanges.every(tileChange=>
+            isStringIsAValidIndex(tileChange.row) && isStringIsAValidIndex(tileChange.col)&&
+            !!tileChange.status && [...IMAGES_PATHS.keys()].some((statusName)=> tileChange.status === statusName )
+        ))
+    }
+
+    const isStringIsAValidIndex = (integerString)=>{
+        return (!!integerString && !Number.isNaN(integerString) && Number.isInteger(+integerString) &&
+                (+integerString)>=0 && (+integerString)< BOARD_SIZE)
+    }
+
     document.addEventListener("DOMContentLoaded",()=>{
         getUpdates();
         document.querySelectorAll(BUTTON_CLASS_NAME).forEach((button)=>{

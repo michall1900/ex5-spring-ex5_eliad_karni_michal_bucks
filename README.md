@@ -1,6 +1,9 @@
 ## Authors
-* Name:  Email:
-* Name:  Email:
+* Name: Eliad Karni  Email: eliadka@edu.hac.ac.il
+* Name: Michal Bucks Email: michalbu@edu.hac.ac.il
+
+## Note
+We are using one extra day: Eliad has two. In solange permission, we can use one day and not lose points about that. 
 
 ## Description
 

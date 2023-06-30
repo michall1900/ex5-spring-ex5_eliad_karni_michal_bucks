@@ -42,7 +42,8 @@ public class LobbyController {
     public @ResponseBody List<Map<String,String>> getRooms() {
         List<Map<String, String>> ans = new ArrayList<>();
         for(Room room : roomService.getAllRooms()){
-            ans.add(room.getInfo());
+            if (room.getStatus() == Room.RoomEnum.WAITING_FOR_NEW_PLAYER)
+                ans.add(room.getInfo());
         }
         return ans;
     }

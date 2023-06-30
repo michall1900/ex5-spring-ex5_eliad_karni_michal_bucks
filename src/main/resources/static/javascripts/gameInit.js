@@ -231,8 +231,8 @@
         }
 
         /**
-         * This function is handle with delete
-         * @param controller
+         * This function is handle with delete event
+         * @param controller - The controller to receive from it the click listener to add.
          */
         #handleDelete(controller){
             if (isAddPressed)
@@ -241,34 +241,7 @@
                 displayError(YOU_SHOULD_CLICK_DELETE_FIRST_ERROR)//should be changed to displayErrorMessage
             else{
                 this.#relevantElements.forEach(({btnId,imgId, row, col})=>{
-                    const btn = document.getElementById(btnId)
-                    const img = document.getElementById(imgId)
-                    const srcToCompute = getSrcToCompare(img)
-                    let isNeedToChange = true
-                    if (srcToCompute === IMG_SOURCES_MAP.get("noShip")){
-                        for (let currentRow = Math.max(row-1, 0);
-                             currentRow<= Math.min(row+1, BOARD_SIZE-1) && isNeedToChange; currentRow++)
-                            for (let currentCol = Math.max(col-1, 0);
-                                 currentCol<= Math.min(col+1, BOARD_SIZE-1); currentCol++){
-                                if (currentRow===row && currentCol===col)
-                                    continue;
-                                let imgElement = document.getElementById(`image_${currentRow}.${currentCol}`);
-                                let compareSrc = getSrcToCompare(imgElement)
-                                if (compareSrc === IMG_SOURCES_MAP.get("submarineCell") &&
-                                    !(this.#firstIndex.row<=currentRow && currentRow<=this.#lastIndex.row &&
-                                     this.#firstIndex.col<=currentCol && currentCol<=this.#lastIndex.col)){
-                                    isNeedToChange = false;
-                                    break;
-                                }
-                            }
-                    }
-                    if (isNeedToChange){
-                        img.setAttribute("src", IMG_SOURCES_MAP.get("empty"))
-                        btn.removeAttribute("disabled")
-                        const clonedBtn = btn.cloneNode(true)
-                        clonedBtn.addEventListener("click", (_)=>controller.handleBoardClick(row, col))
-                        btn.parentNode.replaceChild(clonedBtn, btn);
-                    }
+                    this.#changeTilesPictures(btnId, imgId, row, col, controller)
                 })
                 handelSubmarineAddButton(this.#size, false)
                 controller.deleteSubmarineFromList(this.getFirstIndexString())
@@ -278,9 +251,69 @@
             }
         }
 
+        /**
+         * This function is changing the tiles' images if there is need to while pressing on delete.
+         * @param btnId - The current submarine's button id.
+         * @param imgId - The current submarine's image id.
+         * @param row - The row of the current tile that it should be checked.
+         * @param col - The column of the current tile that it should be checked.
+         * @param controller The controller to receive from it the click listener to add.
+         */
+        #changeTilesPictures(btnId, imgId, row, col, controller){
+            const btn = document.getElementById(btnId)
+            const img = document.getElementById(imgId)
+            const srcToCompute = getSrcToCompare(img)
+            let isNeedToChange = true
+            if (srcToCompute === IMG_SOURCES_MAP.get("noShip"))
+                isNeedToChange = this.#checkIfThereNeedToChange(row,col)
+            if (isNeedToChange){
+                img.setAttribute("src", IMG_SOURCES_MAP.get("empty"))
+                btn.removeAttribute("disabled")
+                const clonedBtn = btn.cloneNode(true)
+                clonedBtn.addEventListener("click", (_)=>controller.handleBoardClick(row, col))
+                btn.parentNode.replaceChild(clonedBtn, btn);
+            }
+        }
+
+        /**
+         * This function is checking if there is a need to change the tile.
+         * That's mean that the tile is not used by another submarine.
+         * @param row - The current tile row.
+         * @param col - The current tile column.
+         * @returns {boolean} - If there is need to change the current tile, return true.
+         */
+        #checkIfThereNeedToChange(row,col){
+            for (let currentRow = Math.max(row-1, 0);
+                 currentRow<= Math.min(row+1, BOARD_SIZE-1) ; currentRow++) {
+                for (let currentCol = Math.max(col - 1, 0);
+                     currentCol <= Math.min(col + 1, BOARD_SIZE - 1); currentCol++) {
+                    if (currentRow === row && currentCol === col)
+                        continue;
+                    let imgElement = document.getElementById(`image_${currentRow}.${currentCol}`);
+                    let compareSrc = getSrcToCompare(imgElement)
+                    if (compareSrc === IMG_SOURCES_MAP.get("submarineCell") &&
+                        !(this.#firstIndex.row <= currentRow && currentRow <= this.#lastIndex.row &&
+                        this.#firstIndex.col <= currentCol && currentCol <= this.#lastIndex.col)) {
+
+                        return false
+                    }
+                }
+            }
+            return true;
+        }
+
+        /**
+         * This function is getting the first index as a string.
+         * @returns {string} A string of the first index "<row>.<col>".
+         */
         getFirstIndexString(){
            return `${this.#firstIndex.row}.${this.#firstIndex.col}`
         }
+
+        /**
+         * This function returns an object with the submarine's relevant members to send.
+         * @returns {{firstRow: (number|*), size, lastRow: (number|*), firstCol: ([number,string,string]|number|*), lastCol: ([number,string,string]|number|*)}}
+         */
         getDataToSend(){
             return {"firstRow":this.#firstIndex.row,"firstCol":this.#firstIndex.col,
                 "lastRow":this.#lastIndex.row,"lastCol":this.#lastIndex.col ,
@@ -288,12 +321,18 @@
         }
     }
 
+    /**
+     * A class that holds and handle the while displaying.
+     */
     class Controller{
         #currentSize = DEFAULT_VALUE
         #currentStartIndex = DEFAULT_START_POINT;
         #submarineMap = new Map();
         #numberOfNeededSubmarines = 0
 
+        /**
+         * A c-tor
+         */
         constructor() {
             for (let row = 0; row < BOARD_SIZE; row++) {
                 for (let col = 0; col < BOARD_SIZE; col++) {
@@ -306,16 +345,28 @@
             })
 
         }
+
+        /**
+         * This function is handle with a click on a board.
+         * @param row The row that has been clicked
+         * @param col The column that has been clicked.
+         */
         handleBoardClick(row, col){
             try{
-                this.#handleSubmarineChoice(row, col)
+                this.#checkBoardClick(row, col)
             }
             catch (e){
                 displayError(e)
             }
         }
 
-        #handleSubmarineChoice(row, col){
+        /**
+         * This function validates that the click on the board was valid and change element by the answer.
+         * @param row The row that has been clicked
+         * @param col The column that has been clicked.
+         * @throws Error if the click is invalid.
+         */
+        #checkBoardClick(row, col){
             if (isDeletePressed)
                 throw new Error(EMPTY_ON_DELETE_ERROR)
             if (!isAddPressed)
@@ -335,6 +386,13 @@
                 throw new Error(YOU_CANT_CHOOSE_THIS_CELL_ERROR)
 
         }
+
+        /**
+         * Fills this tile with a submarine image.
+         * @param imageElement - The current image element that the user clicked on.
+         * @param row The row that has been clicked
+         * @param col The column that has been clicked.
+         */
         #handleClickOnEmptyCell(imageElement, row, col){
             //It's the first choice of the user
             if (this.#currentStartIndex === DEFAULT_START_POINT){
@@ -350,6 +408,11 @@
                 this.#createNewSubmarine(row, col)
         }
 
+        /**
+         * Creating a new submarine if it is the second click on "add" mode.
+         * @param row The row that has been clicked
+         * @param col The column that has been clicked.
+         */
         #createNewSubmarine(row, col){
             const submarine = new Submarine(this.#currentStartIndex, {row:row, col:col},this.#currentSize)
             submarine.displaySubmarine(this)
@@ -357,19 +420,27 @@
             this.setCurrentSize(DEFAULT_VALUE)
             this.#submarineMap.set(submarine.getFirstIndexString(), submarine);
             if (this.#submarineMap.size === this.#numberOfNeededSubmarines) {
-                console.log(JSON.stringify(this.#getDataToSend()))
                 DATA_TO_SERVER_ELEMENT.value = JSON.stringify(this.#getDataToSend())
                 READY_BTN_ELEMENT.removeAttribute("disabled")
             }
             INSTRUCTIONS_ELEMENT.innerHTML = INIT_INSTRUCTION
         }
 
+        /**
+         * this function is deleting a submarine from the list when needed.
+         * @param firstIndexString - The string of the first index to find the submarine on the submarines' map.
+         */
         deleteSubmarineFromList(firstIndexString){
             this.#submarineMap.delete(firstIndexString);
             if (this.#submarineMap.size === this.#numberOfNeededSubmarines-1) {
                 READY_BTN_ELEMENT.setAttribute("disabled","")
             }
         }
+
+        /**
+         * This function is setting the current submarine's size.
+         * @param size
+         */
         setCurrentSize (size){
             if (this.#currentSize!== DEFAULT_VALUE){
                 let lastBtn = document.getElementById("addButton_" + this.#currentSize.toString())
@@ -382,29 +453,45 @@
             this.#setCurrentStartIndex(DEFAULT_START_POINT);
         }
 
+        /**
+         * This function is setting the current start index of the submarine.
+         * @param newIndex - {row:__ , col:__} index of the submarine that the user chose.
+         */
         #setCurrentStartIndex(newIndex){
             this.#currentStartIndex = newIndex
         }
 
+        /**
+         * Reset the data about the submarine that the user planed to display.
+         */
         resetOnCancel(){
             if (this.#currentStartIndex!== DEFAULT_START_POINT)
                 document.getElementById(`image_${this.#currentStartIndex.row}.${this.#currentStartIndex.col}`).setAttribute("src", IMG_SOURCES_MAP.get("empty"))
             this.setCurrentSize(DEFAULT_VALUE)
         }
 
+        /**
+         * Return the data for the server in an object.
+         * @returns {{submarines: *[]}}
+         */
         #getDataToSend(){
             let dataToSend = {"submarines":[]}
             this.#submarineMap.forEach((submarine)=>{
                 dataToSend.submarines.push(submarine.getDataToSend())
             })
-            console.log(dataToSend)
             return dataToSend;
         }
     }
 
+    /**
+     * This function is handle with click on add button in the table.
+     * @param event
+     * @param btn - The current button that has been clicked.
+     * @param controller - The controller to set inside it data.
+     */
     const handleAddClick = (event, btn, controller)=>{
         if (isDeletePressed)
-            displayError(DELETE_ON_ADD_ERROR)
+            displayError(ADD_ON_DELETE_ERROR)
         else if (isAddPressed && btn.innerHTML !== CANCEL_BUTTON_VIEW.name){
             displayError(ADD_WHILE_ADD_PRESSED_ERROR)
         }
@@ -423,9 +510,13 @@
         }
 
     }
+    /**
+     * This method is handle with clicking on "delete" button.
+     * @param _
+     */
     const handleDeleteClick = (_)=>{
         if (isAddPressed)
-            displayError(ADD_ON_DELETE_ERROR)
+            displayError(DELETE_ON_ADD_ERROR)
         else{
             if (!isDeletePressed){
                 changeButtonView(DELETE_ELEMENT, CANCEL_BUTTON_VIEW.class, CANCEL_BUTTON_VIEW.name)
@@ -439,7 +530,9 @@
         }
 
     }
-
+    /**
+     * Initialize page data.
+     */
     document.addEventListener("DOMContentLoaded",()=>{
         let controller = new Controller();
         let addButtons = document.querySelectorAll(".addButton");

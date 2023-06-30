@@ -207,8 +207,7 @@ public class RoomService {
             if(toLockRoom)
                 roomsLock.getRoomLock(room.getId()).readLock().lock();
             try {
-                if (room.getPlayers().size()!= Room.SIZE)
-                    throw new RuntimeException(NOT_ENOUGH_PLAYERS);
+                validatePlayersOnGame(room);
                 return room.getPlayers().get(room.getCurrentPlayerIndex()).getUsername();
             }finally {
                 if(toLockRoom)
@@ -234,9 +233,22 @@ public class RoomService {
             throw new InvalidChoiceError(NOT_USER_TURN);
     }
 
-    private void validateOnGame(Room room){
+    /**
+     * Assumption - The function who called this function locked dbLock + room's lock.
+     * @param room
+     */
+    private void checkIfGameFinished(Room room){
         if (room.getStatus().equals(Room.RoomEnum.GAME_OVER))
             throw new GameOver(GAME_OVER);
+    }
+
+    /**
+     * Assumption - both room look and dblock are locked.
+     * @param room
+     */
+    private void validatePlayersOnGame(Room room){
+        if (!room.full())
+            throw new RuntimeException(NOT_ENOUGH_PLAYERS);
     }
     @Transactional
     public void  setUpdates(String currentUserName, UserTurn userTurn){
@@ -246,7 +258,7 @@ public class RoomService {
             roomsLock.getRoomLock(room.getId()).writeLock().lock();
             try {
                 checkIfBothUsersAreInSameRoom(currentUserName, userTurn.getOpponentName());
-                validateOnGame(room);
+                checkIfGameFinished(room);
                 validateTurn(currentUserName);
                 Board board = playerService.getPlayerByUsername(userTurn.getOpponentName(),false).getBoard();
                 ArrayList<HashMap<String, String>> boardUpdates = board.getHitChanges(userTurn.getRow(), userTurn.getCol());
@@ -289,7 +301,7 @@ public class RoomService {
     private List<UpdateObject> getUpdates(String username, int timestamp){
 
         Room room = playerService.getRoomByUsername(username, false);
-        validateOnGame(room);
+        checkIfGameFinished(room);
         List<String> updatesStringArray= room.getUpdateObjects();
         if (timestamp> updatesStringArray.size())
             throw new InvalidChoiceError(INVALID_TIME_STAMP);
@@ -398,24 +410,25 @@ public class RoomService {
     public DeferredResult<ResponseEntity<?>> handleStatusRoomPolling(Principal principal, DeferredResult<ResponseEntity<?>> output){
         try {
             DBLock.readLock().lock();
-            Long roomId = playerService.getRoomByUsername(principal.getName(),false).getId();
+            Room room = playerService.getRoomByUsername(principal.getName(),false);
             //TODO maybe it is not great that the room itself is not blocked when we get this. need to be aware.
             Future<?> future = getExecutorServiceForRoom(principal.getName()).submit(() -> {
                 try {
                     Room.RoomEnum status;
                     do {
-                        roomsLock.getRoomLock(roomId).readLock().lock();
+                        roomsLock.getRoomLock(room.getId()).readLock().lock();
+                        validatePlayersOnGame(room);
                         try{
 
                             status = playerService.getRoomStatusByUserName(principal.getName());
                             if (status != Room.RoomEnum.ON_GAME) {
-                                roomsLock.getRoomLock(roomId).readLock().unlock();
+                                roomsLock.getRoomLock(room.getId()).readLock().unlock();
                                 Thread.sleep(200);
                             }
                         }
                         finally {
                             try {
-                                roomsLock.getRoomLock(roomId).readLock().unlock();
+                                roomsLock.getRoomLock(room.getId()).readLock().unlock();
                             }
                             catch(IllegalMonitorStateException e){
                                 ;
@@ -454,54 +467,54 @@ public class RoomService {
     public DeferredResult<ResponseEntity<?>> handleUpdatePolling(Principal principal, DeferredResult<ResponseEntity<?>> output, int timestamp){
         try {
             DBLock.readLock().lock();
-            Long roomId = playerService.getRoomByUsername(principal.getName(),false).getId();
+            Room room = playerService.getRoomByUsername(principal.getName(), false);
             Future<?> future = getExecutorServiceForRoom(principal.getName()).submit(() -> {
                 try {
                     List<UpdateObject> updates = new ArrayList<>();
-                    do{
-                        roomsLock.getRoomLock(roomId).readLock().lock();
-                        try{
+                    do {
+                        roomsLock.getRoomLock(room.getId()).readLock().lock();
+                        validatePlayersOnGame(room);
+                        try {
                             updates = getUpdates(principal.getName(), timestamp);
                             if (updates.isEmpty()) {
-                                roomsLock.getRoomLock(roomId).readLock().unlock();
+                                roomsLock.getRoomLock(room.getId()).readLock().unlock();
                                 Thread.sleep(200);
                             }
-                        }
-                        finally {
+                        } finally {
                             try {
-                                roomsLock.getRoomLock(roomId).readLock().unlock();
-                            }
-                            catch(IllegalMonitorStateException e){
+                                roomsLock.getRoomLock(room.getId()).readLock().unlock();
+                            } catch (IllegalMonitorStateException e) {
                                 ;
                             }
                         }
                     }
-                    while(updates.isEmpty() && !Thread.currentThread().isInterrupted());
+                    while (updates.isEmpty() && !Thread.currentThread().isInterrupted());
                     if (!Thread.currentThread().isInterrupted())
                         output.setResult(ResponseEntity.ok(updates));
                 }
-                catch (InvalidChoiceError e){
-                    output.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage()));
-                }
-                catch (GameOver e){
-                    output.setResult(ResponseEntity.status(HttpStatus.OK).body("/game/finish-page"));
-                }
+//                catch (InvalidChoiceError e){
+//                    output.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage()));
+//                }
+//                catch (GameOver e){
+//                    output.setResult(ResponseEntity.status(HttpStatus.OK).body("/game/finish-page"));
+//                }
                 catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     //output.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Service Unavailable"));
                 }
-                catch (Exception e) {
-                    output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
-                }
+//                catch (Exception e) {
+//                    output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
+//                }
             });
             output.onTimeout(() -> {
                 future.cancel(true);
                 System.out.println("Timeout! Sent to" + principal.getName());
                 output.setErrorResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Service Unavailable"));
             });
-        } catch (Exception e) {
-            output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
         }
+//        catch (Exception e) {
+//            output.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
+//        }
         finally {
             DBLock.readLock().unlock();
         }
