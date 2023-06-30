@@ -1,7 +1,5 @@
 package hac.filters;
 
-import hac.repo.player.Player;
-import hac.repo.room.Room;
 import hac.services.PlayerService;
 import hac.services.RoomService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-public class GameFilter  implements HandlerInterceptor {
+public class GameFilter implements HandlerInterceptor {
     PlayerService playerService;
 
     RoomService roomService;
@@ -41,17 +39,16 @@ public class GameFilter  implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
+        try{
+            if(request.isUserInRole("USER") || request.isUserInRole("ADMIN")) {
+                roomService.validatePlayerInRoomStatus(request.getUserPrincipal().getName());
+            }
+            else
+                return false;
+        }catch (Exception e){
+            return false;
+        }
         return true;
-//        try {
-//            if(request.isUserInRole("USER") || request.isUserInRole("ADMIN")) {
-//                Player player = playerService.getPlayerByUsername(request.getUserPrincipal().getName(), true);
-//                Room room = playerService.getRoomByUsername(request.getUserPrincipal().getName());
-//                //if(room.getStatus() != Room.RoomEnum)
-//            }
-//            return true;
-//        }catch (Exception e){
-//            return false;
-//        }
     }
 
     @Override
