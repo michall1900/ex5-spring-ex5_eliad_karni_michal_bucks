@@ -42,9 +42,9 @@ public class InRoomFilter  implements HandlerInterceptor {
             throws Exception {
         try {
             System.out.println("in in game filter");
-                try {
-                    roomService.removePlayer(request.getUserPrincipal().getName());
-                }catch (Exception e){}
+            try {
+                roomService.removePlayer(request.getUserPrincipal().getName());
+            }catch (Exception e){}
         }catch (Exception e){
             return false;
         }

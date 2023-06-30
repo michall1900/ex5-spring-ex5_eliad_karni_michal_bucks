@@ -19,24 +19,43 @@ import java.security.Principal;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * The Controller handles the rests related to the game management.
+ */
 @Controller
 @RequestMapping("/game")
 public class GameController {
-
+    /**
+     * The member service acts like an api to the boards DB.
+     */
     @Autowired
     BoardService boardService;
-
+    /**
+     * The member service acts like an api to the rooms DB.
+     */
     @Autowired
     private RoomService roomService;
-
+    /**
+     * The member service acts like an api to the players DB.
+     */
     @Autowired
     private PlayerService playerService;
 
+    /**
+     * The page is a waiting page till all the players in the room submits their boards set.
+     * @return Html for the waiting room html.
+     */
     @GetMapping("/wait-to-start-page")
     public String getWaitToStartPage(){
         return "game/waitingForStartGame";
     }
 
+    /**
+     *
+     * @param model used to add parameters
+     * @param principal
+     * @return
+     */
     @GetMapping("/on-game")
     public String onGamePage(Model model, Principal principal){
         //set opponent turn if needed.
@@ -59,8 +78,6 @@ public class GameController {
 //            model.addAttribute("error",e.getMessage());
 //            System.out.println(e.getMessage());
 //        }
-
-
         return "game/initGame";
     }
 
@@ -77,8 +94,9 @@ public class GameController {
             model.addAttribute("error",e.getMessage());
             return "/game/initGame";
         }
-
     }
+
+
     @GetMapping("/update")
     public String getForDeniedAccess(){
         return "redirect:/game/on-game";
