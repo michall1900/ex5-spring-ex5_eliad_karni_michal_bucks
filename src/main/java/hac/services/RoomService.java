@@ -376,11 +376,10 @@ public class RoomService {
 
     /**
      * Assumption - the method who locks this locked the db for writing.
-     * @param username
+     * @param roomId
      */
-    private void shutdownExecutorServiceForRoom(String username) {
-        Long roomId = playerService.getRoomByUsername(username,false).getId();
-        ExecutorService executorService = roomExecutors.remove(roomId);
+    private void shutdownExecutorServiceForRoom(Long roomId) {
+        ExecutorService executorService = roomExecutors.get(roomId);
         executorService.shutdown();
         try {
             if (!executorService.awaitTermination(800, TimeUnit.MILLISECONDS)) {
@@ -388,6 +387,9 @@ public class RoomService {
             }
         } catch (InterruptedException e) {
             executorService.shutdownNow();
+        }
+        finally {
+            roomExecutors.remove(roomId);
         }
 
 
@@ -603,6 +605,26 @@ public class RoomService {
             DBLock.writeLock().unlock();
         }
 
+
+
+    }
+
+    @Transactional
+    public void removePlayer(String username) throws RuntimeException{
+        try {
+            DBLock.writeLock().lock();
+            Player player = playerService.getPlayerByUsername(username, false);
+            Room room = player.getRoom();
+
+            room.getPlayers().remove(player);
+            if (room.getPlayers().isEmpty()) {
+                roomsLock.removeLock(room.getId());
+                shutdownExecutorServiceForRoom(room.getId());
+                roomRepo.delete(room);
+            }
+        }finally {
+            DBLock.writeLock().unlock();
+        }
     }
     //TODO when room closed, shut down its executor.
 }

@@ -10,7 +10,7 @@
     const LAST_STEP_ID = "lastStep";
     const URL_TO_UPDATE = "/game/update"
     const MY_NAME_ID = "name";
-    const ERROR_PATH = "/room-error"
+    const ERROR_PATH = "/lobby/error-message"
     const FINISH_PAGE = "/game/finish-page";
     const IMAGES_PATHS = new Map([["Miss","../images/noShip.png"],["Hit","../images/explodeShip.jpg"]])
     let csrfToken

@@ -4,6 +4,7 @@ import hac.beans.RoomLockHandler;
 import hac.repo.player.Player;
 import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
+import hac.repo.room.RoomRepository;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,8 @@ public class PlayerService {
 
     @Resource(name = "getRoomLock")
     private RoomLockHandler roomsLock;
+    @Autowired
+    private RoomRepository roomRepository;
 
     public Player createNewPlayer(String username){
         Player player = new Player();
@@ -86,23 +89,7 @@ public class PlayerService {
         return getPlayerByUsername(username, true).getStatus();
     }
 
-    @Transactional
-    public void removePlayer(String username) throws RuntimeException{
-        try {
-            DBLock.writeLock().lock();
-            Player player = getPlayerByUsername(username, false);
-            Room room = player.getRoom();
-            if (room!=null) {
-                room.getPlayers().remove(player);
-                //TODO handle with more cases, it's not good to do this.
-                room.setStatus(Room.RoomEnum.WAITING_FOR_NEW_PLAYER);
-            }
-            player.setRoom(null);
-            playersRepo.delete(player);
-        }finally {
-            DBLock.writeLock().unlock();
-        }
-    }
+
 
     public Boolean setWinnersInModelReturnIfNotFound(String username, Model model){
         try {

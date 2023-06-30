@@ -4,10 +4,11 @@
     const ERROR_BODY_ID = "error"
     const DEFAULT_ERROR = "There is a problem to connect to the server"
     const URL = "/game/wait-to-start"
-    const ERROR_PATH = "/room-error"
-
+    const ERROR_PATH = "/lobby/error-message"
+    const SPINNER_ELEMENT_ID = "spinner";
     let ERROR_ELEMENT;
     let ERROR_BTN;
+    let SPINNER_ELEMENT;
 
     /**
      * A function that handle with error, it opens a modal and display the error message.
@@ -51,6 +52,7 @@
         }
         catch (e){
             displayError(DEFAULT_ERROR);
+            SPINNER_ELEMENT.classList.add("d-none");
         }
     }
 
@@ -63,6 +65,7 @@
         if (ERROR_ELEMENT.value && ERROR_ELEMENT.value!=="")
             ERROR_BTN.click();
         waitForAllUsers();
+        SPINNER_ELEMENT = document.getElementById(SPINNER_ELEMENT_ID);
     })
 
 })();

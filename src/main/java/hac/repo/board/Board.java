@@ -7,9 +7,6 @@ import hac.repo.subamrine.Submarine;
 import hac.repo.tile.Tile;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.*;
 
@@ -195,6 +192,13 @@ public class Board {
         hitsMap.put("col", Integer.toString(col));
         hitsMap.put("status", String.valueOf(tile.getStatus()));
         return hitsMap;
+    }
+
+    @Override
+    public String toString(){
+        return "Board{\n" + "board id = \n" +getId()+ "\nplayer's name = " + this.player.getUsername() +
+                "\ntiles = \n{"+ this.getBoardTiles().stream().map((tile)->" " + tile.toString() + ", \n") +
+                "} submarines = \n{" + this.getSubmarines().stream().map((submarine -> " "+ submarine.toString()+ ", \n"))+"}\n}";
     }
 
 }

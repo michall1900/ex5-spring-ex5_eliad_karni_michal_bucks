@@ -38,4 +38,8 @@ public class RoomLockHandler implements Serializable {
             throw new RuntimeException("The lock already exist");
         roomsLock.put(id, new ReentrantReadWriteLock());
     }
+
+    public void removeLock(Long id){
+        roomsLock.remove(id);
+    }
 }

@@ -82,4 +82,9 @@ public class Tile {
         else if(status == TileStatus.Empty)
             setStatus(TileStatus.Miss);
     }
+
+    @Override
+    public String toString(){
+        return "Tile {id = " + getId() + ((submarine!= null)? "submarine's id = "+ submarine.getId(): "")+ "}";
+    }
 }

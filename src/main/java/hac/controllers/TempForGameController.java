@@ -1,49 +1,61 @@
-//package hac.controllers;
-//
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import hac.classes.forGame.UserTurn;
-//import hac.repo.board.Board;
-//import hac.repo.player.Player;
-//import hac.repo.player.PlayerRepository;
-//import hac.repo.room.Room;
-//import hac.services.BoardService;
-//import hac.services.PlayerService;
-//import hac.services.RoomService;
-//import jakarta.validation.ConstraintViolation;
-//import jakarta.validation.ConstraintViolationException;
-//import jakarta.validation.Validator;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//
-//import java.security.Principal;
-//import java.util.List;
-//import java.util.Set;
-//
-//
-////TODO - delete this, it's a temporary route
-//@Controller
-//@RequestMapping("/game/test")
-//public class TempForGameController {
-//
-//    @Autowired
-//    private RoomService roomService;
-//
-//    @Autowired
-//    private PlayerService playerService;
-//
-//    @Autowired
-//    private PlayerRepository playerRepository;
-////    @Autowired
-////    private RoomRepository roomRepo;
-////
-////    @Autowired
-////    private PlayerRepository playersRepo;
-//
-//    @Autowired
-//    BoardService boardService;
-//
+package hac.controllers;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hac.classes.forGame.UserTurn;
+import hac.repo.board.Board;
+import hac.repo.board.BoardRepository;
+import hac.repo.player.Player;
+import hac.repo.player.PlayerRepository;
+import hac.repo.room.Room;
+import hac.repo.room.RoomRepository;
+import hac.repo.subamrine.Submarine;
+import hac.repo.subamrine.SubmarineRepository;
+import hac.repo.tile.Tile;
+import hac.repo.tile.TileRepository;
+import hac.services.BoardService;
+import hac.services.PlayerService;
+import hac.services.RoomService;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.security.Principal;
+import java.util.List;
+import java.util.Set;
+
+
+//TODO - delete this, it's a temporary route
+@Controller
+@RequestMapping("/game/test")
+public class TempForGameController {
+
+    @Autowired
+    private RoomService roomService;
+
+    @Autowired
+    private PlayerService playerService;
+
+    @Autowired
+    private PlayerRepository playerRepository;
+    @Autowired
+    private RoomRepository roomRepo;
+
+    @Autowired
+    private BoardRepository boardRepository;
+
+    @Autowired
+    private TileRepository tileRepository;
+
+    @Autowired
+    private SubmarineRepository submarineRepository;
+
+    @Autowired
+    BoardService boardService;
+
 //    @GetMapping("")
 //    public String tempGame(Principal principal){
 //        try {
@@ -69,26 +81,41 @@
 //        //return "redirect:/game/init";
 //        //return "game/waitingForStartGame";
 //    }
-//
-//    @GetMapping("/test")
-//    public String temp(Principal principal){
-////        try {
-////            Player p = playerRepository.findByUsername("1");
-////            p.setStatus(Player.PlayerStatus.ON_GAME);
-////            playerRepository.save(p);
-////        }
-////        catch (Exception e){
-////            System.out.println(e);
-////        }
-////        try{
-////            Player player = playerService.getPlayerByUsername("1", true);
-////            System.out.println(player.getInfo().toString());
-////        }
-////        catch (Exception e) {
-////            System.out.println(e);
-////        }
-////        UserTurn userTurn = new UserTurn(1,1, "2");
-////        roomService.setUpdates(principal.getName(), userTurn);
-//        return "redirect:/game/on-game";
-//    }
-//}
+
+    @GetMapping("/test")
+    public String temp(Principal principal){
+        roomService.removePlayer(principal.getName());
+
+        return "redirect:/game/test/print";
+    }
+
+    @GetMapping("/print")
+    public String print(Principal principal){
+        System.out.println("Rooms\n===================================================\n\n");
+        for (Room room: roomRepo.findAll()){
+            System.out.println(room);
+        }
+        System.out.println("\n\n===================================================\n\n");
+        System.out.println("Players\n===================================================\n\n");
+        for (Player player: playerRepository.findAll()){
+            System.out.println(player);
+        }
+        System.out.println("\n\n===================================================\n\n");
+        System.out.println("Boards\n===================================================\n\n");
+        for (Board board: boardRepository.findAll()){
+            System.out.println(board);
+        }
+        System.out.println("\n\n===================================================\n\n");
+        System.out.println("Tiles\n===================================================\n\n");
+        for (Tile tile: tileRepository.findAll()){
+            System.out.println(tile);
+        }
+        System.out.println("\n\n===================================================\n\n");
+        System.out.println("Submarines\n===================================================\n\n");
+        for (Submarine submarine: submarineRepository.findAll()){
+            System.out.println(submarine);
+        }
+        System.out.println("\n\n===================================================\n\n");
+        return "redirect:/lobby";
+    }
+}

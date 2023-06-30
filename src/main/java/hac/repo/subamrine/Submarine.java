@@ -139,4 +139,9 @@ public class Submarine {
         hits ++ ;
     }
 
+    @Override
+    public String toString(){
+        return "Submarine{submarine id = " + this.getId() + "}";
+    }
+
 }
