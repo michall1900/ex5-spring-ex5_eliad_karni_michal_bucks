@@ -40,6 +40,7 @@ public class GameFilter implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
         try{
+            System.out.println("aaaaaa");
             if(request.isUserInRole("USER") || request.isUserInRole("ADMIN")) {
                 roomService.validatePlayerInRoomStatus(request.getUserPrincipal().getName());
             }

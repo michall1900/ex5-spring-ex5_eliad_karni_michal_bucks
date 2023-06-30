@@ -44,6 +44,7 @@ public class GameController {
     }
     @GetMapping("/init")
     public String gameInit(Model model, Principal principal){
+        System.out.println("alla hu achbar");
         //TODO handle error
         try{
             roomService.setGameInitModel(model, principal.getName());

@@ -628,7 +628,6 @@ public class RoomService {
             DBLock.writeLock().lock();
             Player player = playerService.getPlayerByUsername(username, false);
             Room room = player.getRoom();
-
             room.getPlayers().remove(player);
             if (room.getPlayers().isEmpty()) {
                 roomsLock.removeLock(room.getId());
@@ -644,15 +643,16 @@ public class RoomService {
     public void validatePlayerInRoomStatus(String username) throws Exception{
         try {
             DBLock.readLock().lock();
-            Long Id = playerService.getRoomByUsername(username, false).getId();
-            roomsLock.getRoomLock(Id).readLock().lock();
+            Room room = playerService.getRoomByUsername(username, false);
+            roomsLock.getRoomLock(room.getId()).readLock().lock();
             try {
                 Room.RoomEnum roomStatus = playerService.getRoomStatusByUserName(username);
-                if(roomStatus != Room.RoomEnum.WAITING_FOR_NEW_PLAYER)
+                if((roomStatus != Room.RoomEnum.WAITING_FOR_NEW_PLAYER && roomStatus != Room.RoomEnum.GAME_OVER)
+                && !room.full())
                     throw new Exception("Player tried to enter the wrong room");
             }
             finally {
-                roomsLock.getRoomLock(Id).readLock().unlock();
+                roomsLock.getRoomLock(room.getId()).readLock().unlock();
             }
         }
         finally {
