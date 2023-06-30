@@ -422,6 +422,11 @@ public class RoomService {
 
                             status = playerService.getRoomStatusByUserName(principal.getName());
                             if (status != Room.RoomEnum.ON_GAME) {
+                                if (status == Room.RoomEnum.GAME_OVER)
+                                    throw new GameOver(GAME_OVER);
+                                if (status!= Room.RoomEnum.WAITING_FOR_BOARDS){
+                                    throw new DbError();
+                                }
                                 roomsLock.getRoomLock(room.getId()).readLock().unlock();
                                 Thread.sleep(200);
                             }

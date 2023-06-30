@@ -64,13 +64,7 @@ public class GameController {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Board board = objectMapper.readValue(boardString, Board.class);
-//            Set<ConstraintViolation<Board>> violations = validator.validate(board);
-//            if (!violations.isEmpty()) {
-//                throw new ConstraintViolationException(violations);
-//            }
-
             roomService.saveNewBoard(board, principal.getName());
-
             return "game/waitingForStartGame";
 
         } catch (Exception e) {
@@ -79,6 +73,10 @@ public class GameController {
             return "/game/initGame";
         }
 
+    }
+    @GetMapping("/update")
+    public String getForDeniedAccess(){
+        return "redirect:/game/on-game";
     }
     @GetMapping("/finish-page")
     public String finishGame(Model model, Principal principal){
