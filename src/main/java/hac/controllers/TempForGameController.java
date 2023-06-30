@@ -12,18 +12,10 @@ import hac.repo.subamrine.Submarine;
 import hac.repo.subamrine.SubmarineRepository;
 import hac.repo.tile.Tile;
 import hac.repo.tile.TileRepository;
-import hac.services.BoardService;
-import hac.services.PlayerService;
-import hac.services.RoomService;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.security.Principal;
 
 
 /**
@@ -32,24 +24,30 @@ import java.security.Principal;
 @Controller
 @RequestMapping("/game/test")
 public class TempForGameController {
-
+    /**The player repository*/
     @Autowired
     private PlayerRepository playerRepository;
+
+    /**The room repository*/
     @Autowired
     private RoomRepository roomRepo;
 
+    /**The board repository*/
     @Autowired
     private BoardRepository boardRepository;
 
+    /**The tile repository*/
     @Autowired
     private TileRepository tileRepository;
 
+    /**The submarine repository*/
     @Autowired
     private SubmarineRepository submarineRepository;
 
-    @Autowired
-    BoardService boardService;
-
+    /**
+     * Prints all the db.
+     * @return "redirect:/lobby"
+     */
     @GetMapping("/print")
     public String print(){
         System.out.println("Rooms\n===================================================\n\n");

@@ -1,26 +1,26 @@
 package hac.filters;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import hac.repo.player.Player;
-import hac.repo.player.PlayerRepository;
-import hac.repo.room.Room;
-import hac.repo.room.RoomRepository;
 import hac.services.PlayerService;
 import hac.services.RoomService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.List;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * Filter to /game/init - handle with many kinds of situations that can happen when getting to this route.
+ */
 public class OnRoomFilter implements HandlerInterceptor {
 
+    /**
+     * An error message when the status is invalid
+     */
     public final static String INVALID_STATUS = "Invalid request to get into the initialize game page.";
 
+    /**
+     * An error message tells the board already sent.
+     */
     public final static String BOARD_ALREADY_SENT = "You already sent the board, please wait";
     /**
      * The member service acts like an api to the rooms DB.
@@ -75,6 +75,19 @@ public class OnRoomFilter implements HandlerInterceptor {
         this.playerService = playerService;
     }
 
+    /**
+     * Getting the request and validate the status.
+     * If the status is valid, it continues, but if it isn't, the user will be navigated to another page.
+     * If the player is not ready, and the game is waiting for boards.
+     * If a player is ready and the game is waiting for boards, that means that he tries to get to the initial room again
+     * when he needs to be in the waiting room, so it returns false and redirect to the relevant status.
+     * If there is a critical error, the user navigated to /lobby/error-message.
+     * @param request current HTTP request
+     * @param response current HTTP response
+     * @param handler chosen handler to execute, for type and/or instance evaluation
+     * @return
+     * @throws Exception
+     */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
@@ -105,13 +118,24 @@ public class OnRoomFilter implements HandlerInterceptor {
         }
 
     }
-
+    /**
+     * The function has no use.
+     * @param request unused.
+     * @param response unused.
+     * @param handler unused.
+     * @throws Exception not thrown
+     */
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, //
                            Object handler, ModelAndView modelAndView) throws Exception {
-
     }
-
+    /**
+     * The function has no use.
+     * @param request unused.
+     * @param response unused.
+     * @param handler unused.
+     * @throws Exception not thrown
+     */
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
                                 Object handler, Exception ex) throws Exception {

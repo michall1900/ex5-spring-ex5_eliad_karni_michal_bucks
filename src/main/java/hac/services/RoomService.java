@@ -33,45 +33,71 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
+/**
+ * Service class for managing rooms in the game.
+ */
 @Service
 public class RoomService {
 
+    /**For room not found error*/
     static final String ROOM_NOT_FOUND ="Room not found";
+    /**For players' already in room error*/
     static final String PLAYER_IN_ROOM = "Player is already in the room";
+    /**For notify the game is over*/
     static final String GAME_OVER = "The game end";
-    static final String NOT_ENOUGH_PLAYERS = "Some of the players are disconnecter";
+
+    /**To note that there are not enough players in the room */
+    static final String NOT_ENOUGH_PLAYERS = "Some of the players are disconnected";
+
+    /**To note that it is not the current player's turn*/
     static final String NOT_USER_TURN = "It's not your turn";
 
+    /**Note to player that he already have board*/
     final static String ALREADY_HAVE_BOARD = "You already have a board";
 
+    /**To return the user that its timestamp invalid*/
     static final String INVALID_TIME_STAMP = "Your timestamp is invalid";
 
+    /**Room's repository*/
     @Autowired
     private RoomRepository roomRepo;
 
+    /**players repository*/
     @Autowired
     private PlayerRepository playersRepo;
 
+    /**player's service*/
     @Autowired
     private PlayerService playerService;
 
+    /**board's service*/
     @Autowired
     private BoardService boardService;
 
+    /**room's executors map*/
     @Resource(name="getRoomExecutors")
     private Map<Long, ExecutorService> roomExecutors;
 
+    /**The db lock*/
     @Resource(name = "getLockForAllDb")
     private ReentrantReadWriteLock DBLock;
 
+    /**The rooms lock handler*/
     @Resource(name = "getRoomLock")
     private RoomLockHandler roomsLock;
 
+    /**borad's repository*/
     @Autowired
     private BoardRepository boardRepository;
 
+    /**
+     * Creates a new room and adds a player to it. Locks the database write operation during execution to ensure thread safety.
+     *
+     * @param player The Player instance to be added to the new room.
+     * @param type An integer representing the type of the room, corresponds to an index in the Board.Options enum.
+     */
     @Transactional
-    public Room createNewRoom(Player player, int type){
+    public void createNewRoom(Player player, int type){
         try {
             DBLock.writeLock().lock();
             Room room = new Room();
@@ -81,12 +107,18 @@ public class RoomService {
             Room room2 = roomRepo.save(room);
             roomsLock.setNewRoomLock(room2.getId());
             setExecutor(room2.getId());
-            return room2;
         }finally {
             DBLock.writeLock().unlock();
         }
     }
 
+    /**
+     * Adds a new player to an existing room, identified by the room's ID. Locks the database write operation during
+     * execution to ensure thread safety.
+     * @param roomId The ID of the Room to which the player will be added.
+     * @param newPlayer The Player instance to be added to the room.
+     * @throws RuntimeException If the room does not exist, or if the player is already in a room.
+     */
     @Transactional
     public void addPlayerToRoom(long roomId, Player newPlayer) {
         try {
@@ -104,22 +136,11 @@ public class RoomService {
         }
     }
 
-//    @Transactional
-//    public void changeRoomStatus(long roomId, Room.RoomEnum status){
-//        try {
-//            DBLock.readLock().lock();
-//            try {
-//                roomsLock.getRoomLock(roomId).writeLock().lock();
-//                Room room = roomRepo.findById(roomId).orElseThrow(() -> new RuntimeException(ROOM_NOT_FOUND));
-//                room.setStatus(status);
-//
-//            }finally {
-//                roomsLock.getRoomLock(roomId).writeLock().unlock();
-//            }
-//        }finally {
-//            DBLock.readLock().unlock();
-//        }
-//    }
+    /**
+     * Retrieves all existing rooms. Locks the database read operation during execution to ensure thread safety.
+     *
+     * @return A List of all Room instances.
+     */
     public List<Room> getAllRooms(){
         try {
             DBLock.readLock().lock();
@@ -128,7 +149,7 @@ public class RoomService {
             DBLock.readLock().unlock();
         }
     }
-//    @Transactional(readOnly = true)
+//    @Transactional
 //    public List<String> getAllNotReadyPlayersNameInRoomByUsername(String username){
 //        List<String> waitingPlayersList = new ArrayList<>();
 //        List<Player> playersOnRoom = playerService.getRoomByUsername(username).getPlayers();
@@ -139,6 +160,13 @@ public class RoomService {
 //        return waitingPlayersList;
 //    }
 
+    /**
+     * Updates the status of the room associated with the specified user.
+     * The method can lock a database and room based on passed parameters.
+     * @param username The username of the user whose room's status should be updated.
+     * @param toLockDB Boolean indicating if database lock is required.
+     * @param toLockRoom Boolean indicating if room lock is required.
+     */
     @Transactional
     public void updateRoomStatusByUsername(String username, boolean toLockDB, boolean toLockRoom){
         try {
@@ -170,6 +198,13 @@ public class RoomService {
         }
     }
 
+    /**
+     * Retrieves the usernames of all the opponents in the room of the specified user.
+     * @param username The username of the user whose opponents' usernames are to be retrieved.
+     * @param toLockDB Boolean indicating if database lock is required.
+     * @param toLockRoom Boolean indicating if room lock is required.
+     * @return A List of usernames of the opponents.
+     */
     public List<String> getAllOpponentNamesByUsername(String username, boolean toLockDB, boolean toLockRoom){
         try {
             if(toLockDB)
