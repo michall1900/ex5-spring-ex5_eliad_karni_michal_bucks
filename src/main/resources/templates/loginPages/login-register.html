@@ -44,7 +44,7 @@
                                 <form th:if="${mode} == login" th:action="@{/login}" method="post">
                                     <div class="mb-3">
                                         <label for="username" class="form-label">Username</label>
-                                        <input type="text" class="form-control" name="username" id="username">
+                                        <input type="text" class="form-control" name="username">
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Password</label>
@@ -60,7 +60,7 @@
                                 <form th:if="${mode} == register" id="register-form" th:action="@{/register}" method="post">
                                     <div class="mb-3">
                                         <label for="username" class="form-label">Username</label>
-                                        <input type="text" class="form-control" name="username">
+                                        <input type="text" class="form-control" id="username" name="username">
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Password</label>
