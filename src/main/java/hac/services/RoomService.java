@@ -414,11 +414,12 @@ public class RoomService {
     public DeferredResult<ResponseEntity<?>> handleStatusRoomPolling(Principal principal, DeferredResult<ResponseEntity<?>> output){
         try {
             DBLock.readLock().lock();
-            Room room = playerService.getRoomByUsername(principal.getName(),false);
+
             Future<?> future = getExecutorServiceForRoom(principal.getName()).submit(() -> {
                 try {
                     Room.RoomEnum status;
                     do {
+                        Room room = playerService.getRoomByUsername(principal.getName(),false);
                         roomsLock.getRoomLock(room.getId()).readLock().lock();
                         validatePlayersOnGame(room);
                         try{

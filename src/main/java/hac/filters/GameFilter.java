@@ -4,6 +4,7 @@ import hac.services.PlayerService;
 import hac.services.RoomService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -44,13 +45,16 @@ public class GameFilter implements HandlerInterceptor {
             if(request.isUserInRole("USER") || request.isUserInRole("ADMIN")) {
                 roomService.validatePlayerInRoomStatus(request.getUserPrincipal().getName());
             }
-            else {
-                response.sendRedirect("/lobby/error-message");
-                return false;
-            }
+//            else {
+//                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+//                response.sendRedirect("/lobby/error-message");
+//                return false;
+//                //return true;
+//            }
         }catch (Exception e){
-            response.sendRedirect("/lobby/error-message");
-            return false;
+//            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+//            response.sendRedirect("/lobby/error-message");
+//            return false;
         }
         return true;
     }
