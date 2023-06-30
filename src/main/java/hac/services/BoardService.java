@@ -19,30 +19,44 @@ import java.util.Objects;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
+/**
+ * The service is an api to the boards DB.
+ */
 @Service
 public class BoardService {
 
-
+    /**
+     * The member service acts like an api to the players DB.
+     */
     @Autowired
     private PlayerService playerService;
 
-//    @Autowired
-//    private BoardRepository boardRepository;
-//
-//    @Autowired
-//    private RoomService roomService;
-
+    /**
+     * The resource is a lock to all the DB.
+     */
     @Resource(name = "getLockForAllDb")
     private ReentrantReadWriteLock DBLock;
 
+    /**
+     * The resource is an object of all the rooms locks.
+     */
     @Resource(name = "getRoomLock")
     private RoomLockHandler roomsLock;
 
+    /**
+     * Default Ctor.
+     */
     public BoardService() {
     }
 
 
-
+    /**
+     * The function returns the board of the received player's as 2D array.
+     * The boolean parameter says if the return value should fill the submarines or not.
+     * @param player The player id.
+     * @param getSubmarine If the submarines should be displayed in the response.
+     * @return The board of the received player's as 2D array
+     */
     private ArrayList<ArrayList<String>> getTwoDimensionalArrayByPlayer(Player player, Boolean getSubmarine){
 
         Board board = player.getBoard();
@@ -70,9 +84,10 @@ public class BoardService {
     }
 
     /**
+     * The function returns all the received player's opponents' boards.
      * Assumption - The function who used this method locked the dbLock + room's lock for reading.
-     * @param username
-     * @return
+     * @param username The player.
+     * @return All the player opponents' boards.
      */
     public HashMap<String, ArrayList<ArrayList<String>>>  getOpponentBoardsByUsername(String username){
         Room room = playerService.getRoomByUsername(username, false);
@@ -87,6 +102,7 @@ public class BoardService {
     }
 
     /**
+     * The function gets the user's 2D array board by the player's username.
      * Assumption - the function who used this method already locked db + room's lock for reading.
      * @param username
      * @return

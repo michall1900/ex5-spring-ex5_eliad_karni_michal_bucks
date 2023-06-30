@@ -112,7 +112,6 @@ public class Room {
     }
 
     public Map<String,String> getInfo(){
-        //TODO ask eliad about that - there is a change and after it redeclaration.
         StringBuilder players = new StringBuilder("[");
         for (Player player : this.players){
             players.append( "\"" + player.getUsername() + "\"").append(",");
