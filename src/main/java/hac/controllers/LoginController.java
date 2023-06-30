@@ -42,10 +42,10 @@ public class LoginController {
     }
 
     /**
-     * The rest returns a login registration page.
+     * The rest returns a registration page.
      * @param errorMessage The error message needed to get displayed
      * @param model To add parameters to the thymeleaf.
-     * @return A
+     * @return the register page html with error message.
      */
     @RequestMapping("/register/{errorMessage}")
     public String getRegisterErrorMessage(@RequestParam("errorMessage") String errorMessage, Model model) {
@@ -54,6 +54,11 @@ public class LoginController {
         return "loginPages/login-register";
     }
 
+    /**
+     * The rest returns a registration page.
+     * @param model To add parameters to the thymeleaf.
+     * @return the register page html.
+     */
     @RequestMapping("/register")
     public String getRegister(Model model) {
         model.addAttribute("mode", "register");
@@ -61,7 +66,9 @@ public class LoginController {
     }
 
     /**
-     * The error page.
+     * The rest perform a registration action.
+     * In case of success the user is redirected to the login page.
+     * In case of failure, the user get back to the registration page with an informative error message.
      * @param user The new user registration parameters.
      * @param model To add parameters to the thymeleaf.
      * @return In case the registration succeed, the function returns to the
@@ -107,6 +114,4 @@ public class LoginController {
         model.addAttribute("errorMessage", errorMessage);
         return "error";
     }
-
-
 }
