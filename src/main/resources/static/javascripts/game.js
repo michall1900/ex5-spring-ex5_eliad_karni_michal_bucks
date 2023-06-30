@@ -1,9 +1,10 @@
 (function(){
-    const TIME_OUT = 1000;
+    const TIME_OUT = 100;
     const BUTTON_CLASS_NAME = ".boardBtn"
     const ERROR_BTN_ID = "errorBtn"
     const ERROR_BODY_ID = "error"
     const DEFAULT_ERROR = "There is a problem to connect to the server"
+    const STILL_PROCESSING_ERROR = "Your last click is still not updated. Please wait until it will update."
     const NOT_YOUR_TURN = "It's not your turn"
     const TURN_ID = "turnOf"
     const LAST_STEP_ID = "lastStep";
@@ -22,7 +23,8 @@
     let ERROR_BTN;
     let MY_NAME;
     let isMyTurn;
-    let isStillProcessing;
+    let isStillProcessing = false;
+    let lastStep = {row:-1, col:-1, opponentName:""};
 
 
     const displayError = (errorMsg)=>{
@@ -55,14 +57,13 @@
 
     const sendClickToServer  = async (buttonIdString, btn) =>{
         let [opponentName, row, col] = buttonIdString.split(".");
-        row = +row
-        col= +col
-        if (!isMyTurn) {
-            displayError(NOT_YOUR_TURN)
+        if (!isMyTurn || isStillProcessing) {
+            displayError(isStillProcessing? STILL_PROCESSING_ERROR :NOT_YOUR_TURN)
             btn.removeAttribute("disabled","");
             return;
         }
-        console.log(opponentName, row, col)
+        lastStep = {row:row, col:col, opponentName: opponentName};
+        isStillProcessing = true;
         try {
             let response = await fetch(URL_TO_UPDATE, {
                 method: "POST",
@@ -70,7 +71,9 @@
                     'Content-Type': 'application/json; charset=utf-8',
                     [csrfHeader]: csrfToken
                 },
-                body: JSON.stringify({"row": row, "col": col, "opponentName": opponentName})
+                // body: JSON.stringify({"row": row, "col": col, "opponentName": opponentName})
+                body: JSON.stringify(lastStep)
+
             })
             await checkResponse(response);
             let data = await response.text();
@@ -82,6 +85,7 @@
         catch(e){
             btn.removeAttribute("disabled","");
             displayError(e);
+            isStillProcessing = false;
             console.log(e);
         }
 
@@ -139,21 +143,33 @@
                 }
             } catch (e) {
                 displayError(DEFAULT_ERROR);
+                isStillProcessing = false;
             }
         }
     }
     const handleReceivedData = (jsonData)=>{
         //TODO needs to validate data + check if the ids correct.
         timestamp += jsonData.length;
+
         let usernameTurn = jsonData[jsonData.length-1].attackDetails.nextTurn;
         isMyTurn = usernameTurn === MY_NAME;
         TURN_ELEMENT.innerHTML = (!isMyTurn)? `'${usernameTurn}'`: "Your";
         let attackDetailsObject = jsonData[jsonData.length-1].attackDetails;
         LAST_STEP_ELEMENT.innerHTML = `User '${attackDetailsObject.attackerName}' hit on 
             '${attackDetailsObject.opponentName}''s board in index row=${attackDetailsObject.row} col = ${attackDetailsObject.col}`;
+
         jsonData.forEach((change)=>{
             let boardChange = change.boardChanges;
-            let prefix = change.attackDetails.opponentName;
+            attackDetailsObject = change.attackDetails
+            console.log(attackDetailsObject, lastStep)
+            console.log(attackDetailsObject.row, lastStep.row)
+            console.log(attackDetailsObject.col, lastStep.col)
+            console.log(attackDetailsObject.opponentName, lastStep.opponentName)
+            console.log(attackDetailsObject.attackerName, MY_NAME)
+            if (attackDetailsObject.row === lastStep.row && attackDetailsObject.col === lastStep.col
+                && attackDetailsObject.attackerName === MY_NAME && attackDetailsObject.opponentName === lastStep.opponentName)
+                isStillProcessing = false;
+            let prefix = attackDetailsObject.opponentName;
             boardChange.forEach((tileChange)=>{
                 let buttonElement = document.getElementById(`${prefix}.${tileChange.row}.${tileChange.col}`)
                 if (!!buttonElement){

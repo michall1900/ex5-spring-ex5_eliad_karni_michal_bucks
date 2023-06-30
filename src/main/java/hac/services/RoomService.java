@@ -408,7 +408,7 @@ public class RoomService {
                             status = playerService.getRoomStatusByUserName(principal.getName());
                             if (status != Room.RoomEnum.ON_GAME) {
                                 roomsLock.getRoomLock(roomId).readLock().unlock();
-                                Thread.sleep(1000);
+                                Thread.sleep(200);
                             }
                         }
                         finally {
@@ -419,7 +419,7 @@ public class RoomService {
                                 ;
                             }
                         }
-                    } while (status != Room.RoomEnum.ON_GAME);
+                    } while (status != Room.RoomEnum.ON_GAME && !Thread.currentThread().isInterrupted());
                     if (!Thread.currentThread().isInterrupted())
                         output.setResult(ResponseEntity.ok("/game/on-game"));
                 }
@@ -456,13 +456,13 @@ public class RoomService {
             Future<?> future = getExecutorServiceForRoom(principal.getName()).submit(() -> {
                 try {
                     List<UpdateObject> updates = new ArrayList<>();
-                    while(updates.isEmpty() && !Thread.currentThread().isInterrupted()) {
+                    do{
                         roomsLock.getRoomLock(roomId).readLock().lock();
                         try{
                             updates = getUpdates(principal.getName(), timestamp);
                             if (updates.isEmpty()) {
                                 roomsLock.getRoomLock(roomId).readLock().unlock();
-                                Thread.sleep(1000);
+                                Thread.sleep(200);
                             }
                         }
                         finally {
@@ -474,6 +474,7 @@ public class RoomService {
                             }
                         }
                     }
+                    while(updates.isEmpty() && !Thread.currentThread().isInterrupted());
                     if (!Thread.currentThread().isInterrupted())
                         output.setResult(ResponseEntity.ok(updates));
                 }
