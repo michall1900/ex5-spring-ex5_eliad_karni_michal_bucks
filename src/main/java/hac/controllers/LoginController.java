@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -17,7 +16,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Objects;
 
 @Controller
 public class LoginController {
@@ -61,8 +59,9 @@ public class LoginController {
     @PostMapping("/register")
     public String registerUser(NewUser user, Model model){
         try {
-            if(!user.isPasswordsEqual())
-                throw new Exception("The two passwords that you have been entered are distinct.");
+            String validation = user.validate();
+            if(validation.equals("Valid"))
+                throw new Exception(validation);
             usersManager.createUser(User.withUsername(user.getUsername())
                     .password(passwordEncoder.encode(user.getPassword()))
                     .roles("USER")

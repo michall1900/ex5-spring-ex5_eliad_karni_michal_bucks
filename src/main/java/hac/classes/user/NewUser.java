@@ -1,17 +1,12 @@
 package hac.classes.user;
 
 import jakarta.validation.constraints.NotEmpty;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 
 @Component
 public class NewUser implements Serializable {
-
 
     @NotEmpty(message = "Username is mandatory")
     private String username;
@@ -51,7 +46,17 @@ public class NewUser implements Serializable {
         this.confirmPassword = confirmPassword;
     }
 
-    public Boolean isPasswordsEqual(){
-        return this.password.equals(this.confirmPassword);
+    public String validate(){
+        if(this.username.length() < 6 || this.username.length() > 30)
+            return "Username length must be between 6-30 characters";
+        if(this.username.contains("\\s"))
+            return "Username cannot contain white spaces";
+        if(this.password.contains("\\s"))
+            return "Password cannot contain white spaces.";
+        if(!this.password.equals(this.confirmPassword))
+            return "The passwords are not equals.";
+        if(this.password.length() > 30 || this.password.length() < 6)
+            return "Password length must be between 6-30 characters";
+        return "Valid";
     }
 }
