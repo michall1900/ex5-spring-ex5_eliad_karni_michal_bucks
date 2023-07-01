@@ -22,11 +22,6 @@ public class Submarine {
     final static String MIN_SIZE_ERROR = "Submarine's size can't be lower than 1";
 
     /**
-     * Error message: is mandatory
-     */
-    final static String NULL_ERROR = "is mandatory";
-
-    /**
      * Error message: Invalid submarine's display (The indexes not pointing on the size or the submarine displayed diagonal)
      */
     final static String INVALID_DISPLAY = "Invalid submarine's display (The indexes not pointing on the size or the submarine displayed diagonal)";

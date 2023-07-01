@@ -70,12 +70,11 @@ public class LobbyController {
     /**
      * The function returns a list of all the players in the room, if the room is full, an informative message added to
      * the JSON.
-     * @param model To add parameters to the thymeleaf.
      * @param principal To get info about the user.
      * @return A list of the players in the room, and if the room is full.
      */
     @GetMapping("/getRoom")
-    public @ResponseBody Map<String,String> getRoom(Model model, Principal principal) {
+    public @ResponseBody Map<String,String> getRoom(Principal principal) {
         try {
             Room room = playerService.getRoomByUsername(principal.getName(), true);
             Map<String, String> ans = room.getInfo();
@@ -84,7 +83,7 @@ public class LobbyController {
             }
             return ans;
         }catch (Exception e){
-            return new HashMap<String, String>();
+            return new HashMap<>();
         }
     }
 
@@ -122,11 +121,10 @@ public class LobbyController {
 
     /**
      * The rest returns the waiting room html.
-     * @param model To add parameters to the thymeleaf.
      * @return The waiting room html.
      */
     @GetMapping("/wait")
-    public String wait(Model model) {
+    public String waitToPlayers() {
         return "/lobby/waitingRoom";
     }
 

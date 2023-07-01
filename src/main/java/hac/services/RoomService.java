@@ -517,7 +517,7 @@ public class RoomService {
                                 roomsLock.getRoomLock(room.getId()).readLock().unlock();
                             }
                             catch(IllegalMonitorStateException e){
-                                ;
+
                             }
                         }
                     } while (status != Room.RoomEnum.ON_GAME && !Thread.currentThread().isInterrupted());
@@ -574,7 +574,6 @@ public class RoomService {
                             try {
                                 roomsLock.getRoomLock(room.getId()).readLock().unlock();
                             } catch (IllegalMonitorStateException e) {
-                                ;
                             }
                         }
                     }

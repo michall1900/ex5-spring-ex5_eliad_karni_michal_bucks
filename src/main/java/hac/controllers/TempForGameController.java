@@ -1,7 +1,5 @@
 package hac.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import hac.classes.forGame.UserTurn;
 import hac.repo.board.Board;
 import hac.repo.board.BoardRepository;
 import hac.repo.player.Player;

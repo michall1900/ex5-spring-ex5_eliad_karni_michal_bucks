@@ -19,7 +19,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The Controller handles the rests related to the game management.
@@ -95,7 +94,7 @@ public class GameController {
             ObjectMapper objectMapper = new ObjectMapper();
             Board board = objectMapper.readValue(boardString, Board.class);
             roomService.saveNewBoard(board, principal.getName());
-            return "redirect:game/wait-to-start-page";
+            return "redirect:/game/wait-to-start-page";
 
         } catch (JsonProcessingException  e) {
             model.addAttribute("error",e.getMessage());

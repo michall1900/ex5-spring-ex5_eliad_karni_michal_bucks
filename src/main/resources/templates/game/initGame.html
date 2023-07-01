@@ -2,7 +2,9 @@
 <head th:insert="~{fragments/head.html :: head}" ></head>
 <body>
     <div th:insert="~{fragments/app-bar.html :: appBar}"></div>
+
     <div class="container">
+        <div th:insert="~{fragments/main-pic.html :: main-pic}"></div>
         <div class="row justify-content-center">
             <div class="col-12 my-2 text-center">
                 <h1>Battleship - Game</h1>
@@ -16,7 +18,7 @@
                     </span>
                 </div>
             </span>
-            <div class="col-12 my-2 text-center" id="instructions">
+            <div class="col-12 my-2 text-center text-primary" style="height: 80px;" id="instructions">
             </div>
             <div class="col-7 col-sm-6 col-lg-5 col-xl-4 align-self-center my-2">
                 <div class="row">

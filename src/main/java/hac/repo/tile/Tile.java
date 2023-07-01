@@ -4,8 +4,6 @@ import hac.classes.customErrors.InvalidChoiceError;
 import hac.repo.subamrine.Submarine;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 /**
  * This class represents a Tile entity in the game, which can be part of a Submarine or empty.
@@ -104,6 +102,7 @@ public class Tile {
      */
     public Tile(TileStatus status, Submarine submarine){
         setStatus(status);
+        setSubmarine(submarine);
     }
     /**
      * Marks this tile as hit and changes its status accordingly.

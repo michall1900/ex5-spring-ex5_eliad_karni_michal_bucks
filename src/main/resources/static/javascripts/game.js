@@ -75,7 +75,7 @@
         let [opponentName, row, col] = buttonIdString.split(".");
         if (!isMyTurn || isStillProcessing) {
             displayError(isStillProcessing? STILL_PROCESSING_ERROR :NOT_YOUR_TURN)
-            btn.removeAttribute("disabled","");
+            btn.removeAttribute("disabled");
             return;
         }
         lastStep = {row:row, col:col, opponentName: opponentName};
@@ -98,7 +98,7 @@
 
         }
         catch(e){
-            btn.removeAttribute("disabled","");
+            btn.removeAttribute("disabled");
             displayError(e);
             isStillProcessing = false;
         }

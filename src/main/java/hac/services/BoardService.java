@@ -1,22 +1,19 @@
 package hac.services;
 
-import hac.beans.RoomLockHandler;
+
 import hac.repo.board.Board;
-import hac.repo.board.BoardRepository;
 import hac.repo.player.Player;
-import hac.repo.player.PlayerRepository;
 import hac.repo.room.Room;
 import hac.repo.tile.Tile;
-import jakarta.annotation.Resource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 
 
 /**
@@ -30,18 +27,6 @@ public class BoardService {
      */
     @Autowired
     private PlayerService playerService;
-
-    /**
-     * The resource is a lock to all the DB.
-     */
-    @Resource(name = "getLockForAllDb")
-    private ReentrantReadWriteLock DBLock;
-
-    /**
-     * The resource is an object of all the rooms locks.
-     */
-    @Resource(name = "getRoomLock")
-    private RoomLockHandler roomsLock;
 
     /**
      * Default Ctor.

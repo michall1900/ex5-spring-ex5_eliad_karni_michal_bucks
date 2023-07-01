@@ -210,7 +210,7 @@ public class Room {
             players.append( "\"" + player.getUsername() + "\"").append(",");
         }
         players = new StringBuilder(players.substring(0, players.length() - 1) + "]");
-        Map<String,String> info = new HashMap<String, String>();
+        Map<String,String> info = new HashMap<>();
         info.put("id", Long.toString(this.id));
         info.put("players", players.toString());
         info.put("type", this.option.name());

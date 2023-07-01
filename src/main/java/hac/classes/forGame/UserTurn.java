@@ -1,8 +1,6 @@
 package hac.classes.forGame;
 
 import hac.repo.board.Board;
-import hac.services.PlayerService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import hac.classes.customErrors.InvalidChoiceError;
 import java.io.Serializable;
