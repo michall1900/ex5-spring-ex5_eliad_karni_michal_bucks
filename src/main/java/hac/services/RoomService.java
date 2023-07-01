@@ -213,6 +213,7 @@ public class RoomService {
             if(toLockRoom)
                 roomsLock.getRoomLock(room.getId()).readLock().lock();
             try {
+                room = playerService.getRoomByUsername(username, false);
                 List<Player> playersOnRoom = room.getPlayers();
                 List<String> namesList = new ArrayList<>();
                 playersOnRoom.forEach((player)->{
@@ -245,6 +246,7 @@ public class RoomService {
             if(toLockRoom)
                 roomsLock.getRoomLock(room.getId()).readLock().lock();
             try {
+                room = playerService.getRoomByUsername(username, false);
                 validatePlayersOnGame(room);
                 return room.getPlayers().get(room.getCurrentPlayerIndex()).getUsername();
             }finally {
@@ -262,12 +264,19 @@ public class RoomService {
      * @param opponentUserName The username of the second user.
      * @throws DbError If the two users are not in the same room.
      */
-    private void checkIfBothUsersAreInSameRoom(String currentUserName, String opponentUserName){
-        Room room1 = playerService.getRoomByUsername(currentUserName, false);
+    private void checkIfBothUsersAreInSameRoom(String currentUserName, String opponentUserName, Room currentRoom){
         Room room2 = playerService.getRoomByUsername(opponentUserName, false);
-        if(room1!=room2){
-            throw new DbError();
+        roomsLock.getRoomLock(room2.getId()).readLock().lock();
+        try{
+            room2 = playerService.getRoomByUsername(opponentUserName, false);
+            if(currentRoom!=room2){
+                throw new DbError();
+            }
         }
+        finally {
+            roomsLock.getRoomLock(room2.getId()).readLock().unlock();
+        }
+
     }
 
     /**
@@ -314,11 +323,9 @@ public class RoomService {
             Room room = playerService.getRoomByUsername(currentUserName, false);
             roomsLock.getRoomLock(room.getId()).writeLock().lock();
             try {
-                checkIfGameFinished(room);
-                validatePlayersOnGame(room);
-                if (room.getStatus()!= Room.RoomEnum.ON_GAME)
-                    throw new DbError();
-                checkIfBothUsersAreInSameRoom(currentUserName, userTurn.getOpponentName());
+                room = playerService.getRoomByUsername(currentUserName, false);
+                validateGameMode(room);
+                checkIfBothUsersAreInSameRoom(currentUserName, userTurn.getOpponentName(), room);
                 validateTurn(currentUserName);
                 Board board = playerService.getPlayerByUsername(userTurn.getOpponentName(),false).getBoard();
                 ArrayList<HashMap<String, String>> boardUpdates = board.getHitChanges(userTurn.getRow(), userTurn.getCol());
@@ -362,11 +369,7 @@ public class RoomService {
     private List<UpdateObject> getUpdates(String username, int timestamp){
 
         Room room = playerService.getRoomByUsername(username, false);
-        checkIfGameFinished(room);
-        validatePlayersOnGame(room);
-        if (room.getStatus()!= Room.RoomEnum.ON_GAME){
-            throw new DbError();
-        }
+        validateGameMode(room);
         List<String> updatesStringArray= room.getUpdateObjects();
         if (timestamp > updatesStringArray.size())
             throw new InvalidChoiceError(INVALID_TIME_STAMP);
@@ -497,9 +500,10 @@ public class RoomService {
                     do {
                         Room room = playerService.getRoomByUsername(principal.getName(),false);
                         roomsLock.getRoomLock(room.getId()).readLock().lock();
-                        validatePlayersOnGame(room);
-                        try{
 
+                        try{
+                            room = playerService.getRoomByUsername(principal.getName(),false);
+                            validatePlayersOnGame(room);
                             status = playerService.getRoomStatusByUserName(principal.getName());
                             if (status != Room.RoomEnum.ON_GAME) {
                                 if (status == Room.RoomEnum.GAME_OVER)
@@ -620,6 +624,7 @@ public class RoomService {
             Room room = playerService.getRoomByUsername(username, false);
             roomsLock.getRoomLock(room.getId()).readLock().lock();
             try {
+                room = playerService.getRoomByUsername(username, false);
                 validateGameMode(room);
                 model.addAttribute("turn", getPlayerUsernameTurn(username, false,false));
                 model.addAttribute("name", username);
@@ -659,6 +664,7 @@ public class RoomService {
             Room room = playerService.getRoomByUsername(username, false);
             roomsLock.getRoomLock(room.getId()).readLock().lock();
             try {
+                room = playerService.getRoomByUsername(username, false);
                 validatePlayersOnGame(room);
                 checkIfGameFinished(room);
                 model.addAttribute("names", getAllOpponentNamesByUsername(username, false, false));
@@ -692,6 +698,8 @@ public class RoomService {
                 roomsLock.getRoomLock(room.getId()).readLock().lock();
             }
             try {
+                if (lockRoom)
+                    room = playerService.getRoomByUsername(username, false);
                 validatePlayersOnGame(room);
                 Room.RoomEnum roomStatus = playerService.getRoomStatusByUserName(username);
                 Player.PlayerStatus playerStatus = playerService.getPlayerStatusByUsername(username);
@@ -785,6 +793,7 @@ public class RoomService {
             Room room = playerService.getRoomByUsername(username, false);
             roomsLock.getRoomLock(room.getId()).readLock().lock();
             try {
+                room = playerService.getRoomByUsername(username, false);
                 Room.RoomEnum roomStatus = playerService.getRoomStatusByUserName(username);
                 if((roomStatus != Room.RoomEnum.WAITING_FOR_NEW_PLAYER && roomStatus != Room.RoomEnum.GAME_OVER)
                 && !room.full())

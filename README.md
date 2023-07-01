@@ -3,14 +3,14 @@
 * Name: Michal Bucks Email: michalbu@edu.hac.ac.il
 
 ## Note
-We are using one extra day: Eliad has two. In solange permission, we can use one day and not lose points about that. 
+We used one free extra date: Eliad has two. In solange permission, we can use one day and not lose points about that. 
 
 ## Description
 
 The project is a battleship board game implementation.
 
 ### General information
-Taken from https://en.wikipedia.org/wiki/Battleship_(game) (also in how to play)\
+Taken from https://en.wikipedia.org/wiki/Battleship_(game) (also in how to play)
 
 Battleship (also known as Battleships or Sea Battle) is a strategy type guessing game for two players. It is played on ruled grids (paper or board) on which each player's fleet of warships are marked. The locations of the fleets are concealed from the other player. Players alternate turns calling "shots" at the other player's ships, and the objective of the game is to destroy the opposing player's fleet.  Battleship is known worldwide as a pencil and paper game which dates from World War I. It was published by various companies as a pad-and-pencil game in the 1930s and was released as a plastic board game by Milton Bradley in 1967. The game has spawned electronic versions, video games, smart device apps and a film.
 
@@ -45,7 +45,6 @@ When one of the players won, you'll be moved into an informative page that indic
 Back to lobby.\
 If you want you can have another game!\
 #### Note: While playing, in most cases, when you click on another tab in the website/ navigate to another path, the room will be closed.
-
 ## Functionality
 
 ### Some things we implemented:
@@ -89,7 +88,7 @@ We implement a rest controller to get and send updates to the board and also han
 <li>/game/update/{timestamp} - A get-request endpoint. This is a long polling route. The client needs to send its current timestamp, which is the index of the last update he gets in the updates' list (room holds it). At first, it should be initialized to 0.
 On timeout, the server sends status 504.\
 The returned object looking like that:\ 
-[{attackDetails:{attackerName:___, opponentName:___, row:___, col:___}, boardChanges:[{row:___, col:___, status:"Hit"/"Miss"}, {..}, ...]}, ...]\
+[{attackDetails:{attackerName:___, opponentName:___, row:___, col:___}, boardChanges:[{row:___, col:___, status:"Hit"/"Miss"}, {..}, ...]}, {...},...]
 Rows and columns need to be 0 &lt;= integer &lt; Board.Size.
 attackerName is the username of the attacker, opponentName is the attacked player's username. The reason that the returned board changes is a list is for cases that the change happened in more than one tile(submarine sink). 
 </li>
@@ -100,7 +99,7 @@ attackerName is the username of the attacker, opponentName is the attacked playe
 
 ### How to send the board (for client side)?
 You need to send an object looking like that:
-{submarines: [{firstRow:___, firstCol:___, lastRow:___, lastCol:___, size:___}, {...},...]}
+{submarines: [{firstRow: ___, firstCol: ___, lastRow: ___, lastCol: ___, size: ___}, {...},...]}
 
 ## Installation
 All the project is stored in memory and therefore no spacial installation is needed.

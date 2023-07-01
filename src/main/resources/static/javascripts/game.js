@@ -12,6 +12,7 @@
     const MY_NAME_ID = "name";
     const ERROR_PATH = "/lobby/error-message"
     const FINISH_PAGE = "/game/finish-page";
+    const INVALID_TURN_ERROR = "Someone already hit this index"
     const IMAGES_PATHS = new Map([["Miss","../images/noShip.png"],["Hit","../images/explodeShip.jpg"]])
     const BOARD_SIZE = 10
     let csrfToken
@@ -58,7 +59,12 @@
         }
         else{
             try {
-                return await response.text();
+                let error= await response.text();
+                if (error.includes(INVALID_TURN_ERROR)) {
+                    isStillProcessing = false;
+                    isMyTurn = true;
+                 }
+                return error;
             }
             catch{
                 return DEFAULT_ERROR;
@@ -100,7 +106,6 @@
         catch(e){
             btn.removeAttribute("disabled");
             displayError(e);
-            isStillProcessing = false;
         }
 
 
@@ -171,7 +176,6 @@
                 }
             } catch (e) {
                 displayError(DEFAULT_ERROR);
-                isStillProcessing = false;
             }
         }
     }

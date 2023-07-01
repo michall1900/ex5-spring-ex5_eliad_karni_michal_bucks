@@ -134,6 +134,7 @@ public class PlayerService {
             Player player = getPlayerByUsername(username, false);
             roomsLock.getRoomLock(player.getRoom().getId()).readLock().lock();
             try {
+                player = getPlayerByUsername(username, false);
                 if (player.getRoom().getStatus()!= Room.RoomEnum.GAME_OVER)
                     throw new DbError();
                 if (player.getStatus() == Player.PlayerStatus.WIN) {
