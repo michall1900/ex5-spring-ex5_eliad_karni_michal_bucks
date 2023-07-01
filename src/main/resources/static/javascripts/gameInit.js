@@ -124,22 +124,13 @@
                      col++){
                     const relevantButton = document.getElementById(`${row}.${col}`)
                     let imageElement = document.getElementById(`image_${row}.${col}`)
-                    //let clonedButton
                     if ((this.#isVertical?
                         (col=== this.#firstIndex.col && this.#firstIndex.row<= row && row<= this.#lastIndex.row):
                         (row === this.#firstIndex.row && this.#firstIndex.col<= col && col<= this.#lastIndex.col))){
                         this.#displaySubmarineCell(imageElement, relevantButton, controller);
-                        // imageElement.setAttribute("src", IMG_SOURCES_MAP.get("submarineCell"))
-                        // clonedButton = relevantButton.cloneNode(true)
-                        // clonedButton.addEventListener("click", (_) =>{this.#handleDelete(controller)})
-                        // relevantButton.parentNode.replaceChild(clonedButton,relevantButton)
                     }
                     else{
                         this.#displayNoShipCell(imageElement,relevantButton);
-                        // imageElement.setAttribute("src", IMG_SOURCES_MAP.get("noShip"))
-                        // let clonedButton = relevantButton.cloneNode(true)
-                        // clonedButton.setAttribute("disabled","")
-                        // relevantButton.parentNode.replaceChild(clonedButton,relevantButton)
                     }
                     this.#relevantElements.push({btnId: `${row}.${col}`, imgId:`image_${row}.${col}`,
                         row:row, col:col});

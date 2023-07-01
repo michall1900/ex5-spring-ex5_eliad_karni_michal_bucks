@@ -536,7 +536,6 @@ public class RoomService {
             });
             output.onTimeout(() -> {
                 future.cancel(true);
-                System.out.println("Timeout! Sent to" + principal.getName());
                 output.setErrorResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Service Unavailable"));
             });
         }
@@ -599,7 +598,6 @@ public class RoomService {
             });
             output.onTimeout(() -> {
                 future.cancel(true);
-                System.out.println("Timeout! Sent to" + principal.getName());
                 output.setErrorResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Service Unavailable"));
             });
         }

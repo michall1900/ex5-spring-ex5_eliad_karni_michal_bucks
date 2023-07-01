@@ -58,6 +58,7 @@ public class RestGameController {
      * The object that needs to send here needs to look like that:
      * {row:___, col:___ , opponentName:___}
      * @param principal To extract username
+     * @param userTurn A userturn object
      * @return ResponseEntity with the relevant response as described before.
      * @throws RuntimeException when there are problems/ game over.
      */

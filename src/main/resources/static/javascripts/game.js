@@ -27,21 +27,31 @@
     let isStillProcessing = false;
     let lastStep = {row:-1, col:-1, opponentName:""};
 
-
+    /**
+     * Displays an error message on the webpage.
+     * @param {string} errorMsg - The error message to display.
+     */
     const displayError = (errorMsg)=>{
         ERROR_ELEMENT.innerHTML = errorMsg
         ERROR_BTN.click();
     }
-
+    /**
+     * Checks a server response and throws an error if it is not OK.
+     * @param {Response} response - The server response to check.
+     * @throws {Error} When the server response is not OK.
+     */
     const checkResponse = async (response) =>{
         if (!response.ok) {
-            console.log(response.status);
             const err = await getErrorMessage(response);
             throw new Error(`Some error occurred ${response.status}. ${err}`);
         }
     }
+    /**
+     * Retrieves and returns an error message from a server response.
+     * @param {Response} response - The server response that contains the error message.
+     * @returns {Promise<string>} A promise that resolves with the error message.
+     */
     const getErrorMessage = async (response) =>{
-        console.log(response);
         if (response.status !== 400){
             isNeedToPoll=false;
             window.location.href = ERROR_PATH
@@ -56,6 +66,11 @@
         }
     }
 
+    /**
+     * Sends a user's move to the server, updating the button state and handling errors.
+     * @param {string} buttonIdString - The button's ID, which identifies the user's move.
+     * @param {HTMLElement} btn - The button that was clicked.
+     */
     const sendClickToServer  = async (buttonIdString, btn) =>{
         let [opponentName, row, col] = buttonIdString.split(".");
         if (!isMyTurn || isStillProcessing) {
@@ -86,17 +101,26 @@
             btn.removeAttribute("disabled","");
             displayError(e);
             isStillProcessing = false;
-            console.log(e);
         }
 
 
 
     }
 
+    /**
+     * Handles button click events, disabling the button and sending the click to the server.
+     * @param {Event} event - The button click event.
+     * @param {HTMLElement} btn - The button that was clicked.
+     */
     const handleBtnClick= (event, btn)=>{
         btn.setAttribute("disabled","");
         sendClickToServer(btn.id, btn);
     }
+
+    /**
+     * Periodically polls the server for updates and handles the response.
+     * May recursively call itself after a delay.
+     */
      async function getUpdates (){
 
         if(isNeedToPoll) {
@@ -107,7 +131,6 @@
                         [csrfHeader]: csrfToken
                     }
                 });
-                console.log(response.status);
                 if (response.status === 504) {
                     //reconnect - waiting a lot of time
                     await new Promise(resolve => setTimeout(resolve, TIME_OUT))
@@ -152,6 +175,10 @@
             }
         }
     }
+    /**
+     * Processes data received from the server, updating the game state and the webpage accordingly.
+     * @param {Object} jsonData - The data received from the server.
+     */
     const handleReceivedData = (jsonData)=>{
         validateResponse(jsonData)
         timestamp += jsonData.length;
@@ -183,31 +210,51 @@
         })
 
     }
-
+    /**
+     * Validates the server response.
+     * @param {Object} jsonData - The data received from the server.
+     * @throws {Error} When the server response is not valid.
+     */
     const validateResponse = (jsonData)=>{
         if (!Array.isArray(jsonData) || !jsonData.every((data)=>
             isValidAttackDetails(data.attackDetails) && isValidBoardChanges(data.boardChanges)
         ))
             throw new Error(DEFAULT_ERROR);
     }
+    /**
+     * Validates the structure and contents of an attack details object.
+     * @param {Object} attackDetails - The attack details to validate.
+     * @returns {boolean} true if the attack details object is valid; false otherwise.
+     */
     const isValidAttackDetails = (attackDetails)=>{
         return (!!attackDetails && !!attackDetails.attackerName && !!attackDetails.opponentName &&
             isStringIsAValidIndex(attackDetails.row) && isStringIsAValidIndex(attackDetails.col)
         )
     }
-
+    /**
+     * Validates the structure and contents of a board changes array.
+     * @param {Array} boardChanges - The array of board changes to validate.
+     * @returns {boolean} true if the board changes array is valid; false otherwise.
+     */
     const isValidBoardChanges = (boardChanges)=>{
         return (!!boardChanges  && Array.isArray(boardChanges) && boardChanges.every(tileChange=>
             isStringIsAValidIndex(tileChange.row) && isStringIsAValidIndex(tileChange.col)&&
             !!tileChange.status && [...IMAGES_PATHS.keys()].some((statusName)=> tileChange.status === statusName )
         ))
     }
-
+    /**
+     * Checks if a string can be interpreted as a valid board index.
+     * @param {string} integerString - The string to check.
+     * @returns {boolean} true if the string can be interpreted as a valid index; false otherwise.
+     */
     const isStringIsAValidIndex = (integerString)=>{
         return (!!integerString && !Number.isNaN(integerString) && Number.isInteger(+integerString) &&
                 (+integerString)>=0 && (+integerString)< BOARD_SIZE)
     }
-
+    /**
+     * This event listener initializes the game once the HTML document is fully loaded.
+     * It starts the update loop, adds click event listeners to all game buttons, and initializes global variables.
+     */
     document.addEventListener("DOMContentLoaded",()=>{
         getUpdates();
         document.querySelectorAll(BUTTON_CLASS_NAME).forEach((button)=>{
@@ -224,7 +271,6 @@
         isMyTurn = (TURN_ELEMENT.innerText === "Your")
 
         const name = document.getElementById(MY_NAME_ID);
-        console.log(name.innerText);
         MY_NAME = (!!name)? name.innerText : "";
     })
 })();

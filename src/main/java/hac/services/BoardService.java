@@ -104,8 +104,8 @@ public class BoardService {
     /**
      * The function gets the user's 2D array board by the player's username.
      * Assumption - the function who used this method already locked db + room's lock for reading.
-     * @param username
-     * @return
+     * @param username A string includes the username
+     * @return 2D array board by the player's username
      */
     public ArrayList<ArrayList<String>> getUserTwoDimensionalArrayBoardByUsername(String username){
         Player player = playerService.getPlayerByUsername(username, false);

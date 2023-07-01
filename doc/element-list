@@ -1,0 +1,14 @@
+hac
+hac.beans
+hac.classes.customErrors
+hac.classes.forGame
+hac.classes.user
+hac.configurations
+hac.controllers
+hac.filters
+hac.repo.board
+hac.repo.player
+hac.repo.room
+hac.repo.subamrine
+hac.repo.tile
+hac.services

@@ -6,9 +6,12 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
+/**
+ * The players' repository
+ */
 public interface PlayerRepository extends JpaRepository<Player, Long> {
     /**
-     * Lasy player find by the player's username.
+     * Las player find by the player's username.
      * @param username The player's username.
      * @return The found player.
      */

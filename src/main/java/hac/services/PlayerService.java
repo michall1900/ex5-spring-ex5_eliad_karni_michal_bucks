@@ -84,7 +84,7 @@ public class PlayerService {
      * @param username The player's username.
      * @param toLockDB If the DB lock action is needed.
      * @return The room the player at.
-     * @throws RuntimeException
+     * @throws RuntimeException when there is an error to find the room.
      */
     public Room getRoomByUsername(String username, Boolean toLockDB) throws RuntimeException{
         try{

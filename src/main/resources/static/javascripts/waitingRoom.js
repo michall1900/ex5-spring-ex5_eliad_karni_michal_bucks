@@ -34,7 +34,6 @@
      */
     function checkGameStarted(roomJson){
         if(roomJson.hasOwnProperty("start_game")) {
-            console.log("room is full");
             window.location.href = "/game/init";
         }
     }
@@ -70,14 +69,12 @@
                 await subscribe();
             } else if (response.status !== 200) {
                 // An error - let's show it
-                console.log(response.statusText);
                 // Reconnect in one second
                 await new Promise(resolve => setTimeout(resolve, 1000 * UPDATE_RATE));
                 await subscribe();
             } else {
                 // Get and show the message
                 let message = await response.json();
-                console.log(message);
                 checkAnswer(message);
                 setRoomTable(message);
                 checkGameStarted(message);
@@ -85,9 +82,7 @@
                 await subscribe()
             }
         }catch (e){
-            console.log(e);
             badResponseCounter++;
-            console.log(badResponseCounter);
             if(badResponseCounter === MAX_BAD_RESPONSE){
                 window.location.href = "/lobby";
             }

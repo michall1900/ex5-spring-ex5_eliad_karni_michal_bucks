@@ -52,7 +52,7 @@ public class OnRoomFilter implements HandlerInterceptor {
 
     /**
      * The room service setter.
-     * @return The room setter.
+     * @param roomService The room setter.
      */
     public void setRoomService(RoomService roomService) {
         this.roomService = roomService;
@@ -69,7 +69,7 @@ public class OnRoomFilter implements HandlerInterceptor {
 
     /**
      * The player service setter.
-     * @return The player setter.
+     * @param playerService The player setter.
      */
     public void setPlayerService(PlayerService playerService) {
         this.playerService = playerService;
@@ -85,8 +85,8 @@ public class OnRoomFilter implements HandlerInterceptor {
      * @param request current HTTP request
      * @param response current HTTP response
      * @param handler chosen handler to execute, for type and/or instance evaluation
-     * @return
-     * @throws Exception
+     * @return boolean tells to move or not to the route.
+     * @throws Exception in any case of exception
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)

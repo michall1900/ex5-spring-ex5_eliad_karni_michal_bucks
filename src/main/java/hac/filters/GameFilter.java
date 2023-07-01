@@ -44,7 +44,7 @@ public class GameFilter implements HandlerInterceptor {
 
     /**
      * The room service setter.
-     * @return The room setter.
+     * @param roomService the room service
      */
     public void setRoomService(RoomService roomService) {
         this.roomService = roomService;
@@ -61,7 +61,7 @@ public class GameFilter implements HandlerInterceptor {
 
     /**
      * The player service setter.
-     * @return The player setter.
+     * @param playerService The player setter.
      */
     public void setPlayerService(PlayerService playerService) {
         this.playerService = playerService;

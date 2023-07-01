@@ -4,6 +4,9 @@ import hac.repo.room.Room;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * A player entity
+ */
 @Entity
 public class Player {
 

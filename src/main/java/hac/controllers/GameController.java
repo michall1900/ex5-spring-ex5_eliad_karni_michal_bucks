@@ -152,6 +152,7 @@ public class GameController {
     /**
      * Handle with ConstraintViolationException exceptions.
      * @param ex The exception
+     * @param model To add attributes to html.
      * @return gameInit page with the relevant errors.
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -15,18 +15,29 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class FiltersConfig implements WebMvcConfigurer {
 
+    /**Room service*/
     @Autowired
     RoomService roomService;
 
+    /**Player service*/
     @Autowired
     PlayerService playerService;
 
+    /**
+     * To handle with static folder
+     * @param registry ResourceHandlerRegistry
+     */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
                 .addResourceHandler("/static/**")
                 .addResourceLocations("/static/");
     }
+
+    /**
+     * To add interceptors
+     * @param registry InterceptorRegistry
+     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new OnRoomFilter(roomService, playerService))

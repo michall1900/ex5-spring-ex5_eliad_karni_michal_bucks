@@ -28,6 +28,12 @@ public class NewUser implements Serializable {
     @NotEmpty(message = "Password is mandatory")
     private String confirmPassword;
 
+    /**
+     * ctor with all values.
+     * @param username The username
+     * @param password The password
+     * @param confirmPassword the confirmation password.
+     */
     public NewUser(String username, String password, String confirmPassword) {
         this.username = username;
         setPassword(password);

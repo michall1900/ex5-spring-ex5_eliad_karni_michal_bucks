@@ -30,7 +30,6 @@
         else{
             event.target.submit();
         }
-        console.log("error message" + errorMessage);
         if(errorMessage !== ""){
             document.getElementById("error-message").innerHTML = errorMessage
         }

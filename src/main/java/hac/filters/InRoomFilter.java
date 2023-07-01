@@ -42,7 +42,7 @@ public class InRoomFilter  implements HandlerInterceptor {
 
     /**
      * The room service setter.
-     * @return The room setter.
+     * @param roomService The room setter.
      */
     public void setRoomService(RoomService roomService) {
         this.roomService = roomService;
@@ -59,7 +59,7 @@ public class InRoomFilter  implements HandlerInterceptor {
 
     /**
      * The player service setter.
-     * @return The player setter.
+     * @param playerService The player setter.
      */
     public void setPlayerService(PlayerService playerService) {
         this.playerService = playerService;
@@ -93,7 +93,6 @@ public class InRoomFilter  implements HandlerInterceptor {
      * @param response unused.
      * @param handler unused.
      * @throws Exception not thrown
-     * @return true always.
      */
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response,
@@ -107,7 +106,6 @@ public class InRoomFilter  implements HandlerInterceptor {
      * @param response unused.
      * @param handler unused.
      * @throws Exception not thrown
-     * @return true always.
      */
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
