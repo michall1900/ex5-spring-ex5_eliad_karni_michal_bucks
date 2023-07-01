@@ -3,7 +3,7 @@
 * Name: Michal Bucks Email: michalbu@edu.hac.ac.il
 
 ## Note
-We used one free extra date: Eliad has two. In solange permission, we can use one day and not lose points about that. 
+We used one free extra day: Eliad has two. In solange permission, we can use one day and not lose points about that. 
 
 ## Description
 
